@@ -19,7 +19,7 @@ if (typeof window !== "undefined") {
 * 加载霓虹灯条模型组件。通过props接收进度
 */ 
 function ModelLoader({ scrollProgress }) {
-  const { scene } = useGLTF('/models/neon_scene01.glb'); // 加载霓虹灯条模型。如果存在则返回，不存在则返回null。
+  const { scene } = useGLTF('/models/Neon_scene01.glb'); // 加载霓虹灯条模型。如果存在则返回，不存在则返回null。
   const group = useRef(null); // 是一个三维对象，用于存储所有的模型。
   const materialsRef = useRef([]); // 是一个数组，存储所有的材质。
 
