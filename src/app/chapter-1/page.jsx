@@ -1,64 +1,42 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Scroll, ScrollControls, useScroll, OrbitControls, useGLTF, useTexture, Text } from "@react-three/drei";
+import { OrbitControls, useGLTF, useTexture, Text } from "@react-three/drei";
 import { EffectComposer, Bloom, Vignette, DepthOfField } from "@react-three/postprocessing";
 import * as THREE from "three";
-import { useMemo, useRef, useState, useEffect } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import vertexShader from "../../shaders/neon.vert.glsl";
 import fragmentShader from "../../shaders/neon.frag.glsl";
 
+// 注册GSAP插件
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
+
 /*
-* 加载霓虹灯条模型组件。scrollProgress 是滚动进度。 
+* 加载霓虹灯条模型组件。通过props接收进度
 */ 
 function ModelLoader({ scrollProgress }) {
   const { scene } = useGLTF('/models/neon_scene01.glb'); // 加载霓虹灯条模型。如果存在则返回，不存在则返回null。
   const group = useRef(null); // 是一个三维对象，用于存储所有的模型。
-  const [animationProgress, setAnimationProgress] = useState(0); // 是一个状态，用于存储动画进度。
   const materialsRef = useRef([]); // 是一个数组，存储所有的材质。
-
-  // 页面加载后触发增长动画
-  useEffect(() => {
-    // 设置一个定时器，用于触发增长动画。
-    const timer = setTimeout(() => {
-      const duration = 3000; // 3秒动画
-      const startTime = Date.now(); // 获取当前时间。
-      
-      const animate = (currentTime) => {
-        const elapsed = Date.now() - startTime; 
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = (1 - Math.pow(1 - progress, 3)) * 0.95; // 使用 easeOutCubic 缓动，从 0 到 0.6
-        setAnimationProgress(eased); // 设置动画进度。
-        
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        }
-      };
-      
-      requestAnimationFrame(animate);
-    }, 500); // 延迟 0.5 秒开始
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  // 更新材质进度值
-  useEffect(() => {
-    materialsRef.current.forEach(material => {
-      if (material && material.uniforms && material.uniforms.progress) {
-        material.uniforms.progress.value = animationProgress;
-      }
-    });
-  }, [animationProgress]);
 
   // 渲染和更新时间uniform用在材质中。
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     if (!group.current) return; // 如果 group 不存在，则返回。
     
-    // 更新时间uniform用在材质中。
+    // 更新时间uniform和progress
     materialsRef.current.forEach(material => {
-      if (material && material.uniforms && material.uniforms.time) {
-        material.uniforms.time.value = t;
+      if (material && material.uniforms) {
+        if (material.uniforms.time) {
+          material.uniforms.time.value = t;
+        }
+        if (material.uniforms.progress) {
+          material.uniforms.progress.value = scrollProgress;
+        }
       }
     });
   });
@@ -88,7 +66,7 @@ function ModelLoader({ scrollProgress }) {
           toneMapped: false, // 禁用色调映射，让 tube 模型触发 bloom
           uniforms: {
             color: { value: new THREE.Color(currentColor) },
-            progress: { value: 0 },
+            progress: { value: 0.3 }, // 初始显示30%，让neon一开始就可见
             time: { value: 0 },
             fogNear: { value: 15.0 }, // 迷雾开始的距离
             fogFar: { value: 20.0 }, // 迷雾完全遮挡的距离
@@ -116,32 +94,6 @@ function ModelLoader({ scrollProgress }) {
 }
 
 
-// 动态景深效果组件
-function DynamicDepthOfField({ scrollProgress }) {
-  const { camera } = useThree();
-  const focusDistance = useMemo(() => new THREE.Vector3(), []);
-  
-  useFrame(() => {
-    const p = scrollProgress();
-    // 根据滚动进度动态调整焦点距离
-    // 开始时焦点在远处（4.2），结束时焦点在近处（0.5）
-    const startFocus = 4.2;
-    const endFocus = 0.5;
-    const currentFocus = THREE.MathUtils.lerp(startFocus, endFocus, p);
-    
-    // 设置焦点位置
-    focusDistance.set(0, 0, -currentFocus);
-  });
-
-  return (
-    <DepthOfField
-      focusDistance={focusDistance}
-      focalLength={0.015}
-      bokehScale={3}
-      height={480}
-    />
-  );
-}
 
 // 带 Glitch 效果的图片组件
 function GlitchImage({ url, position, rotation, scale, opacity }) {
@@ -251,7 +203,7 @@ function CameraRig({ scrollProgress, debugControls = false }) {
 
   useFrame(() => {
     if (debugControls) return; // 调试时让 OrbitControls 接管相机
-    const p = scrollProgress();
+    const p = scrollProgress;
     
     if (p <= 0.25) {
       // 第一阶段：0% -> 25%
@@ -340,7 +292,7 @@ function GalleryTunnel({ scrollProgress }) {
   // 根据滚动进度控制 3D 图片廊的可见性与入场动画
   useFrame((state, delta) => {
     if (!group?.current) return;
-    const p = typeof scrollProgress === "function" ? scrollProgress() : 0;
+    const p = scrollProgress;
     const revealStart = 0.23; // 从 23% 开始出现
     const t = THREE.MathUtils.clamp((p - revealStart) / (1 - revealStart), 0, 1);
 
@@ -527,9 +479,8 @@ function AIAccuracyChart() {
         className="w-full rounded-lg overflow-hidden" 
         style={{ 
           aspectRatio: '2/1',
-          background: 'rgba(0, 0, 0, 0.1)',
-          backdropFilter: 'blur(24px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
+          background: 'rgba(6, 7, 11, 0.5)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
         }}
       >
@@ -705,107 +656,250 @@ function AIAccuracyChart() {
   );
 }
 
-// 图表section组件：直接显示
-function ChartSection({ children }) {
-  return (
-    <div>
-      {children}
-    </div>
-  );
-}
 
-// 淡入组件：当元素进入视口50%时淡入
-function FadeInSection({ children }) {
-  const [isVisible, setIsVisible] = useState(false);
-  const domRef = useRef(null);
+export default function ChapterOnePage() {
+  const scrollContainerRef = useRef(null);
+  const section1Ref = useRef(null);
+  const section2Ref = useRef(null);
+  const section3Ref = useRef(null);
+  
+  // 使用React state存储滚动进度（声明式方式）
+  const [scrollProgress, setScrollProgress] = useState(0);
+  
+  // 计算neon材质进度
+  const neonProgress = useMemo(() => {
+    const scrollFactor = Math.min(scrollProgress * 2, 1);
+    return 0.3 + scrollFactor * 0.65; // 0.3 -> 0.95
+  }, [scrollProgress]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          // 当元素进入视口50%时触发
-          if (entry.isIntersecting) {
-            setIsVisible(true);
-          }
+    // 创建一个可被GSAP动画化的对象
+    const scrollData = { progress: 0 };
+    
+    // 存储动画触发状态
+    let s1Triggered = false;
+    let s2FadeInTriggered = false;
+    let s2FadeOutTriggered = false;
+    let s3Triggered = false;
+    
+    const ctx = gsap.context(() => {
+      const container = scrollContainerRef.current;
+      
+      // ===== 创建所有动画时间轴 =====
+      
+      // Section 1: 标题淡出
+      gsap.set(section1Ref.current, { opacity: 1 });
+      const s1FadeOut = gsap.timeline({ paused: true })
+        .to(section1Ref.current, {
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.inOut"
         });
-      },
-      {
-        threshold: 0.5, // 50%可见时触发
-      }
-    );
+      
+      // Section 2: 文字淡入淡出
+      gsap.set(section2Ref.current, { opacity: 0 });
+      const s2FadeIn = gsap.timeline({ paused: true })
+        .to(section2Ref.current, {
+          opacity: 1,
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+      const s2FadeOut = gsap.timeline({ paused: true })
+        .to(section2Ref.current, {
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+      
+      // Section 3: 图表淡入
+      gsap.set(section3Ref.current, { opacity: 0 });
+      const s3FadeIn = gsap.timeline({ paused: true })
+        .to(section3Ref.current, {
+          opacity: 1,
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+      
+      // ===== 主timeline：用scrub控制progress，用.call()触发HTML动画 =====
+      const mainTimeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: container,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 2, // 2秒阻尼
+        }
+      });
+      
+      // 动画一个dummy对象，让timeline有内容（受scrub控制）
+      const dummy = { value: 0 };
+      let lastProgress = 0;
+      
+      mainTimeline.to(dummy, {
+        value: 1,
+        duration: 1,
+        ease: "none",
+        onUpdate: function() {
+          // 每帧更新progress（受scrub影响，有延迟）
+          const p = this.progress();
+          scrollData.progress = p;
+          setScrollProgress(p);
+          
+          // 检测滚动方向
+          const isReversing = p < lastProgress;
+          
+          // === 基于区间的状态管理（更可靠） ===
+          
+          // Section 1 应该可见的区间：0-20%
+          if (p < 0.20) {
+            // 应该可见
+            if (s1Triggered) {
+              s1Triggered = false;
+              s1FadeOut.reverse();
+            }
+          }
+          
+          // Section 2 应该可见的区间：28%-45%
+          if (p >= 0.28 && p < 0.45) {
+            // 应该可见
+            if (s2FadeOutTriggered) {
+              // 如果之前淡出了，重新淡入
+              s2FadeOutTriggered = false;
+              s2FadeInTriggered = true;
+              s2FadeOut.pause();
+              s2FadeIn.restart();
+            } else if (!s2FadeInTriggered) {
+              // 如果还没淡入过，触发淡入
+              s2FadeInTriggered = true;
+              s2FadeIn.restart();
+            }
+          } else if (p < 0.28) {
+            // 在28%以下，应该隐藏
+            if (s2FadeInTriggered) {
+              s2FadeInTriggered = false;
+              s2FadeIn.reverse();
+            }
+          } else if (p >= 0.45) {
+            // 在45%以上，应该淡出
+            if (s2FadeInTriggered && !s2FadeOutTriggered) {
+              s2FadeOutTriggered = true;
+              s2FadeInTriggered = false;
+              s2FadeIn.pause();
+              s2FadeOut.restart();
+            }
+          }
+          
+          // Section 3 应该可见的区间：53%-100%
+          if (p < 0.53) {
+            // 应该隐藏
+            if (s3Triggered) {
+              s3Triggered = false;
+              s3FadeIn.reverse();
+            }
+          }
+          
+          lastProgress = p;
+        }
+      });
+      
+      // 在timeline的特定位置触发HTML动画（位置受scrub控制，但动画独立播放）
+      mainTimeline.call(() => {
+        if (!s1Triggered) {
+          s1Triggered = true;
+          s1FadeOut.play();
+        }
+      }, null, 0.20);
+      
+      mainTimeline.call(() => {
+        if (!s2FadeInTriggered) {
+          s2FadeInTriggered = true;
+          s2FadeOutTriggered = false;
+          s2FadeIn.play();
+        }
+      }, null, 0.28);
+      
+      mainTimeline.call(() => {
+        if (!s2FadeOutTriggered) {
+          s2FadeOutTriggered = true;
+          s2FadeInTriggered = false;
+          s2FadeOut.play();
+        }
+      }, null, 0.45);
+      
+      mainTimeline.call(() => {
+        if (!s3Triggered) {
+          s3Triggered = true;
+          s3FadeIn.play();
+        }
+      }, null, 0.53);
 
-    const currentElement = domRef.current;
-    if (currentElement) {
-      observer.observe(currentElement);
-    }
+    });
 
-    return () => {
-      if (currentElement) {
-        observer.unobserve(currentElement);
-      }
-    };
+    return () => ctx.revert();
   }, []);
 
   return (
-    <div
-      ref={domRef}
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transition: 'opacity 0.8s ease-in-out',
-      }}
-    >
-      {children}
-    </div>
-  );
-}
+    <div className="overflow-x-hidden">
+      {/* 渐变背景 */}
+      <div 
+        className="fixed inset-0 w-screen h-screen pointer-events-none"
+        style={{
+          backgroundImage: 'url(/images/gradient.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          zIndex: 0
+        }}
+      />
 
-export default function ChapterOnePage() {
-  return (
-    <div 
-      className="relative h-[100svh] w-screen overflow-hidden text-white"
-      style={{
-        backgroundImage: 'url(/images/gradient.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
-    >
-      <Canvas
-        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, alpha: true }}
-        camera={{ fov: 50, near: 0.1, far: 100 }}
-        dpr={[1, 1.5]}
-        style={{ background: 'transparent' }}
+      {/* 3D Canvas - 固定背景层 */}
+      <div 
+        className="fixed inset-0 w-screen h-screen" 
+        style={{ 
+          zIndex: 1,
+          transform: 'translateZ(0)', // 强制创建合成层
+          willChange: 'transform' // 优化渲染
+        }}
       >
-        <ambientLight intensity={0.25} />
-        <directionalLight position={[2, 3, 5]} intensity={0.6} />
+        <Canvas
+          gl={{ 
+            antialias: true, 
+            toneMapping: THREE.ACESFilmicToneMapping, 
+            alpha: true,
+            preserveDrawingBuffer: true // 保留绘制缓冲，让backdrop-filter可以访问
+          }}
+          camera={{ fov: 50, near: 0.1, far: 100 }}
+          dpr={[1, 1.5]}
+          style={{ background: 'transparent' }}
+        >
+          <ambientLight intensity={0.25} />
+          <directionalLight position={[2, 3, 5]} intensity={0.6} />
+          
+          {/* 通过props传递进度（声明式） */}
+          <CameraRig scrollProgress={scrollProgress} debugControls={false} />
+          <ModelLoader scrollProgress={neonProgress} />
+          <GalleryTunnel scrollProgress={scrollProgress} />
 
-        {/* 使用滚动驱动相机与内容 */}
-        <ScrollControls pages={4} damping={0.15}> 
-          <SceneWithScroll debugControls={false} />
-        </ScrollControls>
-      </Canvas>
-      
-      {/* 固定的滚动提示 */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 text-xs opacity-70 z-50 pointer-events-none">
-        Scroll ↓
+          {/* 后处理效果 */}
+          <EffectComposer>
+            <Bloom 
+              intensity={0.5} 
+              luminanceThreshold={0.1} 
+              mipmapBlur 
+              luminanceSmoothing={0.9}
+              radius={0.2}
+            />
+          </EffectComposer>
+        </Canvas>
       </div>
-    </div>
-  );
-}
 
-function SceneWithScroll({ debugControls = false }) {
-  const s = useScroll();
-  const getProgress = () => s.offset;
-
-  return (
-    <>
-      <CameraRig scrollProgress={getProgress} debugControls={debugControls} />
-      {debugControls && <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />}
-      <ModelLoader scrollProgress={getProgress} />
-
-      {!debugControls && (
-      <Scroll html>
-        <section className="h-[100svh] w-screen flex items-start relative" style={{ paddingLeft: '24px', paddingTop: '64px' }}>
+      {/* 滚动容器 - 创建滚动高度 */}
+      <div ref={scrollContainerRef} className="relative w-screen pointer-events-none" style={{ height: '1000vh', zIndex: 10 }}>
+        {/* Section 1: 标题 */}
+        <section 
+          ref={section1Ref}
+          className="fixed top-0 left-0 w-screen h-screen flex items-start text-white pointer-events-none"
+          style={{ paddingLeft: '24px', paddingTop: '64px', opacity: 1, zIndex: 10 }}
+        >
           <div className="max-w-[800px]">
             <p className="text-sm opacity-80 mb-2">Chapter I · The Introduction</p>
             <h1 className="text-white font-light leading-[0.95] tracking-[-0.05em]"
@@ -821,53 +915,50 @@ function SceneWithScroll({ debugControls = false }) {
           </div>
         </section>
 
-        <FadeInSection>
-          <section className="h-[100svh] w-screen flex items-start" style={{ paddingLeft: '24px', paddingTop: '64px' }}>
-            <div className="max-w-[1100px]">
-              <h2 className="font-light opacity-90 mb-6"
-                  style={{ fontSize: "clamp(20px, 3vw, 36px)" }}>
-                In recent years, we have seen major improvements in AI across image and video creation capabilities.
-              </h2>
-            </div>
-          </section>
-        </FadeInSection>
+        {/* Section 2: 第二段文字 */}
+        <section 
+          ref={section2Ref}
+          className="fixed top-0 left-0 w-screen h-screen flex items-start text-white pointer-events-none"
+          style={{ paddingLeft: '24px', paddingTop: '64px', opacity: 0, zIndex: 10 }}
+        >
+          <div className="max-w-[1100px]">
+            <h2 className="font-light opacity-90 mb-6 tracking-[-0.05em]"
+                style={{ fontSize: "clamp(20px, 3vw, 64px)" }}>
+              In recent years, we have seen major improvements in AI across image and video creation capabilities.
+            </h2>
+          </div>
+        </section>
 
-        <ChartSection>
-          <section className="h-[100svh] w-screen flex items-center justify-center" style={{ padding: '64px 24px' }}>
-            <div className="w-full max-w-[1200px]">
-              <AIAccuracyChart />
-            </div>
-          </section>
-        </ChartSection>
-      </Scroll>
-      )}
+        {/* Section 3: 图表 */}
+        <section 
+          ref={section3Ref}
+          className="fixed top-0 left-0 w-screen h-screen flex items-center justify-center text-white pointer-events-none"
+          style={{ 
+            padding: '64px 24px', 
+            opacity: 0, 
+            zIndex: 10,
+            isolation: 'isolate' // 确保backdrop-filter工作
+          }}
+        >
+          <div className="w-full max-w-[1200px] pointer-events-auto">
+            <AIAccuracyChart />
+          </div>
+        </section>
+      </div>
 
+      {/* 固定的滚动提示 */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 text-xs opacity-70 pointer-events-none text-white" style={{ zIndex: 50 }}>
+        Scroll ↓
+      </div>
 
-      {/* 调试模式：显示坐标轴 */}
-      {debugControls && <DebugAxes size={5} />}
-
-      {/* 图片库 */}
-      <group position={[0, 0, 0]}>
-        <GalleryTunnel scrollProgress={getProgress} />
-      </group>
-
-      {/* 后处理效果 - 使用标准 Bloom */}
-      <EffectComposer>
-        <Bloom 
-          intensity={0.5} 
-          luminanceThreshold={0.1} 
-          mipmapBlur 
-          luminanceSmoothing={0.9}
-          radius={0.2}
-        />
-        {/* <Vignette eskil={false} offset={0.2} darkness={0.7} />
-        <DynamicDepthOfField scrollProgress={getProgress} /> */}
-      </EffectComposer>
-    </>
+      {/* Debug: 显示滚动进度 */}
+      <div className="fixed top-4 right-4 text-white text-xs pointer-events-none" style={{ zIndex: 50, fontFamily: 'monospace' }}>
+        <div className="bg-black bg-opacity-50 p-3 rounded">
+          <div>Scroll Progress: {(scrollProgress * 100).toFixed(1)}%</div>
+          <div>Neon Progress: {(neonProgress * 100).toFixed(1)}%</div>
+        </div>
+      </div>
+    </div>
   );
 }
 
-function DebugAxes({ size = 1 }) {
-  const axes = useMemo(() => new THREE.AxesHelper(size), [size]);
-  return <primitive object={axes} />;
-}

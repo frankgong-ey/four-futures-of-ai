@@ -47,7 +47,6 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${eyInterstate.variable} antialiased`}
-        style={{ fontFamily: 'var(--font-eyinterstate)', fontWeight: 300 }}
       >
         {children}
       </body>
