@@ -9,6 +9,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import vertexShader from "../../shaders/neon.vert.glsl";
 import fragmentShader from "../../shaders/neon.frag.glsl";
+import LoadingScreen from "../components/LoadingScreen";
 
 // 注册GSAP插件
 if (typeof window !== "undefined") {
@@ -92,8 +93,6 @@ function ModelLoader({ scrollProgress }) {
     </group>
   );
 }
-
-
 
 // 带 Glitch 效果的图片组件
 function GlitchImage({ url, position, rotation, scale, opacity }) {
@@ -402,6 +401,155 @@ function GalleryTunnel({ scrollProgress }) {
   );
 }
 
+// Quotes Carousel组件
+function QuotesCarousel() {
+  const containerRef = useRef(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // 易于管理的quotes数据
+  const quotes = [
+    {
+      text: "The looming AI monopolies",
+      source: "Politico",
+      year: "2024"
+    },
+    {
+      text: "OpenAI's Sam Altman predicts artificial superintelligence (AGI) by 2025",
+      source: "Tech Radar", 
+      year: "2024"
+    },
+    {
+      text: "OpenAI's $10 Million+ AI Consulting Business: Deployment Takes Center Stage",
+      source: "Forbes",
+      year: "2025"
+    },
+    {
+      text: "How will you respond when AI agents reshape your firm's business model?",
+      source: "Accounting Today",
+      year: "2025"
+    },
+    {
+      text: "AI will transform every industry, but the question is how quickly and who will lead",
+      source: "MIT Technology Review",
+      year: "2024"
+    },
+    {
+      text: "The future belongs to those who can harness AI's potential while managing its risks",
+      source: "Harvard Business Review",
+      year: "2025"
+    },
+    {
+      text: "We're not just building tools, we're creating the next generation of intelligence",
+      source: "Nature AI",
+      year: "2024"
+    }
+  ];
+
+  // 自动滚动效果
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % quotes.length);
+    }, 3000); // 每3秒切换一次
+
+    return () => clearInterval(interval);
+  }, [quotes.length]);
+
+  return (
+    <div ref={containerRef} className="relative h-full w-full overflow-hidden">
+      <div className="absolute inset-0 flex flex-col justify-center">
+        {quotes.map((quote, index) => {
+          // 计算当前quote在可视区域中的位置
+          const relativeIndex = (index - currentIndex + quotes.length) % quotes.length;
+          const isVisible = relativeIndex <= 4; // 显示当前及前后4个（总共5个）
+          
+          if (!isVisible) return null;
+
+          // 计算透明度和位置
+          let opacity = 0;
+          let translateY = 0;
+          
+          if (relativeIndex === 0) {
+            // 上方待消失的quote（低透明度）
+            opacity = 0.3;
+            translateY = -160;
+          } else if (relativeIndex === 1) {
+            // 第一个高亮quote
+            opacity = 1;
+            translateY = -60;
+          } else if (relativeIndex === 2) {
+            // 第二个高亮quote
+            opacity = 1;
+            translateY = 60;
+          } else if (relativeIndex === 3) {
+            // 下方待高亮的quote（低透明度）
+            opacity = 0.3;
+            translateY = 160;
+          } else if (relativeIndex === 4) {
+            // 第五个quote（完全透明）
+            opacity = 0;
+            translateY = 260;
+          }
+
+          return (
+            <div
+              key={index} // 使用固定的index作为key，让React复用DOM元素
+              className="absolute w-full transition-all ease-out"
+              style={{
+                transform: `translateY(${translateY}px)`,
+                opacity: opacity,
+                zIndex: quotes.length - relativeIndex,
+                transitionDuration: '1000ms'
+              }}
+            >
+              <div className="text-white">
+                <div 
+                  className="font-light leading-tight mb-2"
+                  style={{ fontSize: "clamp(14px, 2.5vw, 18px)" }}
+                >
+                  "{quote.text}"
+                </div>
+                <div 
+                  className="text-white/60 text-sm"
+                  style={{ fontSize: "clamp(12px, 2vw, 14px)" }}
+                >
+                  {quote.source}, {quote.year}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Section 4组件
+function Section4() {
+  return (
+    <div className="flex h-screen w-full px-8 md:px-16 lg:px-24">
+      {/* 左侧标题区域 */}
+      <div className="w-2/5 flex flex-col justify-center pr-8">
+        <div className="text-white/60 text-sm mb-4">
+          Chapter II: Shaping Tomorrow
+        </div>
+        <h1 
+          className="text-white font-light leading-tight"
+          style={{ fontSize: "clamp(32px, 5vw, 48px)" }}
+        >
+          No one truly knows what the future of AI holds—but with foresight, we can be ready for whatever comes next.
+        </h1>
+      </div>
+
+      {/* 右侧滚动区域 */}
+      <div className="w-3/5 flex items-center h-full">
+        <div className="w-full h-96">
+          <QuotesCarousel />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // AI准确性图表组件
 function AIAccuracyChart() {
   const chartRef = useRef(null);
@@ -662,15 +810,32 @@ export default function ChapterOnePage() {
   const section1Ref = useRef(null);
   const section2Ref = useRef(null);
   const section3Ref = useRef(null);
+  const section4Ref = useRef(null);
   
   // 使用React state存储滚动进度（声明式方式）
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   
   // 计算neon材质进度
   const neonProgress = useMemo(() => {
     const scrollFactor = Math.min(scrollProgress * 2, 1);
     return 0.3 + scrollFactor * 0.65; // 0.3 -> 0.95
   }, [scrollProgress]);
+
+  // 处理加载完成
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+    // Loading screen消失后，让Section1标题淡入
+    setTimeout(() => {
+      if (section1Ref.current) {
+        gsap.to(section1Ref.current, {
+          opacity: 1,
+          duration: 1.2,
+          ease: "power2.out"
+        });
+      }
+    }, 100);
+  };
 
   useEffect(() => {
     // 创建一个可被GSAP动画化的对象
@@ -681,14 +846,16 @@ export default function ChapterOnePage() {
     let s2FadeInTriggered = false;
     let s2FadeOutTriggered = false;
     let s3Triggered = false;
+    let s3FadeOutTriggered = false;
+    let s4Triggered = false;
     
     const ctx = gsap.context(() => {
       const container = scrollContainerRef.current;
       
       // ===== 创建所有动画时间轴 =====
       
-      // Section 1: 标题淡出
-      gsap.set(section1Ref.current, { opacity: 1 });
+      // Section 1: 标题淡出（初始状态为0，等待loading screen消失后淡入）
+      gsap.set(section1Ref.current, { opacity: 0 });
       const s1FadeOut = gsap.timeline({ paused: true })
         .to(section1Ref.current, {
           opacity: 0,
@@ -711,11 +878,32 @@ export default function ChapterOnePage() {
           ease: "power2.inOut"
         });
       
-      // Section 3: 图表淡入
+      // Section 3: 图表淡入/淡出
       gsap.set(section3Ref.current, { opacity: 0 });
       const s3FadeIn = gsap.timeline({ paused: true })
         .to(section3Ref.current, {
           opacity: 1,
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+      const s3FadeOut = gsap.timeline({ paused: true })
+        .to(section3Ref.current, {
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+      
+      // Section 4: Quotes Carousel淡入/淡出
+      gsap.set(section4Ref.current, { opacity: 0 });
+      const s4FadeIn = gsap.timeline({ paused: true })
+        .to(section4Ref.current, {
+          opacity: 1,
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+      const s4FadeOut = gsap.timeline({ paused: true })
+        .to(section4Ref.current, {
+          opacity: 0,
           duration: 0.5,
           ease: "power2.inOut"
         });
@@ -788,12 +976,48 @@ export default function ChapterOnePage() {
             }
           }
           
-          // Section 3 应该可见的区间：53%-100%
-          if (p < 0.53) {
-            // 应该隐藏
+          // Section 3 应该可见的区间：53%-65%
+          if (p >= 0.53 && p < 0.65) {
+            // 应该可见
+            if (s3FadeOutTriggered) {
+              // 如果之前淡出了，重新淡入
+              s3FadeOutTriggered = false;
+              s3Triggered = true;
+              s3FadeOut.pause();
+              s3FadeIn.restart();
+            } else if (!s3Triggered) {
+              // 如果还没淡入过，触发淡入
+              s3Triggered = true;
+              s3FadeIn.restart();
+            }
+          } else if (p < 0.53) {
+            // 在53%以下，应该隐藏
             if (s3Triggered) {
               s3Triggered = false;
               s3FadeIn.reverse();
+            }
+          } else if (p >= 0.65) {
+            // 在65%以上，应该淡出
+            if (s3Triggered && !s3FadeOutTriggered) {
+              s3FadeOutTriggered = true;
+              s3Triggered = false;
+              s3FadeIn.pause();
+              s3FadeOut.restart();
+            }
+          }
+          
+          // Section 4 应该可见的区间：70%-100%
+          if (p >= 0.70) {
+            // 应该可见
+            if (!s4Triggered) {
+              s4Triggered = true;
+              s4FadeIn.restart();
+            }
+          } else if (p < 0.70) {
+            // 在70%以下，应该隐藏
+            if (s4Triggered) {
+              s4Triggered = false;
+              s4FadeIn.reverse();
             }
           }
           
@@ -831,6 +1055,21 @@ export default function ChapterOnePage() {
           s3FadeIn.play();
         }
       }, null, 0.53);
+      
+      mainTimeline.call(() => {
+        if (!s3FadeOutTriggered) {
+          s3FadeOutTriggered = true;
+          s3Triggered = false;
+          s3FadeOut.play();
+        }
+      }, null, 0.65);
+      
+      mainTimeline.call(() => {
+        if (!s4Triggered) {
+          s4Triggered = true;
+          s4FadeIn.play();
+        }
+      }, null, 0.70);
 
     });
 
@@ -839,6 +1078,8 @@ export default function ChapterOnePage() {
 
   return (
     <div className="overflow-x-hidden">
+      {/* 加载屏幕 */}
+      {isLoading && <LoadingScreen onComplete={handleLoadingComplete} />}
       {/* 渐变背景 */}
       <div 
         className="fixed inset-0 w-screen h-screen pointer-events-none"
@@ -898,7 +1139,7 @@ export default function ChapterOnePage() {
         <section 
           ref={section1Ref}
           className="fixed top-0 left-0 w-screen h-screen flex items-start text-white pointer-events-none"
-          style={{ paddingLeft: '24px', paddingTop: '64px', opacity: 1, zIndex: 10 }}
+          style={{ paddingLeft: '24px', paddingTop: '64px', opacity: 0, zIndex: 10 }}
         >
           <div className="max-w-[800px]">
             <p className="text-sm opacity-80 mb-2">Chapter I · The Introduction</p>
@@ -942,6 +1183,20 @@ export default function ChapterOnePage() {
         >
           <div className="w-full max-w-[1200px] pointer-events-auto">
             <AIAccuracyChart />
+          </div>
+        </section>
+
+        {/* Section 4: Quotes Carousel */}
+        <section 
+          ref={section4Ref}
+          className="fixed top-0 left-0 w-screen h-screen flex items-center justify-center text-white pointer-events-none"
+          style={{ 
+            opacity: 0, 
+            zIndex: 10
+          }}
+        >
+          <div className="w-full pointer-events-auto">
+            <Section4 />
           </div>
         </section>
       </div>
