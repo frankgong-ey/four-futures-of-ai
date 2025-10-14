@@ -20,6 +20,14 @@ import circlePlaneFragmentShader from "../../shaders/circlePlane.frag.glsl";
 import torusLinesVertexShader from "../../shaders/torusLines.vert.glsl";
 import torusLinesFragmentShader from "../../shaders/torusLines.frag.glsl";
 import LoadingScreen from "../components/LoadingScreen";
+import Section1 from "../components/Section1";
+import Section2 from "../components/Section2";
+import Section3 from "../components/Section3";
+import Section4 from "../components/Section4";
+import Section5 from "../components/Section5";
+import GalleryTunnel from "../components/GalleryTunnel";
+import Navigation from "../components/Navigation";
+import DebugUI from "../components/DebugUI";
 import SplitType from "split-type";
 
 // 注册GSAP插件
@@ -28,7 +36,7 @@ if (typeof window !== "undefined") {
 }
 
 /*
-* 加载霓虹灯条模型组件。通过props接收进度
+* 加载模型组件，接收进度和可见性 ✅
 */ 
 function ModelLoader({ scrollProgress, visible = true }) {
   const { scene } = useGLTF('/models/Neon_scene01.glb'); // 加载霓虹灯条模型。如果存在则返回，不存在则返回null。
@@ -112,9 +120,6 @@ function ModelLoader({ scrollProgress, visible = true }) {
   );
 }
 
-/*
-* 加载问题A模型组件，在80%滚动时显示
-*/ 
 function QuestionAModel({ scrollProgress, visible }) {
   const { scene } = useGLTF('/models/questionA_v3.glb');
   const group = useRef(null);
@@ -494,119 +499,26 @@ function QuestionAModel({ scrollProgress, visible }) {
   );
 }
 
-// 带 Glitch 效果的图片组件
-function GlitchImage({ url, position, rotation, scale, opacity }) {
-  const texture = useTexture(url);
-  const meshRef = useRef();
-  
-  // 设置纹理的颜色空间
-  useEffect(() => {
-    if (texture) {
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.needsUpdate = true;
-    }
-  }, [texture]);
-  
-  const material = useMemo(() => {
-    return new THREE.ShaderMaterial({
-      transparent: true,
-      side: THREE.DoubleSide,
-      toneMapped: true, // 启用色调映射，限制图片亮度，避免触发 bloom
-      uniforms: {
-        uTexture: { value: texture },
-        uTime: { value: 0 },
-        uOpacity: { value: opacity },
-        uGlitchIntensity: { value: 0.35 }
-      },
-      vertexShader: `
-        varying vec2 vUv;
-        
-        void main() {
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform sampler2D uTexture;
-        uniform float uTime;
-        uniform float uOpacity;
-        uniform float uGlitchIntensity;
-        varying vec2 vUv;
-        
-        // 随机函数
-        float random(vec2 st) {
-          return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
-        }
-        
-        void main() {
-          vec2 uv = vUv;
-          
-          // 随机的 glitch 触发
-          float glitchTrigger = step(0.9, random(vec2(uTime * 0.5, uTime * 0.3)));
-          
-          // RGB 通道分离
-          float offset = uGlitchIntensity * glitchTrigger * 0.02;
-          vec4 r = texture2D(uTexture, uv + vec2(offset, 0.0));
-          vec4 g = texture2D(uTexture, uv);
-          vec4 b = texture2D(uTexture, uv - vec2(offset, 0.0));
-          vec4 color = vec4(r.r, g.g, b.b, g.a);
-          
-          // 水平扫描线位移
-          float scanline = step(0.95, random(vec2(floor(uv.y * 50.0), floor(uTime * 10.0))));
-          float displacement = (random(vec2(floor(uTime * 5.0), floor(uv.y * 20.0))) - 0.5) * 0.05;
-          uv.x += displacement * scanline * glitchTrigger;
-          
-          // 如果有位移，重新采样
-          if (scanline > 0.0 && glitchTrigger > 0.0) {
-            color = texture2D(uTexture, uv);
-          }
-          
-          // 随机闪烁
-          float flicker = 1.0 - glitchTrigger * 0.3 * random(vec2(uTime * 20.0));
-          color.rgb *= flicker;
-          
-          // 应用透明度
-          color.a *= uOpacity;
-          
-          gl_FragColor = color;
-        }
-      `
-    });
-  }, [texture]);
-  
-  // 更新时间 uniform
-  useFrame((state) => {
-    if (meshRef.current && meshRef.current.material) {
-      meshRef.current.material.uniforms.uTime.value = state.clock.elapsedTime;
-      meshRef.current.material.uniforms.uOpacity.value = opacity;
-    }
-  });
-  
-  return (
-    <mesh ref={meshRef} position={position} rotation={rotation} scale={scale}>
-      <planeGeometry args={[1, 1]} />
-      <primitive object={material} attach="material" />
-    </mesh>
-  );
-}
-
+/*
+* 相机组件，接收进度和调试控制 ✅
+*/ 
 function CameraRig({ scrollProgress, debugControls = false }) {
   const { camera, gl, size, set } = useThree();
   const startPos = useMemo(() => new THREE.Vector3(-5, 1, 8), []); 
   const midPos = useMemo(() => new THREE.Vector3(20, 4, 0), []); // 50%时的位置
   const endPos = useMemo(() => new THREE.Vector3(30, 4, -10), []); // 100%时的位置
-  
-  // 正交相机的起始和结束位置
-  const orthoStartPos = useMemo(() => new THREE.Vector3(2, 2, 2), []); // 右侧初始位置
-  const orthoEndPos = useMemo(() => new THREE.Vector3(-2.5, 1.5, 2,5), []); // 最终位置
-  const orthoStartLookAt = useMemo(() => new THREE.Vector3(2, 1, 0), []); // 右侧初始看向
-  const orthoEndLookAt = useMemo(() => new THREE.Vector3(0, 1, 0), []); // 最终看向
-  
+
   const startLookAt = useMemo(() => new THREE.Vector3(0, 0, -1), []);
   const midLookAt = useMemo(() => new THREE.Vector3(30, 4, 0), []); // 50%时看向的位置
   const endLookAt = useMemo(() => new THREE.Vector3(40, 4, 10), []); // 100%时看向的位置
   const currentLookAt = useMemo(() => new THREE.Vector3(), []);
-
+  
+  // 正交相机的起始和结束位置
+  const orthoStartPos = useMemo(() => new THREE.Vector3(2, 2, 2), []); // 右侧初始位置
+  const orthoEndPos = useMemo(() => new THREE.Vector3(-2.5, 1.5, 2.5), []); // 最终位置
+  const orthoStartLookAt = useMemo(() => new THREE.Vector3(2, 1, 0), []); // 右侧初始看向
+  const orthoEndLookAt = useMemo(() => new THREE.Vector3(0, 1, 0), []); // 最终看向
+  
   // 创建正交相机
   const orthographicCamera = useMemo(() => {
     const aspect = size.width / size.height;
@@ -692,594 +604,17 @@ function CameraRig({ scrollProgress, debugControls = false }) {
   return null;
 }
 
-function GalleryTunnel({ scrollProgress }) {
-  const group = useRef(null);
-  const [opacity, setOpacity] = useState(0);
-  const movementOffset = useRef(0); // 用于持续向前移动的偏移量
-  const hasStartedMoving = useRef(false); // 标记是否已经开始持续移动
-  const planes = useMemo(() => {
-    const arr = [];
-    const imageUrls = [
-      "/images/gallery_1.png",
-      "/images/gallery_2.png",
-      "/images/gallery_3.png",
-      "/images/gallery_4.png",
-      "/images/gallery_5.png",
-      "/images/gallery_6.png",
-      "/images/gallery_7.png",
-      "/images/gallery_8.png",
-      "/images/gallery_9.png",
-      "/images/gallery_10.png",
-    ];
-    // 每张图片的 prompt 文本
-    const prompts = [
-      "A futuristic cityscape at sunset",
-      "Abstract digital art with vibrant colors",
-      "A serene mountain landscape",
-      "Cyberpunk street scene at night",
-      "Ethereal forest with glowing lights",
-      "Geometric patterns in motion",
-      "Deep space nebula",
-      "Minimalist architecture design",
-      "Surreal dreamscape",
-      "Dynamic particle system"
-    ];
-    
-    for (let i = 0; i < 10; i++) {
-      // 摄像机从 (-5,1,8) 移动到 (20,3,0)
-      // 把图片放在摄像机终点后方，从 X=22 开始
-      const x = 22 + i * 3; // 从X=22开始，间隔3单位
-      
-      // 随机的Y坐标变化，在2.5到3.5之间
-      const yOffset = Math.random() * 1; // 0到1的随机值
-      const y = 4.5 + yOffset; // 基准高度3，上下浮动0.5
-      
-      // 左右交替 Z 坐标
-      const z = i % 2 === 0 ? -2 : 2; // 偶数左侧(-2)，奇数右侧(2)
-      
-      // 朝向 +X 方向（-Math.PI/2 = -90度，让图片面向 +X，即朝向摄像机来的方向）
-      const rotY = -Math.PI / 2;
-      
-      // 随机的缩放，在0.8到1.2之间
-      const scaleFactor = 0.8 + Math.random() * 0.4; // 0.8到1.2的随机值
-      const scale = [1.6 * scaleFactor, 0.9 * scaleFactor, 1];
-      
-      arr.push({ 
-        pos: [x, y, z], 
-        rotY, 
-        scale, 
-        url: imageUrls[i % imageUrls.length],
-        prompt: prompts[i % prompts.length]
-      });
-    }
-    return arr;
-  }, []);
-
-  // 根据滚动进度控制 3D 图片廊的可见性与入场动画
-  useFrame((state, delta) => {
-    if (!group?.current) return;
-    const p = scrollProgress;
-    const revealStart = 0.23; // 从 23% 开始出现
-    const t = THREE.MathUtils.clamp((p - revealStart) / (1 - revealStart), 0, 1);
-
-    // 计算基础位置（入场动画的目标位置）
-    const basePosition = THREE.MathUtils.lerp(5, 0, t);
-    
-    // 当滚动在25%-50%之间时，图片持续移动
-    if (p >= 0.25 && p < 0.5) {
-      if (!hasStartedMoving.current) {
-        // 第一次到达25%，初始化移动起点
-        hasStartedMoving.current = true;
-        movementOffset.current = basePosition;
-      }
-      // 持续向摄像机方向移动（X轴负方向）
-      const moveSpeed = 0.5; // 每秒移动0.5单位
-      movementOffset.current -= delta * moveSpeed;
-      group.current.position.x = movementOffset.current;
-    } else if (p >= 0.5) {
-      // 50%以后保持在最后的位置（虽然不可见了）
-      // 不做任何操作，保持最后的 movementOffset
-      group.current.position.x = movementOffset.current;
-    } else {
-      // p < 0.25，即回滚到25%之前
-      if (hasStartedMoving.current) {
-        // 如果已经开始移动过，回滚时平滑过渡到当前滚动位置
-        // 使用 lerp 让位置平滑回到基础位置
-        movementOffset.current = THREE.MathUtils.lerp(movementOffset.current, basePosition, 0.1);
-        group.current.position.x = movementOffset.current;
-        
-        // 如果已经接近基础位置，重置移动标志
-        if (Math.abs(movementOffset.current - basePosition) < 0.01) {
-          hasStartedMoving.current = false;
-        }
-      } else {
-        // 正常的入场动画
-        group.current.position.x = basePosition;
-        movementOffset.current = basePosition;
-      }
-    }
-    
-    // 轻微缩放入场
-    const s = THREE.MathUtils.lerp(0.8, 1, t);
-    group.current.scale.set(s, s, s);
-    
-    // 透明度控制：23%-25% 淡入，48%-50% 淡出
-    let finalOpacity = 0;
-    if (p < 0.25) {
-      // 淡入阶段：23%-25%
-      const fadeInStart = 0.23;
-      const fadeInEnd = 0.25;
-      finalOpacity = THREE.MathUtils.clamp((p - fadeInStart) / (fadeInEnd - fadeInStart), 0, 1);
-    } else if (p < 0.48) {
-      // 完全可见阶段：25%-48%
-      finalOpacity = 1;
-    } else if (p < 0.5) {
-      // 淡出阶段：48%-50%
-      const fadeOutStart = 0.48;
-      const fadeOutEnd = 0.5;
-      finalOpacity = 1 - THREE.MathUtils.clamp((p - fadeOutStart) / (fadeOutEnd - fadeOutStart), 0, 1);
-    } else {
-      // 完全不可见：50%以后
-      finalOpacity = 0;
-    }
-    setOpacity(finalOpacity);
-  });
-
-  return (
-    <group ref={group}>
-      {planes.map((p, i) => {
-        // 计算文本位置：在图片左上角上方
-        const imageHeight = p.scale[1] * 0.5; // 图片高度的一半
-        const imageWidth = p.scale[0]; // 图片宽度
-        const textY = p.pos[1] + imageHeight + 0.1; // 图片顶部上方0.1单位
-        
-        // 由于图片旋转了-90度，局部X方向在世界坐标中是Z方向
-        // 图片左边缘在局部X=-imageWidth*0.5，对应世界Z坐标减去imageWidth*0.5
-        const textZ = p.pos[2] - imageWidth * 0.5;
-        
-        return (
-          <group key={i}>
-            <GlitchImage
-              url={p.url}
-              position={p.pos}
-              rotation={[0, p.rotY, 0]}
-              scale={p.scale}
-              opacity={opacity}
-            />
-            <Text
-              position={[p.pos[0], textY, textZ]}
-              rotation={[0, p.rotY, 0]}
-              fontSize={0.05}
-              color="#ffffff"
-              anchorX="left"
-              anchorY="bottom"
-              maxWidth={imageWidth}
-              outlineWidth={0.001}
-              outlineColor="#000000"
-              fillOpacity={opacity}
-              outlineOpacity={opacity}
-            >
-              {p.prompt}
-            </Text>
-          </group>
-        );
-      })}
-    </group>
-  );
-}
-
-// Quotes Carousel组件
-function QuotesCarousel() {
-  const containerRef = useRef(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  // 易于管理的quotes数据
-  const quotes = [
-    {
-      text: "The looming AI monopolies",
-      source: "Politico",
-      year: "2024"
-    },
-    {
-      text: "OpenAI's Sam Altman predicts artificial superintelligence (AGI) by 2025",
-      source: "Tech Radar", 
-      year: "2024"
-    },
-    {
-      text: "OpenAI's $10 Million+ AI Consulting Business: Deployment Takes Center Stage",
-      source: "Forbes",
-      year: "2025"
-    },
-    {
-      text: "How will you respond when AI agents reshape your firm's business model?",
-      source: "Accounting Today",
-      year: "2025"
-    },
-    {
-      text: "AI will transform every industry, but the question is how quickly and who will lead",
-      source: "MIT Technology Review",
-      year: "2024"
-    },
-    {
-      text: "The future belongs to those who can harness AI's potential while managing its risks",
-      source: "Harvard Business Review",
-      year: "2025"
-    },
-    {
-      text: "We're not just building tools, we're creating the next generation of intelligence",
-      source: "Nature AI",
-      year: "2024"
-    }
-  ];
-
-  // 自动滚动效果
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % quotes.length);
-    }, 3000); // 每3秒切换一次
-
-    return () => clearInterval(interval);
-  }, [quotes.length]);
-
-  return (
-    <div ref={containerRef} className="relative h-full w-full overflow-hidden">
-      <div className="absolute inset-0 flex flex-col justify-center">
-        {quotes.map((quote, index) => {
-          // 计算当前quote在可视区域中的位置
-          const relativeIndex = (index - currentIndex + quotes.length) % quotes.length;
-          const isVisible = relativeIndex <= 4; // 显示当前及前后4个（总共5个）
-          
-          if (!isVisible) return null;
-
-          // 计算透明度和位置
-          let opacity = 0;
-          let translateY = 0;
-          
-          if (relativeIndex === 0) {
-            // 上方待消失的quote（低透明度）
-            opacity = 0.3;
-            translateY = -160;
-          } else if (relativeIndex === 1) {
-            // 第一个高亮quote
-            opacity = 1;
-            translateY = -60;
-          } else if (relativeIndex === 2) {
-            // 第二个高亮quote
-            opacity = 1;
-            translateY = 60;
-          } else if (relativeIndex === 3) {
-            // 下方待高亮的quote（低透明度）
-            opacity = 0.3;
-            translateY = 160;
-          } else if (relativeIndex === 4) {
-            // 第五个quote（完全透明）
-            opacity = 0;
-            translateY = 260;
-          }
-
-          return (
-            <div
-              key={index} // 使用固定的index作为key，让React复用DOM元素
-              className="absolute w-full transition-all ease-out"
-              style={{
-                transform: `translateY(${translateY}px)`,
-                opacity: opacity,
-                zIndex: quotes.length - relativeIndex,
-                transitionDuration: '1000ms'
-              }}
-            >
-              <div className="text-white">
-                <div 
-                  className="font-light leading-tight mb-2"
-                  style={{ fontSize: "clamp(14px, 2.5vw, 18px)" }}
-                >
-                  "{quote.text}"
-                </div>
-                <div 
-                  className="text-white/60 text-sm"
-                  style={{ fontSize: "clamp(12px, 2vw, 14px)" }}
-                >
-                  {quote.source}, {quote.year}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-// Section 4组件
-function Section4() {
-  return (
-    <div className="flex h-screen w-full px-8 md:px-16 lg:px-24 gap-10 md:gap-16 lg:gap-24">
-      {/* 左侧标题区域 */}
-      <div className="w-1/2 flex flex-col justify-center">
-        <div className="text-white/60 text-sm mb-4">
-          Chapter II: Shaping Tomorrow
-        </div>
-        <h1 
-          className="text-white font-light leading-tight"
-          style={{ fontSize: "clamp(32px, 5vw, 48px)" }}
-        >
-          No one truly knows what the future of AI holds—but with foresight, we can be ready for whatever comes next.
-        </h1>
-      </div>
-
-      {/* 右侧滚动区域 */}
-      <div className="w-1/2 flex items-center h-full">
-        <div className="w-full h-96">
-          <QuotesCarousel />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// AI准确性图表组件
-function AIAccuracyChart() {
-  const chartRef = useRef(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsVisible(true);
-          }
-        });
-      },
-      { threshold: 0.3 }
-    );
-
-    const currentElement = chartRef.current;
-    if (currentElement) {
-      observer.observe(currentElement);
-    }
-
-    return () => {
-      if (currentElement) {
-        observer.unobserve(currentElement);
-      }
-    };
-  }, []);
-
-  // 图表数据
-  const dataPoints = [
-    { x: 0.15, y: 3.5, label: null },
-    { x: 0.35, y: 8.5, label: null },
-    { x: 0.55, y: 6.5, label: "Chat GPT" },
-    { x: 0.75, y: 13.5, label: "Chat GPT" },
-    { x: 0.85, y: 5.5, label: null },
-    { x: 0.87, y: 15.5, label: null },
-    { x: 0.95, y: 9, label: null },
-    { x: 0.98, y: 17.5, label: null },
-  ];
-
-  // 时间标签
-  const timeLabels = [
-    "May, 24", "Jul, 24", "Sep, 24", "Nov, 24", 
-    "Jan, 25", "Mar, 25", "May, 25"
-  ];
-
-  // 准确度标签
-  const accuracyLabels = [
-    "0.0", "2.5", "5.0", "7.5", "10.0", 
-    "12.5", "15.0", "17.5", "20.0"
-  ];
-
-  const chartWidth = 1000;
-  const chartHeight = 500;
-  const margin = { top: 60, right: 80, bottom: 80, left: 80 };
-
-  return (
-    <div ref={chartRef} className="w-full">
-      {/* 标题 */}
-      <div className="mb-8">
-        <h3 className="text-white text-sm opacity-80 mb-2">
-          AI's Accuracy on Humanity's Last Exam
-        </h3>
-        <h2 
-          className="text-white font-light text-2xl"
-          style={{ fontSize: "clamp(24px, 4vw, 32px)" }}
-        >
-          And AI performance has improved exponentially.
-        </h2>
-      </div>
-
-      {/* SVG图表 */}
-      <div 
-        className="w-full rounded-lg overflow-hidden" 
-        style={{ 
-          aspectRatio: '2/1',
-          background: 'rgba(6, 7, 11, 0.1)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-        }}
-      >
-        <svg
-          width="100%"
-          height="100%"
-          viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-          style={{ background: 'transparent' }}
-        >
-          {/* 定义发光效果 */}
-          <defs>
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-              <feMerge> 
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-            <filter id="pointGlow">
-              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-
-          {/* 网格线 */}
-          {accuracyLabels.map((_, i) => {
-            const y = margin.top + (i * (chartHeight - margin.top - margin.bottom) / 8);
-            return (
-              <line
-                key={`grid-y-${i}`}
-                x1={margin.left}
-                y1={y}
-                x2={chartWidth - margin.right}
-                y2={y}
-                stroke="rgba(255,255,255,0.1)"
-                strokeWidth="1"
-              />
-            );
-          })}
-
-          {/* X轴 */}
-          <line
-            x1={margin.left}
-            y1={chartHeight - margin.bottom}
-            x2={chartWidth - margin.right}
-            y2={chartHeight - margin.bottom}
-            stroke="white"
-            strokeWidth="1"
-          />
-
-          {/* Y轴 */}
-          <line
-            x1={margin.left}
-            y1={margin.top}
-            x2={margin.left}
-            y2={chartHeight - margin.bottom}
-            stroke="white"
-            strokeWidth="1"
-          />
-
-          {/* X轴标签 */}
-          {timeLabels.map((label, i) => {
-            const x = margin.left + (i * (chartWidth - margin.left - margin.right) / 6);
-            return (
-              <text
-                key={`x-label-${i}`}
-                x={x}
-                y={chartHeight - margin.bottom + 25}
-                fill="white"
-                fontSize="12"
-                textAnchor="middle"
-                className="opacity-80"
-              >
-                {label}
-              </text>
-            );
-          })}
-
-          {/* Y轴标签 */}
-          {accuracyLabels.map((label, i) => {
-            const y = chartHeight - margin.bottom - (i * (chartHeight - margin.top - margin.bottom) / 8);
-            return (
-              <g key={`y-label-${i}`}>
-                <text
-                  x={margin.left - 15}
-                  y={y + 4}
-                  fill="white"
-                  fontSize="12"
-                  textAnchor="end"
-                  className="opacity-80"
-                >
-                  {label}
-                </text>
-                {/* Y轴标题 */}
-                {i === 4 && (
-                  <text
-                    x={15}
-                    y={chartHeight / 2}
-                    fill="white"
-                    fontSize="12"
-                    textAnchor="middle"
-                    className="opacity-80"
-                    transform={`rotate(-90, 15, ${chartHeight / 2})`}
-                  >
-                    Accuracy (%)
-                  </text>
-                )}
-              </g>
-            );
-          })}
-
-          {/* 趋势线 */}
-          <path
-            d={`M ${margin.left + dataPoints[0].x * (chartWidth - margin.left - margin.right)} ${
-              chartHeight - margin.bottom - (dataPoints[0].y / 20) * (chartHeight - margin.top - margin.bottom)
-            } Q ${margin.left + dataPoints[3].x * (chartWidth - margin.left - margin.right)} ${
-              chartHeight - margin.bottom - (dataPoints[3].y / 20) * (chartHeight - margin.top - margin.bottom)
-            } ${margin.left + dataPoints[7].x * (chartWidth - margin.left - margin.right)} ${
-              chartHeight - margin.bottom - (dataPoints[7].y / 20) * (chartHeight - margin.top - margin.bottom)
-            }`}
-            fill="none"
-            stroke="white"
-            strokeWidth="3"
-            filter="url(#glow)"
-            className={`transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
-            style={{
-              strokeDasharray: isVisible ? 'none' : '1000',
-              strokeDashoffset: isVisible ? '0' : '1000',
-              transition: 'stroke-dashoffset 2s ease-out, opacity 0.5s ease-out'
-            }}
-          />
-
-          {/* 数据点 */}
-          {dataPoints.map((point, i) => {
-            const x = margin.left + point.x * (chartWidth - margin.left - margin.right);
-            const y = chartHeight - margin.bottom - (point.y / 20) * (chartHeight - margin.top - margin.bottom);
-            
-            return (
-              <g key={`point-${i}`}>
-                <circle
-                  cx={x}
-                  cy={y}
-                  r="6"
-                  fill="white"
-                  filter="url(#pointGlow)"
-                  className={`transition-all duration-500 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}
-                  style={{ transitionDelay: `${i * 100}ms` }}
-                />
-                
-                {/* 标签 */}
-                {point.label && (
-                  <text
-                    x={x}
-                    y={y - 15}
-                    fill="white"
-                    fontSize="10"
-                    textAnchor="middle"
-                    className={`opacity-90 transition-all duration-500 ${isVisible ? 'opacity-90' : 'opacity-0'}`}
-                    style={{ transitionDelay: `${i * 100 + 300}ms` }}
-                  >
-                    {point.label}
-                  </text>
-                )}
-              </g>
-            );
-          })}
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-
+/*
+* 主组件 ✅
+*/ 
 export default function ChapterOnePage() {
   const scrollContainerRef = useRef(null);
   const section1Ref = useRef(null);
   const section2Ref = useRef(null);
   const section3Ref = useRef(null);
-  const canvasContainerRef = useRef(null);
-  const chartBlurOverlayRef = useRef(null);
   const section3ChartRef = useRef(null);
+  const section3BlurOverlayRef = useRef(null);
+  const canvasContainerRef = useRef(null);
   const section4Ref = useRef(null);
   const section5Ref = useRef(null);
   
@@ -1410,6 +745,7 @@ export default function ChapterOnePage() {
     }, 100);
   };
 
+  // 滚动动画
   useEffect(() => {
     // 创建一个可被GSAP动画化的对象
     const scrollData = { progress: 0 };
@@ -1454,7 +790,7 @@ export default function ChapterOnePage() {
       
       // Section 3: 图表淡入/淡出（全局遮罩，定位到图表区域，避免与section透明度冲突）
       gsap.set(section3Ref.current, { opacity: 0 });
-      if (chartBlurOverlayRef.current) gsap.set(chartBlurOverlayRef.current, { opacity: 0, display: 'none' });
+      if (section3BlurOverlayRef.current) gsap.set(section3BlurOverlayRef.current, { opacity: 0, display: 'none' });
       const s3FadeIn = gsap.timeline({ paused: true })
         .to(section3Ref.current, {
           opacity: 1,
@@ -1462,17 +798,18 @@ export default function ChapterOnePage() {
           ease: "power2.inOut"
         }, 0)
         .call(() => {
-          if (!chartBlurOverlayRef.current || !section3ChartRef.current) return;
+          if (!section3ChartRef.current || !section3BlurOverlayRef.current) return;
+          
           const rect = section3ChartRef.current.getBoundingClientRect();
-          const el = chartBlurOverlayRef.current;
+          const blurOverlay = section3BlurOverlayRef.current;
           // 将遮罩定位到图表区域（相对于视口）
-          el.style.left = rect.left + 'px';
-          el.style.top = rect.top + 'px';
-          el.style.width = rect.width + 'px';
-          el.style.height = rect.height + 'px';
-          el.style.display = 'block';
+          blurOverlay.style.left = rect.left + 'px';
+          blurOverlay.style.top = rect.top + 'px';
+          blurOverlay.style.width = rect.width + 'px';
+          blurOverlay.style.height = rect.height + 'px';
+          blurOverlay.style.display = 'block';
         }, null, 0)
-        .to(chartBlurOverlayRef.current, {
+        .to(section3BlurOverlayRef.current, {
           opacity: 1,
           duration: 0.5,
           ease: "power2.inOut"
@@ -1483,12 +820,14 @@ export default function ChapterOnePage() {
           duration: 0.5,
           ease: "power2.inOut"
         }, 0)
-        .to(chartBlurOverlayRef.current, {
+        .to(section3BlurOverlayRef.current, {
           opacity: 0,
           duration: 0.5,
           ease: "power2.inOut",
           onComplete: () => {
-            if (chartBlurOverlayRef.current) chartBlurOverlayRef.current.style.display = 'none';
+            if (section3BlurOverlayRef.current) {
+              section3BlurOverlayRef.current.style.display = 'none';
+            }
           }
         }, 0);
       
@@ -1705,6 +1044,7 @@ export default function ChapterOnePage() {
     return () => ctx.revert();
   }, []);
 
+  // 渲染
   return (
     <div className="overflow-x-hidden">
       {/* 加载屏幕 */}
@@ -1765,123 +1105,31 @@ export default function ChapterOnePage() {
       </div>
 
       {/* 固定导航 - 左上角（加载时隐藏） */}
-      {!isLoading && (
-        <div className="fixed top-4 left-4 z-[60] pointer-events-auto">
-          <div className="flex items-center gap-3 select-none" aria-hidden="true">
-            <img src="/images/nav_logo.svg" alt="Navigation" className="h-16 w-auto" />
-          </div>
-        </div>
-      )}
+      <Navigation isLoading={isLoading} />
 
-      {/* 全局模糊遮罩（位于 Canvas 上层、Sections 下层），动态定位到图表区域 */}
-      <div
-        ref={chartBlurOverlayRef}
-        className="fixed pointer-events-none"
-        style={{
-          left: 0,
-          top: 0,
-          width: 0,
-          height: 0,
-          zIndex: 5,
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
-          background: 'rgba(0,0,0,0.001)',
-          opacity: 0,
-          display: 'none'
-        }}
-      />
 
       {/* 滚动容器 - 创建滚动高度 */}
       <div ref={scrollContainerRef} className="relative w-screen pointer-events-none" style={{ height: '1000vh', zIndex: 10 }}>
         {/* Section 1: 标题 */}
-        <section 
-          ref={section1Ref}
-          className="fixed top-0 left-0 w-screen h-screen flex items-start text-white pointer-events-none"
-          style={{ paddingLeft: '24px', paddingTop: '120px', opacity: 0, zIndex: 10 }}
-        >
-          <div className="max-w-[800px]">
-            <p className="text-sm opacity-80 mb-2">Chapter I · The Introduction</p>
-            <h1 className="font-light leading-[0.95] tracking-[-0.05em]"
-                style={{
-                  fontSize: "clamp(32px, 6vw, 120px)",
-                  color: "#FFFFFF"
-                }}>
-              Will you shape the future of AI,
-            </h1>
-          </div>
-          {/* 右下角固定的副标题 */}
-          <div className="absolute bottom-24 right-24 text-right pointer-events-none">
-            <div
-              className="text-white font-light opacity-80 tracking-[-0.05em] fancy-text"
-              style={{
-                fontSize: "clamp(32px, 6vw, 120px)",
-                textShadow: "0 0 20px rgba(80,200,255,.35)",
-              }}
-            >
-              or will it shape you?
-            </div>
-          </div>
-        </section>
+        <Section1 ref={section1Ref} />
 
         {/* Section 2: 第二段文字 */}
-        <section 
-          ref={section2Ref}
-          className="fixed top-0 left-0 w-screen h-screen flex items-start text-white pointer-events-none"
-          style={{ paddingLeft: '24px', paddingTop: '120px', opacity: 0, zIndex: 10 }}
-        >
-            <div className="max-w-[1100px]">
-            <h2 className="font-light opacity-90 mb-6 tracking-[-0.05em]"
-                style={{ fontSize: "clamp(20px, 3vw, 64px)" }}>
-                In recent years, we have seen major improvements in AI across image and video creation capabilities.
-              </h2>
-            </div>
-          </section>
+        <Section2 ref={section2Ref} />
 
         {/* Section 3: 图表 */}
-        <section 
+        <Section3 
           ref={section3Ref}
-          className="fixed top-0 left-0 w-screen h-screen flex items-center justify-center text-white pointer-events-none"
-          style={{ 
-            padding: '64px 24px', 
-            opacity: 0, 
-            zIndex: 10
+          onRefsReady={(chartRef, blurOverlayRef) => {
+            section3ChartRef.current = chartRef.current;
+            section3BlurOverlayRef.current = blurOverlayRef.current;
           }}
-        >
-          <div ref={section3ChartRef} className="w-full max-w-[1200px] pointer-events-auto" style={{ position: 'relative', zIndex: 1 }}>
-            <AIAccuracyChart />
-          </div>
-          </section>
+        />
 
         {/* Section 4: Quotes Carousel */}
-        <section 
-          ref={section4Ref}
-          className="fixed top-0 left-0 w-screen h-screen flex items-center justify-center text-white pointer-events-none"
-          style={{ 
-            opacity: 0, 
-            zIndex: 10
-          }}
-        >
-          <div className="w-full pointer-events-auto">
-            <Section4 />
-          </div>
-        </section>
+        <Section4 ref={section4Ref} />
 
         {/* Section 5: Question Scene */}
-        <section 
-          ref={section5Ref}
-          className="fixed top-0 left-0 w-screen h-screen text-white pointer-events-none"
-          style={{ 
-            opacity: 0, 
-            zIndex: 10
-          }}
-        >
-          {/* 顶部标题 */}
-          <div className="absolute top-12 left-0 w-full text-center pt-20 pointer-events-auto">
-            <h2 className="text-4xl md:text-5xl font-light leading-tight tracking-[-0.05em]">
-              By 2030, will AI progress be defined by...
-            </h2>
-          </div>
-        </section>
+        <Section5 ref={section5Ref} />
       </div>
 
       {/* 固定的滚动提示（加载时隐藏） */}
@@ -1892,12 +1140,7 @@ export default function ChapterOnePage() {
       )}
 
       {/* Debug: 显示滚动进度 */}
-      <div className="fixed top-4 right-4 text-white text-xs pointer-events-none" style={{ zIndex: 50, fontFamily: 'monospace' }}>
-        <div className="bg-black bg-opacity-50 p-3 rounded">
-          <div>Scroll Progress: {(scrollProgress * 100).toFixed(1)}%</div>
-          <div>Neon Progress: {(neonProgress * 100).toFixed(1)}%</div>
-        </div>
-      </div>
+      <DebugUI scrollProgress={scrollProgress} neonProgress={neonProgress} />
     </div>
   );
 }
