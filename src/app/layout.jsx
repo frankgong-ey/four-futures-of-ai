@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// EYInterstate 字体配置
+// EYInterstate
 const eyInterstate = localFont({
   src: [
     {
