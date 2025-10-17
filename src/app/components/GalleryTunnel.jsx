@@ -73,16 +73,16 @@ function GalleryTunnel({ scrollProgress }) {
   useFrame((state, delta) => {
     if (!group?.current) return;
     const p = scrollProgress;
-    const revealStart = 0.23; // 从 23% 开始出现
+    const revealStart = 0.08; // 从 8% 开始出现
     const t = THREE.MathUtils.clamp((p - revealStart) / (1 - revealStart), 0, 1);
 
     // 计算基础位置（入场动画的目标位置）
     const basePosition = THREE.MathUtils.lerp(5, 0, t);
     
-    // 当滚动在25%-50%之间时，图片持续移动
-    if (p >= 0.25 && p < 0.5) {
+    // 当滚动在10%-20%之间时，图片持续移动
+    if (p >= 0.10 && p < 0.20) {
       if (!hasStartedMoving.current) {
-        // 第一次到达25%，初始化移动起点
+        // 第一次到达10%，初始化移动起点
         hasStartedMoving.current = true;
         movementOffset.current = basePosition;
       }
@@ -90,12 +90,12 @@ function GalleryTunnel({ scrollProgress }) {
       const moveSpeed = 0.5; // 每秒移动0.5单位
       movementOffset.current -= delta * moveSpeed;
       group.current.position.x = movementOffset.current;
-    } else if (p >= 0.5) {
-      // 50%以后保持在最后的位置（虽然不可见了）
+    } else if (p >= 0.20) {
+      // 20%以后保持在最后的位置（虽然不可见了）
       // 不做任何操作，保持最后的 movementOffset
       group.current.position.x = movementOffset.current;
     } else {
-      // p < 0.25，即回滚到25%之前
+      // p < 0.10，即回滚到10%之前
       if (hasStartedMoving.current) {
         // 如果已经开始移动过，回滚时平滑过渡到当前滚动位置
         // 使用 lerp 让位置平滑回到基础位置
@@ -117,23 +117,23 @@ function GalleryTunnel({ scrollProgress }) {
     const s = THREE.MathUtils.lerp(0.8, 1, t);
     group.current.scale.set(s, s, s);
     
-    // 透明度控制：23%-25% 淡入，48%-50% 淡出
+    // 透明度控制：8%-10% 淡入，16%-18% 淡出
     let finalOpacity = 0;
-    if (p < 0.25) {
-      // 淡入阶段：23%-25%
-      const fadeInStart = 0.23;
-      const fadeInEnd = 0.25;
+    if (p < 0.10) {
+      // 淡入阶段：8%-10%
+      const fadeInStart = 0.08;
+      const fadeInEnd = 0.10;
       finalOpacity = THREE.MathUtils.clamp((p - fadeInStart) / (fadeInEnd - fadeInStart), 0, 1);
-    } else if (p < 0.48) {
-      // 完全可见阶段：25%-48%
+    } else if (p < 0.16) {
+      // 完全可见阶段：10%-16%
       finalOpacity = 1;
-    } else if (p < 0.5) {
-      // 淡出阶段：48%-50%
-      const fadeOutStart = 0.48;
-      const fadeOutEnd = 0.5;
+    } else if (p < 0.18) {
+      // 淡出阶段：16%-18%
+      const fadeOutStart = 0.16;
+      const fadeOutEnd = 0.18;
       finalOpacity = 1 - THREE.MathUtils.clamp((p - fadeOutStart) / (fadeOutEnd - fadeOutStart), 0, 1);
     } else {
-      // 完全不可见：50%以后
+      // 完全不可见：18%以后
       finalOpacity = 0;
     }
     setOpacity(finalOpacity);

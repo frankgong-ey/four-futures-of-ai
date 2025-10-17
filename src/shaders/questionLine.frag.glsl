@@ -4,6 +4,7 @@ uniform float time;
 uniform float timeOffset;  // 随机时间偏移
 uniform float fogNear;
 uniform float fogFar;
+uniform float fullVisible; // 1.0 时整条线完全可见（忽略进度与Y裁剪）
 varying vec2 vUv;
 varying vec3 vNormal;
 varying float vDistance;
@@ -21,6 +22,11 @@ void main() {
   // 在进度边缘添加渐变效果
   float edgeFade = 1.0 - smoothstep(progress - 0.05, progress, reversedV);
   visibility *= edgeFade;
+  
+  // 若要求整条线完全可见，则强制可见性为1
+  if (fullVisible > 0.5) {
+    visibility = 1.0;
+  }
   
   // 多高光流动动画
   float highlightSpeed = 0.1; // 流动速度
@@ -124,6 +130,10 @@ void main() {
   // Y轴裁剪：reversedV在0-0.4时不显示
   // 在0.4-0.45处淡入
   float yClip = smoothstep(0.3, 0.4, reversedV);
+  // fullVisible 时跳过Y轴裁剪
+  if (fullVisible > 0.5) {
+    yClip = 1.0;
+  }
   alpha *= yClip;
   
   // 计算迷雾效果
