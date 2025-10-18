@@ -1,6 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
+import BackgroundLines from "../components/BackgroundLines";
+import Navigation from "../components/Navigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +37,13 @@ const eyInterstate = localFont({
   display: "swap",
 });
 
+// Interstate Black Condensed for titles
+const interstateBlackCondensed = localFont({
+  src: "../fonts/interstate-black-cond.otf",
+  variable: "--font-interstate-black-cond",
+  display: "swap",
+});
+
 export const metadata = {
   title: "Four Futures of AI",
   description: "An immersive exhibit exploring possible futures of AI.",
@@ -46,8 +55,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${eyInterstate.variable} antialiased`}
+        className={`${eyInterstate.variable} ${interstateBlackCondensed.variable} antialiased`}
       >
+        <Navigation />
+        <BackgroundLines />
         {children}
       </body>
     </html>

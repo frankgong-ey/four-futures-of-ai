@@ -10,6 +10,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-eyinterstate);
   --font-mono: var(--font-geist-mono);
+  --font-title: var(--font-interstate-black-cond);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -39,4 +40,26 @@ body::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
+}
+
+/* CSS动画 - 单词淡入效果 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation-name: fade-in;
+  animation-timing-function: ease-out;
+}
+
+/* 全局字体定义 */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-interstate-black-cond), sans-serif;
 }

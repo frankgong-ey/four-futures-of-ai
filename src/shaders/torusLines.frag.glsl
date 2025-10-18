@@ -1,13 +1,14 @@
 uniform vec3 color;
 uniform float time;
-uniform float fadeOffset; // 每条线的随机生长偏移
+// fadeOffset 现在来自顶点 attribute，在顶点着色器传递为 varying
 varying float vAlpha;
 varying float vLinePosition; // 0.0 = 起点, 1.0 = 终点
+varying float vFadeOffset;
 
 void main() {
   // 使用sin波控制生长进度（0到1循环）
   // 每条线有不同的fadeOffset，造成随机的生长时机
-  float growthCycle = sin(time * 0.5 + fadeOffset) * 0.5 + 0.5;
+  float growthCycle = sin(time * 0.5 + vFadeOffset) * 0.5 + 0.5;
   
   // 生长效果：只显示从起点到当前生长位置的部分
   // vLinePosition是沿线段的位置（需要在geometry中设置）
