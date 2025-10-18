@@ -10,6 +10,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-eyinterstate);
   --font-mono: var(--font-geist-mono);
+  --font-title: var(--font-interstate-black-cond);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -56,4 +57,9 @@ body::-webkit-scrollbar {
 .animate-fade-in {
   animation-name: fade-in;
   animation-timing-function: ease-out;
+}
+
+/* 全局字体定义 */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-interstate-black-cond), sans-serif;
 }

@@ -2,405 +2,330 @@
 
 import React, { useMemo, useRef, useEffect, useState } from "react";
 import * as THREE from "three";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, OrthographicCamera } from "@react-three/drei";
+import { CatmullRomCurve3 } from "three";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { OrbitControls, OrthographicCamera} from "@react-three/drei";
+import { useControls, Leva } from "leva";
 
-import laserVertexShader from "../../shaders/laserRect.vert.glsl";
-import laserFragmentShader from "../../shaders/laserRect.frag.glsl";
-import cometFragmentShader from "../../shaders/laserRectComets.frag.glsl";
-import ribbonVertexShader from "../../shaders/laserRibbon.vert.glsl";
-import ribbonFragmentShader from "../../shaders/laserRibbon.frag.glsl";
-import ribbonCometFragmentShader from "../../shaders/laserRibbonComet.frag.glsl";
-import gradVert from "../../shaders/gradientBackground.vert.glsl";
-import gradFrag from "../../shaders/gradientBackground.frag.glsl";
+import ribbonVertexShader from "./shaders/laserRibbon.vert.glsl";
+import ribbonFragmentShader from "./shaders/laserRibbon.frag.glsl";
+import ringVertexShader from "./shaders/ringGradient.vert.glsl";
+import ringFragmentShader from "./shaders/ringGradient.frag.glsl";
+import FirstScreen from "../../components/FirstScreen";
 
-function LaserRect({ color, intensity, falloff, width, planeWidth = 2, planeHeight = 1, mode = "laser", bandCount = 6, speed = 0.3, core = 0.03, tail = 12.0, headBoost = 2.0 }) {
-  const materialRef = useRef();
 
-  const uniforms = useMemo(
-    () => ({
-      uColor: { value: new THREE.Color(color || "#33ccff") },
-      uIntensity: { value: intensity ?? 1.4 },
-      uFalloff: { value: falloff ?? 18.0 },
-      uWidth: { value: width ?? 0.02 },
-      uTime: { value: 0 },
-      uBandCount: { value: bandCount },
-      uSpeed: { value: speed },
-      uCore: { value: core },
-      uTail: { value: tail },
-      uHeadBoost: { value: headBoost },
-    }),
-    []
-  );
 
-  // No animation for now
-  useFrame((_, delta) => {
-    uniforms.uTime.value += delta;
-  });
-
-  useEffect(() => {
-    if (!materialRef.current) return;
-    uniforms.uColor.value.set(color || "#33ccff");
-  }, [color, uniforms]);
-
-  useEffect(() => {
-    if (!materialRef.current) return;
-    uniforms.uIntensity.value = intensity ?? 1.4;
-  }, [intensity, uniforms]);
-
-  useEffect(() => {
-    if (!materialRef.current) return;
-    uniforms.uFalloff.value = falloff ?? 18.0;
-  }, [falloff, uniforms]);
-
-  useEffect(() => {
-    if (!materialRef.current) return;
-    uniforms.uWidth.value = width ?? 0.02;
-  }, [width, uniforms]);
-
-  useEffect(() => { uniforms.uBandCount.value = bandCount; }, [bandCount, uniforms]);
-  useEffect(() => { uniforms.uSpeed.value = speed; }, [speed, uniforms]);
-  useEffect(() => { uniforms.uCore.value = core; }, [core, uniforms]);
-  useEffect(() => { uniforms.uTail.value = tail; }, [tail, uniforms]);
-  useEffect(() => { uniforms.uHeadBoost.value = headBoost; }, [headBoost, uniforms]);
-
-  return (
-    <mesh>
-      <planeGeometry args={[planeWidth, planeHeight, 1, 1]} />
-      <shaderMaterial
-        ref={materialRef}
-        vertexShader={laserVertexShader}
-        fragmentShader={mode === "comets" ? cometFragmentShader : laserFragmentShader}
-        uniforms={uniforms}
-        transparent
-        blending={THREE.AdditiveBlending}
-        depthWrite={false}
-        side={THREE.DoubleSide}
-      />
-    </mesh>
-  );
-}
 
 export default function TestPage() {
-  // Debug states
-  const [rectColor, setRectColor] = useState("#33ccff");
-  const [rectIntensity, setRectIntensity] = useState(2.0);
-  const [rectFalloff, setRectFalloff] = useState(18.0);
-  const [rectWidth, setRectWidth] = useState(0.02);
-  const [rectPlaneWidth, setRectPlaneWidth] = useState(2.0);
-  const [rectMode, setRectMode] = useState("comets"); // "laser" | "comets"
-  const [rectBands, setRectBands] = useState(8);
-  const [rectSpeed, setRectSpeed] = useState(0.6);
-  const [rectCore, setRectCore] = useState(0.06);
-  const [rectTail, setRectTail] = useState(18.0);
-  const [rectHeadBoost, setRectHeadBoost] = useState(3.0);
-
-  const [ribbonColor, setRibbonColor] = useState("#33ccff");
-  const [ribbonIntensity, setRibbonIntensity] = useState(1.8);
-  const [ribbonWidth, setRibbonWidth] = useState(0.15);
-  const [ribbonSegments, setRibbonSegments] = useState(80);
-  const [ribbonFalloff, setRibbonFalloff] = useState(8.0);
-  const [ribbonMode, setRibbonMode] = useState("comet"); // "laser" | "comet"
-  const [ribbonSpeed, setRibbonSpeed] = useState(1.0);
-  const [ribbonCore, setRibbonCore] = useState(0.1);
-  const [ribbonTail, setRibbonTail] = useState(25.0);
-  const [ribbonHeadBoost, setRibbonHeadBoost] = useState(4.0);
-  const [ribbonWireframe, setRibbonWireframe] = useState(false);
-
-  const [p0, setP0] = useState([-0.8, -0.3]);
-  const [p1, setP1] = useState([-0.3, 0.4]);
-  const [p2, setP2] = useState([0.3, -0.4]);
-  const [p3, setP3] = useState([0.8, 0.3]);
-
-  // gradient bg states
-  const [bgA, setBgA] = useState("#0b1020");
-  const [bgB, setBgB] = useState("#1b2a6b");
-  const [bgSpeed, setBgSpeed] = useState(0.6);
-
-  // Note: 不再自动联动 falloff，便于获得更粗的发光核心
-
-  // Fullscreen canvas with orthographic camera and orbit controls
-  return (
-    <div style={{ width: "100vw", height: "100vh", background: "#1a1a1a" }}>
-      <Canvas gl={{ antialias: true }}>
-        <GradientBackground colorA={bgA} colorB={bgB} speed={bgSpeed} />
-        <OrthographicCamera makeDefault position={[0, 0, 5]} zoom={100} />
-        <OrbitControls enableDamping dampingFactor={0.05} />
-
-        {/* axes helper for orientation */}
-        <axesHelper args={[1.5]} />
-
-        {/* simple neutral light to help visualize any 3D controls, though shader is unlit */}
-        <ambientLight intensity={0.5} />
-
-        {/* 2D rectangle with custom shader */}
-        <LaserRect
-          color={rectColor}
-          intensity={rectIntensity}
-          falloff={rectFalloff}
-          width={rectWidth}
-          planeWidth={rectPlaneWidth}
-          mode={rectMode}
-          bandCount={rectBands}
-          speed={rectSpeed}
-          core={rectCore}
-          tail={rectTail}
-          headBoost={rectHeadBoost}
+  
+  // 使用leva管理所有调试参数 - 简化结构
+  const {
+    // 激光带颜色（独立控制）
+    ribbon1Color,
+    ribbon2Color,
+    ribbon3Color,
+    ribbon4Color,
+    
+    // 共用激光带参数
+    ribbonIntensity,
+    ribbonWidth,
+    ribbonSegments,
+    ribbonFalloff,
+    ribbonShakeIntensity,
+    hoverRadius,
+    
+    // 隧道环参数
+    tunnelVisible,
+    tunnelRingCount,
+    tunnelOpacity,
+    
+    
+    // 第一条曲线控制点
+    p1_0x, p1_0y,
+    p1_1x, p1_1y,
+    p1_2x, p1_2y,
+    p1_3x, p1_3y,
+    
+    // 第二条曲线控制点
+    p2_0x, p2_0y,
+    p2_1x, p2_1y,
+    p2_2x, p2_2y,
+    p2_3x, p2_3y,
+    
+    // 第三条曲线控制点
+    p3_0x, p3_0y,
+    p3_1x, p3_1y,
+    p3_2x, p3_2y,
+    p3_3x, p3_3y,
+    
+    // 第四条曲线控制点
+    p4_0x, p4_0y,
+    p4_1x, p4_1y,
+    p4_2x, p4_2y,
+    p4_3x, p4_3y,
+    
+  } = useControls({
+    // 激光带颜色（独立控制）
+    ribbon1Color: { value: "#ce78ba", folder: "Colors" },
+    ribbon2Color: { value: "#2bb856", folder: "Colors" },
+    ribbon3Color: { value: "#7ebff5", folder: "Colors" },
+    ribbon4Color: { value: "#f56962", folder: "Colors" },
+    
+    // 共用激光带参数
+    ribbonIntensity: { value: 1.0, min: 0, max: 4, step: 0.05, folder: "Ribbon Settings" },
+    ribbonWidth: { value: 2.0, min: 1.0, max: 4.0, step: 0.05, folder: "Ribbon Settings" },
+    ribbonSegments: { value: 64, min: 8, max: 256, step: 1, folder: "Ribbon Settings" },
+    ribbonFalloff: { value: 4.0, min: 0.1, max: 200, step: 0.1, folder: "Ribbon Settings" },
+    ribbonShakeIntensity: { value: 0.08, min: 0, max: 0.3, step: 0.005, folder: "Ribbon Settings" },
+    hoverRadius: { value: 0.5, min: 0.1, max: 2.0, step: 0.1, folder: "Ribbon Settings" },
+    
+    // 隧道环参数
+    tunnelVisible: { value: true, folder: "Tunnel Rings" },
+    tunnelRingCount: { value: 20, min: 5, max: 50, step: 1, folder: "Tunnel Rings" },
+    tunnelOpacity: { value: 0.8, min: 0.1, max: 1, step: 0.05, folder: "Tunnel Rings" },
+    
+    
+    // 第一条曲线控制点
+    p1_0x: { value: -20, min: -20, max: 20, step: 0.1, folder: "Ribbon 1 Curve" },
+    p1_0y: { value: -0, min: -20, max: 20, step: 0.1, folder: "Ribbon 1 Curve" },
+    p1_1x: { value: 0, min: -20, max: 20, step: 0.1, folder: "Ribbon 1 Curve" },
+    p1_1y: { value: 0, min: -20, max: 20, step: 0.1, folder: "Ribbon 1 Curve" },
+    p1_2x: { value: 20, min: -20, max: 20, step: 0.1, folder: "Ribbon 1 Curve" },
+    p1_2y: { value: 0, min: -20, max: 20, step: 0.1, folder: "Ribbon 1 Curve" },
+    p1_3x: { value: 40, min: -20, max: 40, step: 0.1, folder: "Ribbon 1 Curve" },
+    p1_3y: { value: 0, min: -20, max: 20, step: 0.1, folder: "Ribbon 1 Curve" },
+    
+    // 第二条曲线控制点
+    p2_0x: { value: -20, min: -20, max: 20, step: 0.1, folder: "Ribbon 2 Curve" },
+    p2_0y: { value: 0, min: -20, max: 20, step: 0.1, folder: "Ribbon 2 Curve" },
+    p2_1x: { value: 0, min: -20, max: 20, step: 0.1, folder: "Ribbon 2 Curve" },
+    p2_1y: { value: 0, min: -20, max: 20, step: 0.1, folder: "Ribbon 2 Curve" },
+    p2_2x: { value: 20, min: -20, max: 20, step: 0.1, folder: "Ribbon 2 Curve" },
+    p2_2y: { value: 0, min: -20, max: 20, step: 0.1, folder: "Ribbon 2 Curve" },
+    p2_3x: { value: 40, min: -20, max: 40, step: 0.1, folder: "Ribbon 2 Curve" },
+    p2_3y: { value: 5, min: -20, max: 20, step: 0.1, folder: "Ribbon 2 Curve" },
+    
+    // 第三条曲线控制点
+    p3_0x: { value: -20, min: -20, max: 20, step: 0.1, folder: "Ribbon 3 Curve" },
+    p3_0y: { value: 0, min: -20, max: 20, step: 0.1, folder: "Ribbon 3 Curve" },
+    p3_1x: { value: 0, min: -20, max: 20, step: 0.1, folder: "Ribbon 3 Curve" },
+    p3_1y: { value: 0, min: -20, max: 20, step: 0.1, folder: "Ribbon 3 Curve" },
+    p3_2x: { value: 20, min: -20, max: 20, step: 0.1, folder: "Ribbon 3 Curve" },
+    p3_2y: { value: 3, min: -20, max: 20, step: 0.1, folder: "Ribbon 3 Curve" },
+    p3_3x: { value: 40, min: -20, max: 40, step: 0.1, folder: "Ribbon 3 Curve" },
+    p3_3y: { value: 5, min: -20, max: 20, step: 0.1, folder: "Ribbon 3 Curve" },
+    
+    // 第四条曲线控制点
+    p4_0x: { value: -20, min: -20, max: 20, step: 0.1, folder: "Ribbon 4 Curve" },
+    p4_0y: { value: 0, min: -20, max: 20, step: 0.1, folder: "Ribbon 4 Curve" },
+    p4_1x: { value: 0, min: -20, max: 20, step: 0.1, folder: "Ribbon 4 Curve" },
+    p4_1y: { value: 0, min: -20, max: 20, step: 0.1, folder: "Ribbon 4 Curve" },
+    p4_2x: { value: 20, min: -20, max: 20, step: 0.1, folder: "Ribbon 4 Curve" },
+    p4_2y: { value: -3, min: -20, max: 20, step: 0.1, folder: "Ribbon 4 Curve" },
+    p4_3x: { value: 40, min: -20, max: 40, step: 0.1, folder: "Ribbon 4 Curve" },
+    p4_3y: { value: -5, min: -20, max: 20, step: 0.1, folder: "Ribbon 4 Curve" },
+    
+  });
+  
+  // 构建控制点数组
+  const p1_0 = [p1_0x, p1_0y];
+  const p1_1 = [p1_1x, p1_1y];
+  const p1_2 = [p1_2x, p1_2y];
+  const p1_3 = [p1_3x, p1_3y];
+  
+  const p2_0 = [p2_0x, p2_0y];
+  const p2_1 = [p2_1x, p2_1y];
+  const p2_2 = [p2_2x, p2_2y];
+  const p2_3 = [p2_3x, p2_3y];
+  
+  const p3_0 = [p3_0x, p3_0y];
+  const p3_1 = [p3_1x, p3_1y];
+  const p3_2 = [p3_2x, p3_2y];
+  const p3_3 = [p3_3x, p3_3y];
+  
+  const p4_0 = [p4_0x, p4_0y];
+  const p4_1 = [p4_1x, p4_1y];
+  const p4_2 = [p4_2x, p4_2y];
+  const p4_3 = [p4_3x, p4_3y];
+  
+  
+    // Fullscreen canvas with orthographic camera and orbit controls
+    return (
+    <div 
+    style={{ width: "100vw", height: "100vh" }}
+    className="relative"
+    >
+        <Leva collapsed={false} titleBar={{ title: "调试面板" }} />
+        
+        {/* 背景图片 */}
+        <div 
+            className="fixed inset-0 w-screen h-screen pointer-events-none"
+            style={{
+                backgroundImage: 'url(/images/hero_gradient.png)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                zIndex: 0
+                }}
         />
+        
+        {/* Canvas 3D内容 */}
+        <Canvas 
+          gl={{ 
+            antialias: true,
+            alpha: true,
+          }}
+          style={{ background: "transparent" }}
+          className="absolute inset-0 z-10"
+        >
+          <OrthographicCamera 
+            makeDefault 
+            position={[-3, 0, 8]} 
+            zoom={100}
+            near={-1000}
+            far={1000}
+          />
+          <OrbitControls enableDamping dampingFactor={0.05} />
+  
+          {/* 隧道环参考效果 */}
+          <TunnelRings
+            visible={tunnelVisible}
+            ringCount={tunnelRingCount}
+            opacity={tunnelOpacity}
+          />
+  
+          {/* axes helper for orientation */}
+          <axesHelper args={[1.5]} />
+  
+          {/* simple neutral light to help visualize any 3D controls, though shader is unlit */}
+          <ambientLight intensity={0.5} />
+  
+          {/* First LaserRibbonCubic */}
+          <LaserRibbonCubic
+            p0={p1_0}
+            p1={p1_1}
+            p2={p1_2}
+            p3={p1_3}
+            width={ribbonWidth}
+            color={new THREE.Color(ribbon1Color)}
+            segments={ribbonSegments}
+            intensity={ribbonIntensity}
+            falloff={ribbonFalloff}
+            shakeIntensity={ribbonShakeIntensity}
+            hoverRadius={hoverRadius}
+          />
+  
+           {/* Second LaserRibbonCubic */}
+           <LaserRibbonCubic
+             p0={p2_0}
+             p1={p2_1}
+             p2={p2_2}
+             p3={p2_3}
+             width={ribbonWidth}
+             color={new THREE.Color(ribbon2Color)}
+             segments={ribbonSegments}
+             intensity={ribbonIntensity}
+             falloff={ribbonFalloff}
+             shakeIntensity={ribbonShakeIntensity}
+             hoverRadius={hoverRadius}
+           />
 
-        {/* Complex S-shaped curve using cubic Bezier */}
-        <LaserRibbonCubic
-          p0={p0}
-          p1={p1}
-          p2={p2}
-          p3={p3}
-          width={ribbonWidth}
-          color={new THREE.Color(ribbonColor)}
-          segments={ribbonSegments}
-          intensity={ribbonIntensity}
-          falloff={ribbonFalloff}
-          mode={ribbonMode}
-          speed={ribbonSpeed}
-          core={ribbonCore}
-          tail={ribbonTail}
-          headBoost={ribbonHeadBoost}
-          wireframe={ribbonWireframe}
-        />
-      </Canvas>
+           {/* Third LaserRibbonCubic */}
+           <LaserRibbonCubic
+             p0={p3_0}
+             p1={p3_1}
+             p2={p3_2}
+             p3={p3_3}
+             width={ribbonWidth}
+             color={new THREE.Color(ribbon3Color)}
+             segments={ribbonSegments}
+             intensity={ribbonIntensity}
+             falloff={ribbonFalloff}
+             shakeIntensity={ribbonShakeIntensity}
+             hoverRadius={hoverRadius}
+           />
 
-      {/* Debug panel */}
-      <div style={{ position: "fixed", top: 12, left: 12, zIndex: 100, color: "#eee", fontFamily: "monospace", fontSize: 12 }}>
-        <div style={{ background: "#00000080", padding: 12, borderRadius: 8, minWidth: 300 }}>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>LaserRect</div>
-          <div style={{ display: "grid", gridTemplateColumns: "90px 1fr", gap: 6, alignItems: "center" }}>
-            <label>mode</label>
-            <select value={rectMode} onChange={(e)=>setRectMode(e.target.value)}>
-              <option value="laser">laser</option>
-              <option value="comets">comets</option>
-            </select>
-            <label>color</label>
-            <input type="color" value={rectColor} onChange={(e)=>setRectColor(e.target.value)} />
-            <label>intensity</label>
-            <input type="range" min={0} max={4} step={0.05} value={rectIntensity} onChange={(e)=>setRectIntensity(parseFloat(e.target.value))} />
-            <label>falloff</label>
-            <input type="range" min={1} max={60} step={0.5} value={rectFalloff} onChange={(e)=>setRectFalloff(parseFloat(e.target.value))} />
-            <label>width</label>
-            <input type="range" min={0.0} max={0.2} step={0.002} value={rectWidth} onChange={(e)=>setRectWidth(parseFloat(e.target.value))} />
-            <label>planeWidth</label>
-            <input type="range" min={0.2} max={6} step={0.1} value={rectPlaneWidth} onChange={(e)=>setRectPlaneWidth(parseFloat(e.target.value))} />
-            {rectMode === "comets" && <>
-              <label>bands</label>
-              <input type="range" min={1} max={24} step={1} value={rectBands} onChange={(e)=>setRectBands(parseInt(e.target.value))} />
-              <label>speed</label>
-              <input type="range" min={0.0} max={2.0} step={0.01} value={rectSpeed} onChange={(e)=>setRectSpeed(parseFloat(e.target.value))} />
-              <label>core</label>
-              <input type="range" min={0.0} max={0.2} step={0.002} value={rectCore} onChange={(e)=>setRectCore(parseFloat(e.target.value))} />
-              <label>tail</label>
-              <input type="range" min={1.0} max={40.0} step={0.5} value={rectTail} onChange={(e)=>setRectTail(parseFloat(e.target.value))} />
-              <label>headBoost</label>
-              <input type="range" min={1.0} max={8.0} step={0.1} value={rectHeadBoost} onChange={(e)=>setRectHeadBoost(parseFloat(e.target.value))} />
-            </>}
-          </div>
-
-          <div style={{ height: 10 }} />
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>LaserRibbonCubic</div>
-          <div style={{ display: "grid", gridTemplateColumns: "90px 1fr", gap: 6, alignItems: "center" }}>
-            <label>mode</label>
-            <select value={ribbonMode} onChange={(e)=>setRibbonMode(e.target.value)}>
-              <option value="laser">laser</option>
-              <option value="comet">comet</option>
-            </select>
-            <label>color</label>
-            <input type="color" value={ribbonColor} onChange={(e)=>setRibbonColor(e.target.value)} />
-
-            <label>intensity</label>
-            <input type="range" min={0} max={4} step={0.05} value={ribbonIntensity} onChange={(e)=>setRibbonIntensity(parseFloat(e.target.value))} />
-
-            <label>width</label>
-            <input type="range" min={0.005} max={0.6} step={0.005} value={ribbonWidth} onChange={(e)=>{ const w=parseFloat(e.target.value); setRibbonWidth(w); }} />
-
-            <label>segments</label>
-            <input type="range" min={8} max={256} step={1} value={ribbonSegments} onChange={(e)=>setRibbonSegments(parseInt(e.target.value))} />
-
-            <label>falloff</label>
-            <input type="range" min={0.1} max={200} step={0.1} value={ribbonFalloff} onChange={(e)=>setRibbonFalloff(parseFloat(e.target.value))} />
-            <label>wireframe</label>
-            <input type="checkbox" checked={ribbonWireframe} onChange={(e)=>setRibbonWireframe(e.target.checked)} />
-            {ribbonMode === "comet" && <>
-              <label>speed</label>
-              <input type="range" min={0.0} max={3.0} step={0.01} value={ribbonSpeed} onChange={(e)=>setRibbonSpeed(parseFloat(e.target.value))} />
-              <label>core</label>
-              <input type="range" min={0.0} max={0.3} step={0.002} value={ribbonCore} onChange={(e)=>setRibbonCore(parseFloat(e.target.value))} />
-              <label>tail</label>
-              <input type="range" min={1.0} max={50.0} step={0.5} value={ribbonTail} onChange={(e)=>setRibbonTail(parseFloat(e.target.value))} />
-              <label>headBoost</label>
-              <input type="range" min={1.0} max={8.0} step={0.1} value={ribbonHeadBoost} onChange={(e)=>setRibbonHeadBoost(parseFloat(e.target.value))} />
-            </>}
-          </div>
-
-          <div style={{ height: 8 }} />
-          <div style={{ display: "grid", gridTemplateColumns: "40px 1fr 1fr", gap: 6, alignItems: "center" }}>
-            <div style={{ gridColumn: "1 / span 3", fontWeight: 700 }}>P0</div>
-            <label>x</label>
-            <input type="number" step={0.01} value={p0[0]} onChange={(e)=>setP0([parseFloat(e.target.value), p0[1]])} />
-            <label>y</label>
-            <input type="number" step={0.01} value={p0[1]} onChange={(e)=>setP0([p0[0], parseFloat(e.target.value)])} />
-
-            <div style={{ gridColumn: "1 / span 3", fontWeight: 700 }}>P1</div>
-            <label>x</label>
-            <input type="number" step={0.01} value={p1[0]} onChange={(e)=>setP1([parseFloat(e.target.value), p1[1]])} />
-            <label>y</label>
-            <input type="number" step={0.01} value={p1[1]} onChange={(e)=>setP1([p1[0], parseFloat(e.target.value)])} />
-
-            <div style={{ gridColumn: "1 / span 3", fontWeight: 700 }}>P2</div>
-            <label>x</label>
-            <input type="number" step={0.01} value={p2[0]} onChange={(e)=>setP2([parseFloat(e.target.value), p2[1]])} />
-            <label>y</label>
-            <input type="number" step={0.01} value={p2[1]} onChange={(e)=>setP2([p2[0], parseFloat(e.target.value)])} />
-
-            <div style={{ gridColumn: "1 / span 3", fontWeight: 700 }}>P3</div>
-            <label>x</label>
-            <input type="number" step={0.01} value={p3[0]} onChange={(e)=>setP3([parseFloat(e.target.value), p3[1]])} />
-            <label>y</label>
-            <input type="number" step={0.01} value={p3[1]} onChange={(e)=>setP3([p3[0], parseFloat(e.target.value)])} />
-          </div>
-
-          <div style={{ height: 10 }} />
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>Gradient Background</div>
-          <div style={{ display: "grid", gridTemplateColumns: "90px 1fr", gap: 6, alignItems: "center" }}>
-            <label>colorA</label>
-            <input type="color" value={bgA} onChange={(e)=>setBgA(e.target.value)} />
-            <label>colorB</label>
-            <input type="color" value={bgB} onChange={(e)=>setBgB(e.target.value)} />
-            <label>speed</label>
-            <input type="range" min={0} max={2} step={0.01} value={bgSpeed} onChange={(e)=>setBgSpeed(parseFloat(e.target.value))} />
-          </div>
+           {/* Fourth LaserRibbonCubic */}
+           <LaserRibbonCubic
+             p0={p4_0}
+             p1={p4_1}
+             p2={p4_2}
+             p3={p4_3}
+             width={ribbonWidth}
+             color={new THREE.Color(ribbon4Color)}
+             segments={ribbonSegments}
+             intensity={ribbonIntensity}
+             falloff={ribbonFalloff}
+             shakeIntensity={ribbonShakeIntensity}
+             hoverRadius={hoverRadius}
+           />
+        </Canvas>
+        
+        {/* FirstScreen HTML内容 */}
+        <div className="absolute inset-0 z-20 pointer-events-none">
+          <FirstScreen />
         </div>
       </div>
-    </div>
-  );
+    );
 }
 
+function TunnelRings({ ringCount = 20, ringSpacing = 0.3, radiusStart = 0.3, radiusIncrease = 0.08, ringThickness = 0.05, ringRadialSegments = 16, opacity = 0.8, gradientStrength = 1.0, visible = true }) {
+  if (!visible) return null;
 
-function LaserRibbon({ p0, p1, p2, width = 0.05, color = new THREE.Color(1,1,1), segments = 64, intensity = 1.6, falloff = 6.0 }) {
-  const materialRef = useRef();
 
-  const { geometry, uniforms } = useMemo(() => {
-    const positions = [];
-    const halfCoords = [];
-    const indices = [];
-
-    const halfWidth = width * 0.5;
-
-    const A = new THREE.Vector2(p0[0], p0[1]);
-    const B = new THREE.Vector2(p1[0], p1[1]);
-    const C = new THREE.Vector2(p2[0], p2[1]);
-
-    const pointAt = (t) => {
-      const s = 1 - t;
-      const x = s * s * A.x + 2 * s * t * B.x + t * t * C.x;
-      const y = s * s * A.y + 2 * s * t * B.y + t * t * C.y;
-      return new THREE.Vector2(x, y);
-    };
-
-    const tangentAt = (t) => {
-      // derivative of quadratic Bezier: 2*(1-t)*(B-A) + 2*t*(C-B)
-      const term1 = new THREE.Vector2().subVectors(B, A).multiplyScalar(2 * (1 - t));
-      const term2 = new THREE.Vector2().subVectors(C, B).multiplyScalar(2 * t);
-      return term1.add(term2);
-    };
-
-    for (let i = 0; i <= segments; i++) {
-      const t = i / segments;
-      const P = pointAt(t);
-      const T = tangentAt(t);
-      if (T.lengthSq() === 0) T.set(1, 0);
-      T.normalize();
-      const N = new THREE.Vector2(-T.y, T.x); // left normal
-
-      const left = new THREE.Vector2().copy(P).addScaledVector(N, -halfWidth);
-      const right = new THREE.Vector2().copy(P).addScaledVector(N, +halfWidth);
-
-      // two vertices per segment point
-      positions.push(left.x, left.y, 0);
-      positions.push(right.x, right.y, 0);
-      halfCoords.push(-1, +1);
-
-      if (i < segments) {
-        const base = i * 2;
-        // two triangles (base, base+1, base+2) and (base+1, base+3, base+2)
-        indices.push(base, base + 1, base + 2);
-        indices.push(base + 1, base + 3, base + 2);
-      }
-    }
-
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-    geo.setAttribute("halfCoord", new THREE.Float32BufferAttribute(halfCoords, 1));
-    geo.setIndex(indices);
-
-    const u = {
-      uColor: { value: color },
-      uIntensity: { value: intensity },
-      uFalloff: { value: falloff },
-    };
-    return { geometry: geo, uniforms: u };
-  }, [p0, p1, p2, width, color, intensity, falloff, segments]);
-
-  useEffect(() => {
-    uniforms.uColor.value.copy(color);
-  }, [color, uniforms]);
-  useEffect(() => {
-    uniforms.uIntensity.value = intensity;
-  }, [intensity, uniforms]);
-  useEffect(() => {
-    uniforms.uFalloff.value = falloff;
-  }, [falloff, uniforms]);
+  const rings = Array.from({ length: ringCount }, (_, i) => ({
+    x: i * ringSpacing,             // 每个环沿着x轴正方向移动
+    radius: radiusStart + i * radiusIncrease,   // 半径逐渐变大（从左到右）
+  }));
 
   return (
-    <mesh geometry={geometry} frustumCulled={false}>
-      <shaderMaterial
-        ref={materialRef}
-        vertexShader={ribbonVertexShader}
-        fragmentShader={ribbonFragmentShader}
-        uniforms={uniforms}
-        transparent
-        blending={THREE.AdditiveBlending}
-        depthWrite={false}
-        side={THREE.DoubleSide}
-      />
-    </mesh>
+    <>
+      {rings.map((r, i) => (
+        <mesh key={i} position={[r.x, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+          <ringGeometry args={[r.radius, r.radius + ringThickness, 64]} />
+          <shaderMaterial
+            vertexShader={ringVertexShader}
+            fragmentShader={ringFragmentShader}
+            uniforms={{
+              uColor: { value: new THREE.Color("white") },
+              uOpacity: { value: opacity },
+              uGradientStrength: { value: gradientStrength }
+            }}
+            transparent
+            depthWrite={false}
+            depthTest={false}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      ))}
+    </>
   );
 }
 
-function GradientBackground({ colorA = "#0b1020", colorB = "#1b2a6b", speed = 0.5 }) {
+function LaserRibbonCubic({ p0, p1, p2, p3, width = 0.05, color = new THREE.Color(1,1,1), segments = 64, intensity = 1.6, falloff = 6.0, shakeIntensity = 0.08, hoverRadius = 0.5 }) {
   const materialRef = useRef();
-  const uniforms = useMemo(() => ({
-    uTime: { value: 0 },
-    uColorA: { value: new THREE.Color(colorA) },
-    uColorB: { value: new THREE.Color(colorB) },
-    uSpeed: { value: speed },
-  }), []);
-
-  useFrame((_, delta) => {
-    uniforms.uTime.value += delta;
-  });
-
-  useEffect(() => { uniforms.uColorA.value.set(colorA); }, [colorA, uniforms]);
-  useEffect(() => { uniforms.uColorB.value.set(colorB); }, [colorB, uniforms]);
-  useEffect(() => { uniforms.uSpeed.value = speed; }, [speed, uniforms]);
-
-  // large plane behind everything
-  return (
-    <mesh position={[0, 0, -1]} frustumCulled={false}>
-      <planeGeometry args={[10, 10, 1, 1]} />
-      <shaderMaterial ref={materialRef} vertexShader={gradVert} fragmentShader={gradFrag} uniforms={uniforms} depthWrite={false} />
-    </mesh>
-  );
-}
-
-function LaserRibbonCubic({ p0, p1, p2, p3, width = 0.05, color = new THREE.Color(1,1,1), segments = 64, intensity = 1.6, falloff = 6.0, mode = "laser", speed = 0.6, core = 0.06, tail = 18.0, headBoost = 3.0, wireframe = false }) {
-  const materialRef = useRef();
+  const meshRef = useRef();
+  const { viewport, camera } = useThree();
+  
+  // Raycast相关状态
+  const [hoverPoint, setHoverPoint] = useState({ x: 0, y: 0, active: false });
+  
+  // Raycast处理函数
+  const handlePointerMove = (event) => {
+    if (!event.point) return;
+    
+    // 直接使用React Three Fiber提供的交点坐标
+    const point = event.point;
+    setHoverPoint({ 
+      x: point.x, 
+      y: point.y, 
+      active: true 
+    });
+  };
+  
+  const handlePointerLeave = () => {
+    setHoverPoint({ x: 0, y: 0, active: false });
+  };
 
   // Geometry builds can re-run on shape changes
   const geometry = useMemo(() => {
@@ -411,42 +336,29 @@ function LaserRibbonCubic({ p0, p1, p2, p3, width = 0.05, color = new THREE.Colo
 
     const halfWidth = width * 0.5;
 
-    const A = new THREE.Vector2(p0[0], p0[1]);
-    const B = new THREE.Vector2(p1[0], p1[1]);
-    const C = new THREE.Vector2(p2[0], p2[1]);
-    const D = new THREE.Vector2(p3[0], p3[1]);
-
-    const pointAt = (t) => {
-      const s = 1 - t;
-      const s2 = s * s;
-      const s3 = s2 * s;
-      const t2 = t * t;
-      const t3 = t2 * t;
-      
-      const x = s3 * A.x + 3 * s2 * t * B.x + 3 * s * t2 * C.x + t3 * D.x;
-      const y = s3 * A.y + 3 * s2 * t * B.y + 3 * s * t2 * C.y + t3 * D.y;
-      return new THREE.Vector2(x, y);
-    };
-
-    const tangentAt = (t) => {
-      // derivative of cubic Bezier: 3*(1-t)²*(B-A) + 6*(1-t)*t*(C-B) + 3*t²*(D-C)
-      const s = 1 - t;
-      const term1 = new THREE.Vector2().subVectors(B, A).multiplyScalar(3 * s * s);
-      const term2 = new THREE.Vector2().subVectors(C, B).multiplyScalar(6 * s * t);
-      const term3 = new THREE.Vector2().subVectors(D, C).multiplyScalar(3 * t * t);
-      return term1.add(term2).add(term3);
-    };
+    // 创建CatmullRomCurve3，只需要4个点
+    const curve = new CatmullRomCurve3([
+      new THREE.Vector3(p0[0], p0[1], 0),
+      new THREE.Vector3(p1[0], p1[1], 0),
+      new THREE.Vector3(p2[0], p2[1], 0),
+      new THREE.Vector3(p3[0], p3[1], 0)
+    ]);
 
     for (let i = 0; i <= segments; i++) {
       const t = i / segments;
-      const P = pointAt(t);
-      const T = tangentAt(t);
-      if (T.lengthSq() === 0) T.set(1, 0);
-      T.normalize();
-      const N = new THREE.Vector2(-T.y, T.x); // left normal
+      const P = curve.getPoint(t);
+      const T = curve.getTangent(t);
+      
+      // 转换为2D向量用于计算法向量
+      const P2D = new THREE.Vector2(P.x, P.y);
+      const T2D = new THREE.Vector2(T.x, T.y);
+      
+      if (T2D.lengthSq() === 0) T2D.set(1, 0);
+      T2D.normalize();
+      const N = new THREE.Vector2(-T2D.y, T2D.x); // left normal
 
-      const left = new THREE.Vector2().copy(P).addScaledVector(N, -halfWidth);
-      const right = new THREE.Vector2().copy(P).addScaledVector(N, +halfWidth);
+      const left = new THREE.Vector2().copy(P2D).addScaledVector(N, -halfWidth);
+      const right = new THREE.Vector2().copy(P2D).addScaledVector(N, +halfWidth);
 
       // two vertices per segment point
       positions.push(left.x, left.y, 0);
@@ -476,36 +388,47 @@ function LaserRibbonCubic({ p0, p1, p2, p3, width = 0.05, color = new THREE.Colo
     uIntensity: { value: intensity },
     uFalloff: { value: falloff },
     uTime: { value: 0 },
-    uSpeed: { value: speed },
-    uCore: { value: core },
-    uTail: { value: tail },
-    uHeadBoost: { value: headBoost },
+    uShakeIntensity: { value: shakeIntensity },
+    uHoverPoint: { value: new THREE.Vector2(0, 0) },
+    uHoverActive: { value: 0.0 },
+    uHoverRadius: { value: hoverRadius },
   });
 
   useEffect(() => { uniformsRef.current.uColor.value.copy(color); }, [color]);
   useEffect(() => { uniformsRef.current.uIntensity.value = intensity; }, [intensity]);
   useEffect(() => { uniformsRef.current.uFalloff.value = falloff; }, [falloff]);
-  useEffect(() => { uniformsRef.current.uSpeed.value = speed; }, [speed]);
-  useEffect(() => { uniformsRef.current.uCore.value = core; }, [core]);
-  useEffect(() => { uniformsRef.current.uTail.value = tail; }, [tail]);
-  useEffect(() => { uniformsRef.current.uHeadBoost.value = headBoost; }, [headBoost]);
+  useEffect(() => { uniformsRef.current.uShakeIntensity.value = shakeIntensity; }, [shakeIntensity]);
+  useEffect(() => { uniformsRef.current.uHoverRadius.value = hoverRadius; }, [hoverRadius]);
+  
+  // 更新hover点信息
+  useEffect(() => {
+    uniformsRef.current.uHoverPoint.value.set(hoverPoint.x, hoverPoint.y);
+    uniformsRef.current.uHoverActive.value = hoverPoint.active ? 1.0 : 0.0;
+  }, [hoverPoint]);
 
   useFrame((_, delta) => {
     uniformsRef.current.uTime.value += delta;
   });
 
+  // 返回
   return (
-    <mesh geometry={geometry} frustumCulled={false}>
-      <shaderMaterial key={mode}
+    <mesh 
+      ref={meshRef}
+      geometry={geometry} 
+      frustumCulled={false}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+    >
+      <shaderMaterial
         ref={materialRef}
         vertexShader={ribbonVertexShader}
-        fragmentShader={mode === "comet" ? ribbonCometFragmentShader : ribbonFragmentShader}
+        fragmentShader={ribbonFragmentShader}
         uniforms={uniformsRef.current}
         transparent
         blending={THREE.AdditiveBlending}
         depthWrite={false}
+        depthTest={false}
         side={THREE.DoubleSide}
-        wireframe={wireframe}
       />
     </mesh>
   );

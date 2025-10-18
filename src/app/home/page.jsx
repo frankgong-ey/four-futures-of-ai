@@ -1444,7 +1444,6 @@ export default function ChapterOnePage() {
       {/* 固定导航 - 左上角（加载时隐藏） */}
       <Navigation isLoading={isLoading} />
 
-
       {/* 滚动容器 - 创建滚动高度 */}
       <div ref={scrollContainerRef} className="relative w-screen pointer-events-none" style={{ height: '2000vh', zIndex: 10 }}>
         {/* Section 1: 标题 */}
