@@ -4,20 +4,16 @@ import React, { useMemo, useRef, useEffect, useState } from "react";
 import * as THREE from "three";
 import { CatmullRomCurve3 } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, OrthographicCamera} from "@react-three/drei";
+import { OrbitControls, OrthographicCamera, Environment, ContactShadows, MeshTransmissionMaterial} from "@react-three/drei";
 import { useControls, Leva } from "leva";
 
-import ribbonVertexShader from "./shaders/laserRibbon.vert.glsl";
-import ribbonFragmentShader from "./shaders/laserRibbon.frag.glsl";
-import ringVertexShader from "./shaders/ringGradient.vert.glsl";
-import ringFragmentShader from "./shaders/ringGradient.frag.glsl";
-import frostedGlassFragmentShader from "./shaders/ringFrostedGlass.frag.glsl";
+import ribbonVertexShader from "../test/shaders/laserRibbon.vert.glsl";
+import ribbonFragmentShader from "../test/shaders/laserRibbon.frag.glsl";
+import glassVertexShader from "../../shaders/glassShader.vert.glsl";
+import glassFragmentShader from "../../shaders/glassShader.frag.glsl";
 import FirstScreen from "../../components/FirstScreen";
 
-
-
-
-export default function TestPage() {
+export default function CylinderTestPage() {
   
   // 使用leva管理所有调试参数 - 简化结构
   const {
@@ -35,12 +31,17 @@ export default function TestPage() {
     ribbonShakeIntensity,
     hoverRadius,
     
-    // 隧道环参数
+    // 圆柱体参数
     tunnelVisible,
-    tunnelRingCount,
-    tunnelOpacity,
-    
-    
+    cylinderRadius,
+    cylinderHeight,
+    cylinderThickness,
+    cylinderSegments,
+    coneTopRadius,
+    coneBottomRadius,
+    useCustomShader,
+    refractionStrength,
+    fresnelPower,
     
     // 第一条曲线控制点
     p1_0x, p1_0y,
@@ -81,12 +82,17 @@ export default function TestPage() {
     ribbonShakeIntensity: { value: 0.08, min: 0, max: 0.3, step: 0.005, folder: "Ribbon Settings" },
     hoverRadius: { value: 0.5, min: 0.1, max: 2.0, step: 0.1, folder: "Ribbon Settings" },
     
-    // 隧道环参数
-    tunnelVisible: { value: true, folder: "Tunnel Rings" },
-    tunnelRingCount: { value: 20, min: 5, max: 50, step: 1, folder: "Tunnel Rings" },
-    tunnelOpacity: { value: 0.8, min: 0.1, max: 1, step: 0.05, folder: "Tunnel Rings" },
-    
-    
+    // 圆柱体参数
+    tunnelVisible: { value: true, folder: "Glass Cylinder" },
+    cylinderRadius: { value: 5.0, min: 0.1, max: 1.0, step: 0.05, folder: "Glass Cylinder" },
+    cylinderHeight: { value: 5.0, min: 0.5, max: 5.0, step: 0.1, folder: "Glass Cylinder" },
+    cylinderThickness: { value: 10.0, min: 0.1, max: 10.0, step: 0.1, folder: "Glass Cylinder" },
+    cylinderSegments: { value: 24, min: 8, max: 64, step: 8, folder: "Glass Cylinder" },
+    coneTopRadius: { value: 0.2, min: 0.01, max: 1.0, step: 0.01, folder: "Glass Cylinder" },
+    coneBottomRadius: { value: 1.5, min: 0.01, max: 2.0, step: 0.01, folder: "Glass Cylinder" },
+    useCustomShader: { value: false, folder: "Material Type" },
+    refractionStrength: { value: 0.1, min: 0.0, max: 0.5, step: 0.01, folder: "Custom Shader" },
+    fresnelPower: { value: 2.0, min: 0.5, max: 5.0, step: 0.1, folder: "Custom Shader" },
     
     // 第一条曲线控制点
     p1_0x: { value: -20, min: -20, max: 20, step: 0.1, folder: "Ribbon 1 Curve" },
@@ -158,7 +164,7 @@ export default function TestPage() {
     style={{ width: "100vw", height: "100vh" }}
     className="relative"
     >
-        <Leva collapsed={false} titleBar={{ title: "调试面板" }} />
+        <Leva collapsed={false} titleBar={{ title: "圆柱体测试面板" }} />
         
         {/* 背景图片 */}
         <div 
@@ -190,18 +196,28 @@ export default function TestPage() {
           />
           <OrbitControls enableDamping dampingFactor={0.05} />
   
-          {/* 隧道环参考效果 */}
-          <TunnelRings
+          {/* 圆锥台效果 */}
+          <CylinderTunnel
             visible={tunnelVisible}
-            ringCount={tunnelRingCount}
-            opacity={tunnelOpacity}
+            radius={cylinderRadius}
+            height={cylinderHeight}
+            thickness={cylinderThickness}
+            segments={cylinderSegments}
+            topRadius={coneTopRadius}
+            bottomRadius={coneBottomRadius}
+            useCustomShader={useCustomShader}
+            refractionStrength={refractionStrength}
+            fresnelPower={fresnelPower}
           />
   
           {/* axes helper for orientation */}
           <axesHelper args={[1.5]} />
   
-          {/* simple neutral light to help visualize any 3D controls, though shader is unlit */}
-          <ambientLight intensity={0.5} />
+          {/* 光源和环境 */}
+          <ambientLight intensity={0.3} />
+          <spotLight position={[20, 20, 10]} penumbra={1} castShadow angle={0.2} intensity={1} />
+          <Environment preset="city" />
+          <ContactShadows scale={50} position={[0, -3, 0]} blur={1} far={50} opacity={0.3} />
   
           {/* First LaserRibbonCubic */}
           <LaserRibbonCubic
@@ -272,53 +288,65 @@ export default function TestPage() {
     );
 }
 
-function TunnelRings({ ringCount = 20, ringSpacing = 0.3, radiusStart = 0.3, radiusIncrease = 0.08, ringThickness = 0.05, ringRadialSegments = 16, opacity = 0.8, gradientStrength = 1.0, visible = true }) {
+// 圆锥台组件 - 使用cone geometry，可选择MeshTransmissionMaterial或自定义shader
+function CylinderTunnel({ 
+  radius = 0.3, 
+  height = 2.0, 
+  thickness = 2.0, 
+  segments = 32, 
+  topRadius = 0.1,
+  bottomRadius = 0.5,
+  useCustomShader = false,
+  refractionStrength = 0.1,
+  fresnelPower = 2.0,
+  visible = true 
+}) {
   if (!visible) return null;
 
-  const materialRefs = useRef([]);
-  
+  const materialRef = useRef();
+  const { camera } = useThree();
+
   // 更新时间uniform
   useFrame((state) => {
-    const time = state.clock.getElapsedTime();
-    materialRefs.current.forEach(material => {
-      if (material && material.uniforms.uTime) {
-        material.uniforms.uTime.value = time;
-      }
-    });
+    if (useCustomShader && materialRef.current && materialRef.current.uniforms) {
+      materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
+    }
   });
 
-  const rings = Array.from({ length: ringCount }, (_, i) => ({
-    x: i * ringSpacing,             // 每个环沿着x轴正方向移动
-    radius: radiusStart + i * radiusIncrease,   // 半径逐渐变大（从左到右）
-  }));
-
   return (
-    <>
-      {rings.map((r, i) => (
-        <mesh key={i} position={[r.x, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
-          <ringGeometry args={[r.radius, r.radius + ringThickness, 64]} />
-          <shaderMaterial
-            ref={(ref) => {
-              if (ref) materialRefs.current[i] = ref;
-            }}
-            vertexShader={ringVertexShader}
-            fragmentShader={ringFragmentShader}
-            uniforms={{
-              uColor: { value: new THREE.Color("white") },
-              uOpacity: { value: opacity },
-              uGradientStrength: { value: gradientStrength },
-              uTime: { value: 0 },
-              uNoiseScale: { value: 4.0 },
-              uFrostIntensity: { value: 0.6 }
-            }}
-            transparent
-            depthWrite={false}
-            depthTest={false}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
-      ))}
-    </>
+    <mesh position={[0, 0, 0]} rotation={[0, 0, Math.PI / 2]} receiveShadow castShadow>
+      <cylinderGeometry args={[topRadius, bottomRadius, height, segments]} />
+      {useCustomShader ? (
+        <shaderMaterial
+          ref={materialRef}
+          vertexShader={glassVertexShader}
+          fragmentShader={glassFragmentShader}
+          uniforms={{
+            uColor: { value: new THREE.Color("white") },
+            uOpacity: { value: 0.8 },
+            uTime: { value: 0 },
+            uRefractionStrength: { value: refractionStrength },
+            uFresnelPower: { value: fresnelPower }
+          }}
+          transparent
+          depthWrite={false}
+          side={THREE.DoubleSide}
+        />
+      ) : (
+        <MeshTransmissionMaterial 
+          backside 
+          backsideThickness={5} 
+          thickness={thickness}
+          roughness={0.2}
+          transmission={1}
+          ior={1.5}
+          chromaticAberration={0.02}
+          backsideTransmission={0.8}
+          samples={10}
+          resolution={512}
+        />
+      )}
+    </mesh>
   );
 }
 
@@ -453,5 +481,3 @@ function LaserRibbonCubic({ p0, p1, p2, p3, width = 0.05, color = new THREE.Colo
     </mesh>
   );
 }
-
-

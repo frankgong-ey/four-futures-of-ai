@@ -22,7 +22,7 @@ export default function FirstScreen() {
         </div>
 
         {/* 底部标题 - 绝对定位，距离屏幕下边缘240px */}
-        <div className="absolute bottom-[240px] left-0 right-0 px-[16px] md:px-[64px] sm:px-[16px] z-10">
+        <div className="absolute bottom-[120px] left-0 right-0 px-[16px] md:px-[64px] sm:px-[16px] z-10">
           <div className="grid grid-cols-12 gap-[24px]">
             <div className="col-span-2 col-start-2 text-left flex items-end">
                 <div className="flex flex-col text-sm gap-[8px]">
