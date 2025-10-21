@@ -6,7 +6,7 @@ const Navigation = ({ isLoading }) => {
   }
 
   return (
-    <div className="fixed top-4 left-4 z-[60] pointer-events-auto">
+    <div className="fixed top-4 left-4 z-[99] pointer-events-auto">
       <div className="flex items-center gap-3 select-none" aria-hidden="true">
         <img src="/images/nav_logo.svg" alt="Navigation" className="h-16 w-auto" />
       </div>

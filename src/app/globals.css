@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #000000;
   --foreground: #171717;
 }
 
@@ -26,6 +26,7 @@ body {
   font-family: var(--font-eyinterstate), Arial, Helvetica, sans-serif;
   font-weight: 300;
 }
+
 
 /* 隐藏垂直滚动条但保留滚动功能（跨浏览器） */
 html, body {

@@ -112,7 +112,7 @@ function MenuButton() {
 export default function Navigation() {
   return (
     <nav 
-      className="fixed left-0 right-0 z-50 h-16 flex items-center justify-between px-16 bg-transparent"
+      className="fixed left-0 right-0 z-99 h-16 flex items-center justify-between px-16 bg-transparent"
       style={{ height: '64px', marginTop: '16px' }}
     >
       {/* Logo */}
