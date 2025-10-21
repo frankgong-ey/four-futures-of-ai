@@ -6,33 +6,36 @@ import { CatmullRomCurve3 } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrthographicCamera, Environment, MeshTransmissionMaterial, useTexture, useGLTF} from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
+import { easing } from "maath";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
 import neonVertexShader from "../../shaders/neon.vert.glsl";
 import neonFragmentShader from "../../shaders/neon.frag.glsl";
 import questionLineVertexShader from "../../shaders/questionLine.vert.glsl";
 import questionLineFragmentShader from "../../shaders/questionLine.frag.glsl";
 import torusPointsVertexShader from "../../shaders/torusPoints.vert.glsl";
 import torusPointsFragmentShader from "../../shaders/torusPoints.frag.glsl";
-import torusLinesVertexShader from "../../shaders/torusLines.vert.glsl";
-import torusLinesFragmentShader from "../../shaders/torusLines.frag.glsl";
+import geometryLinesVertexShader from "../../shaders/geometryLines.vert.glsl";
+import geometryLinesFragmentShader from "../../shaders/geometryLines.frag.glsl";
 import circlePlaneVertexShader from "../../shaders/circlePlane.vert.glsl";
 import circlePlaneFragmentShader from "../../shaders/circlePlane.frag.glsl";
-import { easing } from "maath";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import ribbonVertexShader from "../../shaders/laserRibbon.vert.glsl";
+import ribbonFragmentShader from "../../shaders/laserRibbon.frag.glsl";
+import imageCardVertexShader from "../../shaders/imageCard.vert.glsl";
+import imageCardFragmentShader from "../../shaders/imageCard.frag.glsl";
+
+import FirstScreen from "./components/FirstScreen";
+import GalleryScreen from "./components/GalleryScreen";
+import ThirdSection from "./components/ThirdSection";
+import FourthSection from "./components/FourthSection";
+
 
 // 注册GSAP插件
 gsap.registerPlugin(ScrollTrigger);
 
-import ribbonVertexShader from "../test/shaders/laserRibbon.vert.glsl";
-import ribbonFragmentShader from "../test/shaders/laserRibbon.frag.glsl";
-import imageCardVertexShader from "../test/shaders/imageCard.vert.glsl";
-import imageCardFragmentShader from "../test/shaders/imageCard.frag.glsl";
-import FirstScreen from "../../components/FirstScreen";
-import GalleryScreen from "../components/GalleryScreen";
-import ThirdSection from "../components/ThirdSection";
-import FourthSection from "../components/FourthSection";
 
-export default function CylinderTestPage() {
+export default function BoothPage() {
   const [galleryScrollProgress, setGalleryScrollProgress] = useState(0);
   const [isInGallerySection, setIsInGallerySection] = useState(false);
   const [galleryFadeOut, setGalleryFadeOut] = useState(0); // 0 = 完全显示, 1 = 完全淡出
@@ -439,6 +442,15 @@ export default function CylinderTestPage() {
           zIndex: 10
         }}
       >
+
+          {/* 动态 Bloom 效果：viewProgress >= 0.70 时启用 */}
+          <BloomFixer enabled={shouldEnableBloom} />
+          {shouldEnableBloom && (
+            <EffectComposer key={shouldEnableBloom ? "bloom-on" : "bloom-off"} multisampling={0}>
+              <Bloom intensity={0.3} luminanceThreshold={1} luminanceSmoothing={0} mipmapBlur />
+            </EffectComposer>
+          )}
+
           <OrthographicCamera 
             makeDefault 
             position={[-3, 0, 8]}
@@ -453,12 +465,6 @@ export default function CylinderTestPage() {
             <QuestionModel />
           )}
 
-          {/* 动态 Bloom 效果：viewProgress >= 0.70 时启用 */}
-          {shouldEnableBloom && (
-            <EffectComposer multisampling={0}>
-              <Bloom intensity={0.5} luminanceThreshold={0.1} luminanceSmoothing={0.0} mipmapBlur />
-            </EffectComposer>
-          )}
           
           {/* Gallery 3D 内容 - 根据滚动进度显示，不干扰FirstScreen */}
           {isInGallerySection && (
@@ -482,14 +488,13 @@ export default function CylinderTestPage() {
   
           {/* 光源和环境 */}
           <ambientLight intensity={0.3} />
-          <spotLight position={[20, 20, 10]} penumbra={1} castShadow angle={0.2} intensity={1} />
           <Environment preset="city" />
   
-          {/* LaserRibbonCubic - 只在FirstScreen时显示 */}
+          {/* LaserSpline - 只在FirstScreen时显示 */}
           {!isInGallerySection && (
             <>
-              {/* First LaserRibbonCubic */}
-              <LaserRibbonCubic
+              {/* First LaserSpline */}
+              <LaserSpline
                 p0={p1_0}
                 p1={p1_1}
                 p2={p1_2}
@@ -503,8 +508,8 @@ export default function CylinderTestPage() {
                 hoverRadius={hoverRadius}
               />
 
-              {/* Second LaserRibbonCubic */}
-              <LaserRibbonCubic
+              {/* Second LaserSpline */}
+              <LaserSpline
                 p0={p2_0}
                 p1={p2_1}
                 p2={p2_2}
@@ -518,8 +523,8 @@ export default function CylinderTestPage() {
                 hoverRadius={hoverRadius}
               />
 
-              {/* Third LaserRibbonCubic */}
-              <LaserRibbonCubic
+              {/* Third LaserSpline */}
+              <LaserSpline
                 p0={p3_0}
                 p1={p3_1}
                 p2={p3_2}
@@ -533,8 +538,8 @@ export default function CylinderTestPage() {
                 hoverRadius={hoverRadius}
               />
 
-              {/* Fourth LaserRibbonCubic */}
-              <LaserRibbonCubic
+              {/* Fourth LaserSpline */}
+              <LaserSpline
                 p0={p4_0}
                 p1={p4_1}
                 p2={p4_2}
@@ -627,11 +632,8 @@ export default function CylinderTestPage() {
       </div>
 
 
-
-
-
-      {/* 调试信息 - 显示滚动位置 - 已隐藏 */}
-      {/* <div
+      {/* 调试信息 - 显示滚动位置 */}
+      <div
         style={{
           position: 'fixed',
           bottom: '20px',
@@ -652,15 +654,30 @@ export default function CylinderTestPage() {
         Gallery Progress: {galleryScrollProgress.toFixed(2)}
         <br />
         View Progress: {viewProgress.toFixed(2)}
-      </div> */}
+      </div>
     </div>
     );
 }
 
+// 重新渲染画面函数，用于清除Bloom缓存
+function BloomFixer({ enabled }) {
+  const { gl, scene, camera } = useThree();
+  const prev = useRef(enabled);
 
+  useEffect(() => {
+    // 从 true → false 时触发：Bloom 被关闭
+    if (prev.current && !enabled) {
+      console.log("🧽 Force re-render clean frame after disabling bloom");
+      gl.autoClear = true; // 确保默认缓冲区清空
+      gl.setRenderTarget(null);
+      gl.clear(true, true, true);
+      gl.render(scene, camera); // 👈 手动再渲染一次干净画面
+    }
+    prev.current = enabled;
+  }, [enabled, gl, scene, camera]);
 
-
-
+  return null;
+}
 
 // 圆锥台组件
 function CylinderTunnel({  
@@ -692,10 +709,13 @@ function CylinderTunnel({
   );
 }
 
-
-// 加载并显示 question_consolidated_v5.glb
+// 加载Question模型
 function QuestionModel() {
+
+  // 加载
   const { scene } = useGLTF('/models/question_consolidated_v5.glb');
+
+  // 创建组
   const group = useRef(null);
 
   // 克隆并为所有 Mesh 应用统一 shader（示例采用 neon）
@@ -859,6 +879,7 @@ function QuestionModel() {
     
     console.log('找到', targetObjects.length, '个目标对象');
     
+    // 如果找到目标对象，创建连线数据
     if (targetObjects.length > 0) {
       // 创建连线数据
       const linePositions = [];
@@ -866,6 +887,7 @@ function QuestionModel() {
       let linesCreated = 0;
       const MAX_TOTAL_SEGMENTS = 8000;
       
+      // 遍历目标对象，创建连线数据
       targetObjects.forEach((obj) => {
         if (linesCreated >= MAX_TOTAL_SEGMENTS) return;
         
@@ -968,8 +990,8 @@ function QuestionModel() {
             color: { value: new THREE.Color('#ffffff') },
             time: { value: 0 }
           },
-          vertexShader: torusLinesVertexShader,
-          fragmentShader: torusLinesFragmentShader,
+          vertexShader: geometryLinesVertexShader,
+          fragmentShader: geometryLinesFragmentShader,
         });
         
         // 创建连线对象
@@ -987,11 +1009,6 @@ function QuestionModel() {
         const center = bbox.getCenter(new THREE.Vector3());
         console.log('连线中心位置:', center);
         
-        if (Math.abs(center.x) < 0.1 && Math.abs(center.y) < 0.1 && Math.abs(center.z) < 0.1) {
-          console.log('⚠️ 警告：连线在原点位置！');
-        } else {
-          console.log('✓ 连线不在原点位置');
-        }
       }
     }
     
@@ -1016,7 +1033,7 @@ function QuestionModel() {
 }
 
 // 使用React.memo优化组件重新渲染
-const LaserRibbonCubic = React.memo(function LaserRibbonCubic({ p0, p1, p2, p3, width = 0.05, color = new THREE.Color(1,1,1), segments = 32, intensity = 1.6, falloff = 6.0, shakeIntensity = 0.08, hoverRadius = 0.5 }) {
+const LaserSpline = React.memo(function LaserSpline({ p0, p1, p2, p3, width = 0.05, color = new THREE.Color(1,1,1), segments = 32, intensity = 1.6, falloff = 6.0, shakeIntensity = 0.08, hoverRadius = 0.5 }) {
   const materialRef = useRef();
   const meshRef = useRef();
   
@@ -1179,49 +1196,6 @@ const LaserRibbonCubic = React.memo(function LaserRibbonCubic({ p0, p1, p2, p3, 
   );
 });
 
-// 摄像头控制组件 - 基于鼠标位置进行旋转
-function CameraRig({ isInGallerySection = false, viewProgress = 0 }) {
-  const lookRef = useRef(new THREE.Vector3(0, 0, 0));
-  useFrame((state, delta) => {
-    // 统一基于状态计算目标机位与朝向
-    let desiredPos;
-    let lookTarget;
-
-    if (viewProgress >= 0.01) {
-      // Views 阶段：分段下降
-      let y = -21; // 基础层
-      if (viewProgress > 0.75) {
-        y -= 30; // -20 再降 60 => -80
-      } else if (viewProgress > 0.5) {
-        y -= 20; // -20 再降 40 => -60
-      } else if (viewProgress > 0.25) {
-        y -= 10; // -20 再降 20 => -40
-      }
-      desiredPos = [-10, y+2, 5];
-      lookTarget = new THREE.Vector3(-5, y, 0);
-    } else if (isInGallerySection) {
-      // Gallery 模式
-      desiredPos = [0, -10, 10];
-      lookTarget = new THREE.Vector3(0, -10, 0);
-    } else {
-      // FirstScreen 默认模式（基于鼠标）
-      desiredPos = [
-        Math.sin(-state.pointer.x) * 5 - 5,
-        state.pointer.y * 10,
-        8 + Math.cos(state.pointer.x) * 3,
-      ];
-      lookTarget = new THREE.Vector3(0, 0, 0);
-    }
-
-    // 惯性缓动到目标机位与目标朝向，同步推进
-    easing.damp3(state.camera.position, desiredPos, 0.2, delta);
-    easing.damp3(lookRef.current, [lookTarget.x, lookTarget.y, lookTarget.z], 0.2, delta);
-    state.camera.lookAt(lookRef.current);
-  });
-
-  return null;
-}
-
 // 3D图片卡片组件 - 使用自定义shader
 const ImageCard = React.memo(function ImageCard({ imagePath, position, opacity = 1.0 }) {
   const meshRef = useRef();
@@ -1267,7 +1241,7 @@ const ImageCard = React.memo(function ImageCard({ imagePath, position, opacity =
   );
 });
 
-// Gallery 3D 组件 - 优化性能
+// Gallery 3D 组件 - 展示图片
 const Gallery3D = React.memo(function Gallery3D({ scrollProgress }) {
   
   // 缓存图片位置计算
@@ -1299,10 +1273,6 @@ const Gallery3D = React.memo(function Gallery3D({ scrollProgress }) {
 
   return (
     <>
-      {/* 环境光 */}
-      <ambientLight intensity={0.4} />
-      <spotLight position={[0, 5, 5]} intensity={1} />
-      
       {/* 3D图片卡片 */}
       {useMemo(() => imagePositions.map((pos, index) => {
         const imagePath = `/images/gallery_${index + 1}.png`;
@@ -1324,3 +1294,46 @@ const Gallery3D = React.memo(function Gallery3D({ scrollProgress }) {
     </>
   );
 });
+
+// 3D场景摄像头控制组件 - 控制摄像头的位置和朝向
+function CameraRig({ isInGallerySection = false, viewProgress = 0 }) {
+  const lookRef = useRef(new THREE.Vector3(0, 0, 0));
+  useFrame((state, delta) => {
+    // 统一基于状态计算目标机位与朝向
+    let desiredPos;
+    let lookTarget;
+
+    if (viewProgress >= 0.01) {
+      // Views 阶段：分段下降
+      let y = -21; // 基础层
+      if (viewProgress > 0.75) {
+        y -= 30; // -20 再降 60 => -80
+      } else if (viewProgress > 0.5) {
+        y -= 20; // -20 再降 40 => -60
+      } else if (viewProgress > 0.25) {
+        y -= 10; // -20 再降 20 => -40
+      }
+      desiredPos = [-10, y + 2, 5];
+      lookTarget = new THREE.Vector3(-5, y, 0);
+    } else if (isInGallerySection) {
+      // Gallery 模式
+      desiredPos = [0, -10, 10];
+      lookTarget = new THREE.Vector3(0, -10, 0);
+    } else {
+      // FirstScreen 默认模式（基于鼠标的动画）
+      desiredPos = [
+        Math.sin(-state.pointer.x) * 5 - 5,
+        state.pointer.y * 10,
+        8 + Math.cos(state.pointer.x) * 3,
+      ];
+      lookTarget = new THREE.Vector3(0, 0, 0);
+    }
+
+    // 惯性缓动到目标机位与目标朝向，同步推进
+    easing.damp3(state.camera.position, desiredPos, 0.2, delta);
+    easing.damp3(lookRef.current, [lookTarget.x, lookTarget.y, lookTarget.z], 0.2, delta);
+    state.camera.lookAt(lookRef.current);
+  });
+
+  return null;
+}
