@@ -7,7 +7,7 @@ import { gsap } from 'gsap';
  * 第一屏HTML内容组件
  * 使用Tailwind的12列grid系统进行布局
  */
-export default function FirstScreen({ progress = 0 }) {
+export default function HeroScreen({ progress = 0 }) {
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
   const bottomTextRef = useRef(null);

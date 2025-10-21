@@ -25,13 +25,13 @@ import ribbonFragmentShader from "../../shaders/laserRibbon.frag.glsl";
 import imageCardVertexShader from "../../shaders/imageCard.vert.glsl";
 import imageCardFragmentShader from "../../shaders/imageCard.frag.glsl";
 
-import FirstScreen from "./components/FirstScreen";
+import HeroScreen from "./components/HeroScreen";
 import GalleryScreen from "./components/GalleryScreen";
 import ThirdSection from "./components/ThirdSection";
 import FourthSection from "./components/FourthSection";
 
 
-// 注册GSAP插件
+// Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
 
 
@@ -40,7 +40,7 @@ export default function BoothPage() {
   const [isInGallerySection, setIsInGallerySection] = useState(false);
   const [galleryFadeOut, setGalleryFadeOut] = useState(0); // 0 = 完全显示, 1 = 完全淡出
   const [scrollPosition, setScrollPosition] = useState(0);
-  const [firstScreenProgress, setFirstScreenProgress] = useState(0);
+  const [heroScreenProgress, setHeroScreenProgress] = useState(0);
   const [shouldPlayQuotesAnimation, setShouldPlayQuotesAnimation] = useState(false);
   const [shouldPlayTitleAnimation, setShouldPlayTitleAnimation] = useState(false);
   const [viewProgress, setViewProgress] = useState(0); // FourthSection滚动进度 0~1
@@ -60,7 +60,7 @@ export default function BoothPage() {
   }, [viewProgress, shouldEnableBloom]);
 
   // 使用ref来引用DOM元素
-  const firstScreenRef = useRef(null);
+  const heroScreenRef = useRef(null);
   const galleryScreenRef = useRef(null);
   const backgroundRef = useRef(null);
   const background2Ref = useRef(null);
@@ -131,19 +131,19 @@ export default function BoothPage() {
 
   // 使用GSAP控制动画和section切换
   useEffect(() => {
-    if (!firstScreenRef.current || !galleryScreenRef.current) {
+    if (!heroScreenRef.current || !galleryScreenRef.current) {
       return;
     }
 
-    // 创建ScrollTrigger来控制FirstScreen的淡出效果
-    const firstScreenTrigger = ScrollTrigger.create({
+    // 创建ScrollTrigger来控制HeroScreen的淡出效果
+    const heroScreenTrigger = ScrollTrigger.create({
       trigger: ".scroll-space",
       start: "top top",
       end: "10% top",
       scrub: 1,
       onUpdate: (self) => {
         const progress = self.progress;
-        setFirstScreenProgress(progress);
+        setHeroScreenProgress(progress);
         // 当滚动进度达到0.95时（即95vh）才切换到Gallery模式
         if (progress >= 0.99) {
           setIsInGallerySection(true);
@@ -365,7 +365,7 @@ export default function BoothPage() {
 
     // 清理函数
     return () => {
-      firstScreenTrigger.kill();
+      heroScreenTrigger.kill();
       galleryScrollTrigger.kill();
       galleryFadeOutTrigger.kill();
       thirdSectionTrigger.kill();
@@ -466,14 +466,14 @@ export default function BoothPage() {
           )}
 
           
-          {/* Gallery 3D 内容 - 根据滚动进度显示，不干扰FirstScreen */}
+          {/* Gallery 3D 内容 - 根据滚动进度显示，不干扰HeroScreen */}
           {isInGallerySection && (
             <group style={{ opacity: 1 - galleryFadeOut }}>
               <Gallery3D scrollProgress={galleryScrollProgress} />
             </group>
           )}
   
-          {/* 圆锥台效果 - 只在FirstScreen时显示 */}
+          {/* 圆锥台效果 - 只在HeroScreen时显示 */}
           {!isInGallerySection && (
             <CylinderTunnel
               visible={tunnelVisible}
@@ -490,7 +490,7 @@ export default function BoothPage() {
           <ambientLight intensity={0.3} />
           <Environment preset="city" />
   
-          {/* LaserSpline - 只在FirstScreen时显示 */}
+          {/* LaserSpline - 只在HeroScreen时显示 */}
           {!isInGallerySection && (
             <>
               {/* First LaserSpline */}
@@ -558,7 +558,7 @@ export default function BoothPage() {
 
       {/* 第一个section - 圆柱体测试 - 固定在屏幕上 */}
       <div
-        ref={firstScreenRef}
+        ref={heroScreenRef}
         style={{ 
           position: 'fixed',
           top: 0,
@@ -570,9 +570,9 @@ export default function BoothPage() {
         }}
         className="relative first-screen-container"
       >
-        {/* FirstScreen HTML内容 */}
+        {/* HeroScreen HTML内容 */}
         <div className="absolute inset-0 pointer-events-none">
-          <FirstScreen progress={firstScreenProgress} />
+          <HeroScreen progress={heroScreenProgress} />
         </div>
       </div>
       
@@ -659,7 +659,7 @@ export default function BoothPage() {
     );
 }
 
-// 重新渲染画面函数，用于清除Bloom缓存
+// Re-render the scene to clear the Bloom cache
 function BloomFixer({ enabled }) {
   const { gl, scene, camera } = useThree();
   const prev = useRef(enabled);
@@ -679,7 +679,7 @@ function BloomFixer({ enabled }) {
   return null;
 }
 
-// 圆锥台组件
+// Cone Tunnel Component
 function CylinderTunnel({  
   height, 
   thickness, 
@@ -709,7 +709,7 @@ function CylinderTunnel({
   );
 }
 
-// 加载Question模型
+// Load Question Model
 function QuestionModel() {
 
   // 加载
@@ -1320,7 +1320,7 @@ function CameraRig({ isInGallerySection = false, viewProgress = 0 }) {
       desiredPos = [0, -10, 10];
       lookTarget = new THREE.Vector3(0, -10, 0);
     } else {
-      // FirstScreen 默认模式（基于鼠标的动画）
+      // HeroScreen 默认模式（基于鼠标的动画）
       desiredPos = [
         Math.sin(-state.pointer.x) * 5 - 5,
         state.pointer.y * 10,
