@@ -28,11 +28,11 @@ export default function GalleryScreen({ scrollProgress = 0 }) {
   const sectionRef = React.useRef(null);
 
   const promptCards = [
-    "A futuristic cityscape at sunset",
-    "Abstract digital art with vibrant colors",
-    "A serene mountain landscape",
-    "Cyberpunk street scene at night",
     "Ethereal forest with glowing lights",
+    "Cyberpunk street scene at night",
+    "A serene mountain landscape",
+    "Abstract digital art with vibrant colors",
+    "A futuristic cityscape at sunset",
   ];
 
   return (

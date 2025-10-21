@@ -804,6 +804,7 @@ function CameraRig({ scrollProgress, debugControls = false }) {
 * 主组件 ✅
 */ 
 export default function ChapterOnePage() {
+  console.log('COMPONENT RENDERED');
   const scrollContainerRef = useRef(null);
   const section1Ref = useRef(null);
   const section2Ref = useRef(null);
@@ -822,11 +823,20 @@ export default function ChapterOnePage() {
   // 使用React state存储滚动进度（声明式方式）
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [shouldEnableBloom, setShouldEnableBloom] = useState(false);
   
   // 计算neon材质进度
   const neonProgress = useMemo(() => {
     const scrollFactor = Math.min(scrollProgress * 2, 1);
     return 0.3 + scrollFactor * 0.65; // 0.3 -> 0.95
+  }, [scrollProgress]);
+
+  // 根据scrollProgress更新Bloom状态
+  useEffect(() => {
+    console.log('USEEFFECT TRIGGERED - scrollProgress:', scrollProgress);
+    const newBloomState = scrollProgress >= 0.70;
+    setShouldEnableBloom(newBloomState);
+    console.log('BLOOM STATE:', newBloomState ? 'bloom yes' : 'bloom no');
   }, [scrollProgress]);
 
   // 处理加载完成
@@ -945,6 +955,7 @@ export default function ChapterOnePage() {
       }
     }, 100);
   };
+
 
   // 滚动动画
   useEffect(() => {
@@ -1428,15 +1439,17 @@ export default function ChapterOnePage() {
           <Questions scrollProgress={scrollProgress} visible={scrollProgress >= 0.40 && scrollProgress < 0.80} />
           <GalleryTunnel scrollProgress={scrollProgress} />
 
-          {/* 后处理效果 */}
+          {/* 后处理效果 - 只在滚动70%以上启用Bloom */}
           <EffectComposer>
-            <Bloom 
-              intensity={0.5} 
-              luminanceThreshold={0.1} 
-              mipmapBlur 
-              luminanceSmoothing={0.9}
-              radius={0.2}
-            />
+            {shouldEnableBloom && (
+              <Bloom 
+                intensity={0.5} 
+                luminanceThreshold={0.1} 
+                mipmapBlur 
+                luminanceSmoothing={0.9}
+                radius={0.2}
+              />
+            )}
           </EffectComposer>
         </Canvas>
       </div>

@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import BackgroundLines from "../components/BackgroundLines";
 import Navigation from "../components/Navigation";
+import NextButton from "../components/NextButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,6 +60,7 @@ export default function RootLayout({
       >
         <Navigation />
         <BackgroundLines />
+        <NextButton />
         {children}
       </body>
     </html>
