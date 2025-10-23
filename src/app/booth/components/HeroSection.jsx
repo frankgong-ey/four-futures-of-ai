@@ -7,28 +7,23 @@ import { gsap } from 'gsap';
  * 第一屏HTML内容组件
  * 使用Tailwind的12列grid系统进行布局
  */
-export default function HeroScreen({ progress = 0 }) {
+export default function HeroSection({ localScrollProgress = 0 }) {
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
   const bottomTextRef = useRef(null);
 
+  // 直接使用localScrollProgress驱动opacity变化：在95%-100%时淡出
+  const opacity = localScrollProgress >= 0.95 ? 1 - (localScrollProgress - 0.95) / 0.05 : 1;
+
   useEffect(() => {
-    if (progress >= 0.95) {
-      // 淡出动画
+    if (titleRef.current && subtitleRef.current && bottomTextRef.current) {
       gsap.to([titleRef.current, subtitleRef.current, bottomTextRef.current], {
-        opacity: 0,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-    } else {
-      // 淡入动画
-      gsap.to([titleRef.current, subtitleRef.current, bottomTextRef.current], {
-        opacity: 1,
-        duration: 0.3,
+        opacity: opacity,
+        duration: 0.5,
         ease: "power2.out"
       });
     }
-  }, [progress]);
+  }, [opacity]);
 
   return (
     <div className="h-screen text-white relative pointer-events-none">

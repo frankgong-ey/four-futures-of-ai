@@ -25,56 +25,53 @@ import ribbonFragmentShader from "../../shaders/laserRibbon.frag.glsl";
 import imageCardVertexShader from "../../shaders/imageCard.vert.glsl";
 import imageCardFragmentShader from "../../shaders/imageCard.frag.glsl";
 
-import HeroScreen from "./components/HeroScreen";
-import GalleryScreen from "./components/GalleryScreen";
-import ThirdSection from "./components/ThirdSection";
-import FourthSection from "./components/FourthSection";
+import HeroSection from "./components/HeroSection";
+import GallerySection from "./components/GallerySection";
+import ChartSection from "./components/ChartSection";
+import QuoteSection from "./components/QuoteSection";
+import QuestionSection from "./components/QuestionSection";
+import EndingSection from "./components/EndingSection";
+import VideoSection from "./components/VideoSection";
+import FluidBackground from "../../components/FluidBackground";
 
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
 
-
 export default function BoothPage() {
-  const [galleryScrollProgress, setGalleryScrollProgress] = useState(0);
-  const [isInGallerySection, setIsInGallerySection] = useState(false);
-  const [galleryFadeOut, setGalleryFadeOut] = useState(0); // 0 = 完全显示, 1 = 完全淡出
+  // 统一的状态管理
+  const [sectionState, setSectionState] = useState({
+    currentSection: 'hero',        // 'hero' | 'gallery' | 'chart' | 'quote' | 'fourth'
+    heroProgress: 0,              // 0-1
+    galleryProgress: 0,           // 0-1  
+    fourthProgress: 0,            // 0-1
+    backgroundLayer: 1,           // 1 | 2 | 3
+  });
+
+
+  // 保留scrollPosition状态用于其他功能
   const [scrollPosition, setScrollPosition] = useState(0);
-  const [heroScreenProgress, setHeroScreenProgress] = useState(0);
-  const [shouldPlayQuotesAnimation, setShouldPlayQuotesAnimation] = useState(false);
-  const [shouldPlayTitleAnimation, setShouldPlayTitleAnimation] = useState(false);
-  const [viewProgress, setViewProgress] = useState(0); // FourthSection滚动进度 0~1
 
   // 计算是否应该启用Bloom
   const shouldEnableBloom = useMemo(() => {
-    return viewProgress >= 0.01;
-  }, [viewProgress]);
+    return sectionState.fourthProgress >= 0.29;
+  }, [sectionState.fourthProgress]);
 
   // 调试Bloom状态
   useEffect(() => {
     console.log('=== BLOOM STATUS ===');
-    console.log('viewProgress:', (viewProgress * 100).toFixed(1) + '%');
+    console.log('fourthProgress:', (sectionState.fourthProgress * 100).toFixed(1) + '%');
     console.log('Bloom enabled:', shouldEnableBloom);
     console.log('Bloom status:', shouldEnableBloom ? '✅ BLOOM YES' : '❌ BLOOM NO');
     console.log('===================');
-  }, [viewProgress, shouldEnableBloom]);
+  }, [sectionState.fourthProgress, shouldEnableBloom]);
 
   // 使用ref来引用DOM元素
-  const heroScreenRef = useRef(null);
-  const galleryScreenRef = useRef(null);
+  const heroSectionRef = useRef(null);
+  const gallerySectionRef = useRef(null);
   const backgroundRef = useRef(null);
   const background2Ref = useRef(null);
-  
-  // ThirdSection refs
-  const thirdSectionRef = useRef(null);
-  const chartRef = useRef(null);
-  const quotesRef = useRef(null);
-  const aiChartRef = useRef(null);
-  const trendLineRef = useRef(null);
-  const backgroundPathRef = useRef(null);
-  
-  // FourthSection refs
-  const fourthSectionRef = useRef(null);
+  const background3Ref = useRef(null);
 
   // 监听滚动位置
   useEffect(() => {
@@ -131,264 +128,118 @@ export default function BoothPage() {
 
   // 使用GSAP控制动画和section切换
   useEffect(() => {
-    if (!heroScreenRef.current || !galleryScreenRef.current) {
+    if (!heroSectionRef.current || !gallerySectionRef.current) {
       return;
     }
 
-    // 创建ScrollTrigger来控制HeroScreen的淡出效果
-    const heroScreenTrigger = ScrollTrigger.create({
+    // 统一的ScrollTrigger管理
+    const triggers = [];
+
+    // ✅ 设置Hero Section的progress (0% - 12%) - 因为heroScren是absolute 
+    const heroTrigger = ScrollTrigger.create({
       trigger: ".scroll-space",
       start: "top top",
-      end: "10% top",
+      end: "8% top",
       scrub: 1,
       onUpdate: (self) => {
         const progress = self.progress;
-        setHeroScreenProgress(progress);
-        // 当滚动进度达到0.95时（即95vh）才切换到Gallery模式
-        if (progress >= 0.99) {
-          setIsInGallerySection(true);
-        } else {
-          setIsInGallerySection(false);
-        }
+        setSectionState(prev => ({
+          ...prev,
+          heroProgress: progress,
+          currentSection:'hero'
+        }));
       }
     });
+    triggers.push(heroTrigger);
 
-     // 创建GalleryScreen的ScrollTrigger来控制3D动画
-     const galleryScrollTrigger = ScrollTrigger.create({
-       trigger: ".scroll-space",
-       start: "10%", // 从100vh开始
-       end: "30% top",   // 到30%时结束
-       scrub: 1,       // 平滑跟随滚动
-       onUpdate: (self) => {
-         const progress = self.progress;
-         setGalleryScrollProgress(progress);
-       }
-     });
-
-     // 创建GalleryScreen淡出效果的ScrollTrigger
-     const galleryFadeOutTrigger = ScrollTrigger.create({
-       trigger: ".scroll-space",
-       start: "28% top", // 从30%开始淡出
-       end: "30% top",   // 到35%完全淡出
-       scrub: 1,
-       onUpdate: (self) => {
-         const fadeProgress = self.progress;
-         setGalleryFadeOut(fadeProgress);
-       }
-     });
-
-     // 创建ThirdSection的ScrollTrigger - 在400vh时出现
-     const thirdSectionTrigger = ScrollTrigger.create({
-       trigger: ".scroll-space", // 使用滚动容器作为触发器
-       start: "30% top",       // 当滚动到400vh时开始
-       end: "100% top",         // 当滚动到600vh时结束
-       scrub: 1,
-       onEnter: () => {
-         // 当滚动到400vh时显示section
-         if (thirdSectionRef.current) {
-           gsap.to(thirdSectionRef.current, 
-             { opacity: 1, duration: 1.5, ease: "power2.out" }
-           );
-         }
-       },
-       onLeave: () => {
-         // 当滚动超过600vh时隐藏section40vh
-         if (thirdSectionRef.current) {
-           gsap.to(thirdSectionRef.current, { opacity: 0, duration: 1.5 });
-         }
-       },
-       onEnterBack: () => {
-         // 当向上滚动回到400vh-600vh范围时重新显示
-         if (thirdSectionRef.current) {
-           gsap.to(thirdSectionRef.current, 
-             { opacity: 1, duration: 1.5, ease: "power2.out" }
-           );
-         }
-       },
-       onLeaveBack: () => {
-         // 当向上滚动离开400vh-600vh范围时隐藏
-         if (thirdSectionRef.current) {
-           gsap.to(thirdSectionRef.current, { opacity: 0, duration: 1.5 });
-         }
-       }
-     });
-
-
-     // 初始隐藏ThirdSection
-     if (thirdSectionRef.current) {
-       gsap.set(thirdSectionRef.current, { opacity: 0 });
-     }
-
-    // 背景切换的ScrollTrigger - 当滚动到30%时切换背景
-    const backgroundTrigger = ScrollTrigger.create({
-       trigger: ".scroll-space",
-       start: "30% top",
-       end: "35% top",
-       scrub: 1, // 平滑跟随滚动
-       onUpdate: (self) => {
-         if (backgroundRef.current && background2Ref.current) {
-           const progress = self.progress;
-           // 第一层背景逐渐淡出
-           gsap.set(backgroundRef.current, { opacity: 1 - progress });
-           // 第二层背景逐渐淡入
-           gsap.set(background2Ref.current, { opacity: progress });
-         }
-       }
-     });
-
-    // 第三层背景切换（70% -> 75%） - 平滑过渡到 gradient_3.svg
-    const backgroundTrigger3 = ScrollTrigger.create({
+    // ✅ Gallery Section (12% - 36%) - 因为galleryScreen是absolute
+    const galleryTrigger = ScrollTrigger.create({
       trigger: ".scroll-space",
-      start: "65% top",
-      end: "70% top",
+      start: "8% top",
+      end: "24% top",
       scrub: 1,
       onUpdate: (self) => {
-        const p = self.progress; // 0 -> 1
-        if (background2Ref.current) {
-          // 第二层从 1 淡出
-          gsap.set(background2Ref.current, { opacity: 1 - p });
-        }
-        if (backgroundRef.current) {
-          if (p <= 0) {
-            // 回到第二层/第一层时，确保第一层可见
-            gsap.set(backgroundRef.current, { backgroundImage: 'url(/images/hero_gradient.png)', opacity: 1 });
-          } else {
-            // 复用第一层容器作为第三层承载，切换其背景图并淡入
-            gsap.set(backgroundRef.current, {
-              backgroundImage: `url(/images/gradient_3.svg)`,
-              opacity: p
-            });
-          }
-        }
+        const progress = self.progress;
+        setSectionState(prev => ({
+          ...prev,
+          galleryProgress: progress,
+          currentSection: 'gallery'
+        }));
       }
     });
+    triggers.push(galleryTrigger);
 
-    // 当整体滚动回到 30% 以内，恢复第一层为可见、第二层为不可见
-    const resetToFirstBackground = ScrollTrigger.create({
-      trigger: '.scroll-space',
-      start: 'top top',
-      end: '30% top',
-      onUpdate: () => {
-        if (backgroundRef.current) {
-          gsap.set(backgroundRef.current, { backgroundImage: 'url(/images/hero_gradient.png)', opacity: 1 });
-        }
-        if (background2Ref.current) {
-          gsap.set(background2Ref.current, { opacity: 0 });
-        }
-      }
-    });
 
-     // 趋势线动画的ScrollTrigger - 当chart进入窗口50%时触发（只触发一次）
-     const trendLineTrigger = ScrollTrigger.create({
-       trigger: chartRef.current,
-       start: "50% bottom", // 当chart的50%进入视窗底部时触发
-       end: "bottom top",
-       once: true, // 只触发一次
-       onEnter: () => {
-         if (trendLineRef.current) {
-           const path = trendLineRef.current;
-           const length = path.getTotalLength();
-           
-           // 先停止所有正在进行的动画
-           gsap.killTweensOf(path);
-           
-           // 设置初始状态
-           gsap.set(path, {
-             strokeDasharray: length,
-             strokeDashoffset: length
-           });
-           
-           // 创建时间线动画
-           const tl = gsap.timeline();
-           
-           // 第一阶段：点和标签动画（1.5秒）
-           tl.to(".data-point", {
-             opacity: 1,
-             r: 4,
-             duration: 0.6,
-             stagger: 0.1, // 每个点间隔0.1秒出现
-             ease: "back.out(1.7)"
-           })
-           .to(".data-label", {
-             opacity: 1,
-             y: 0,
-             duration: 0.4,
-             stagger: 0.05, // 每个标签间隔0.05秒出现
-             ease: "power2.out"
-           }, "-=0.3") // 与点动画重叠0.3秒
-           
-           // 第二阶段：路径绘制动画（2秒）
-           .to([path, backgroundPathRef.current], {
-             strokeDashoffset: 0,
-             duration: 2,
-             ease: "power2.out"
-           }, "+=0.2"); // 点和标签动画完成后0.2秒开始路径动画
-         }
-       }
-     });
 
-     // 标题动画的 ScrollTrigger - 当 quotes 组件进入视野 50% 时触发
-     const titleAnimationTrigger = ScrollTrigger.create({
-       trigger: quotesRef.current,
-       start: "80% bottom", // 当 quotes 组件的 50% 进入视窗底部时触发
-       end: "bottom top",
-       once: true, // 只触发一次
-       onEnter: () => {
-         console.log("Title animation triggered by scroll");
-         setShouldPlayTitleAnimation(true);
-       }
-     });
+    // 背景切换逻辑 - 保持原有的视觉效果
+    // const backgroundTrigger = ScrollTrigger.create({
+    //   trigger: ".scroll-space",
+    //   start: "36% top",
+    //   end: "40% top",
+    //   scrub: 1,
+    //   onUpdate: (self) => {
+    //     if (backgroundRef.current && background2Ref.current) {
+    //       const progress = self.progress;
+    //       gsap.set(backgroundRef.current, { opacity: 1 - progress });
+    //       gsap.set(background2Ref.current, { opacity: progress });
+    //     }
+    //   }
+    // });
+    // triggers.push(backgroundTrigger);
 
-     // Quotes 动画的 ScrollTrigger - 当 quotes 组件进入视野 80% 时触发
-     const quotesAnimationTrigger = ScrollTrigger.create({
-       trigger: quotesRef.current,
-       start: "90% bottom", // 当 quotes 组件的 80% 进入视窗底部时触发
-       end: "bottom top",
-       once: true, // 只触发一次
-       onEnter: () => {
-         console.log("Quotes animation triggered by scroll");
-         setShouldPlayQuotesAnimation(true);
-       }
-     });
-
-     // FourthSection滚动进度的ScrollTrigger
-     const fourthSectionProgressTrigger = ScrollTrigger.create({
-       trigger: ".scroll-space",
-       start: "70% top", // 从600vh开始
-       end: "100%",   // 到650vh结束
-       scrub: 1,
-       onUpdate: (self) => {
-         const progress = self.progress;
-         setViewProgress(progress);
-       }
-     });
+    // const backgroundTrigger3 = ScrollTrigger.create({
+    //   trigger: ".scroll-space",
+    //   start: "78% top",
+    //   end: "85% top",
+    //   scrub: 1,
+    //   onUpdate: (self) => {
+    //     const p = self.progress;
+    //     if (background2Ref.current) {
+    //       gsap.set(background2Ref.current, { opacity: 1 - p });
+    //     }
+    //     if (backgroundRef.current && background3Ref.current) {
+    //       if (p <= 0) {
+    //         gsap.set(background3Ref.current, { opacity: 0 });
+    //       } else {
+    //         gsap.set(background3Ref.current, { opacity: p });
+    //       }
+    //     }
+    //   }
+    // });
+    // triggers.push(backgroundTrigger3);
 
     // 清理函数
     return () => {
-      heroScreenTrigger.kill();
-      galleryScrollTrigger.kill();
-      galleryFadeOutTrigger.kill();
-      thirdSectionTrigger.kill();
-      trendLineTrigger.kill();
-      backgroundTrigger.kill();
-      backgroundTrigger3.kill();
-      resetToFirstBackground.kill();
-      titleAnimationTrigger.kill();
-      quotesAnimationTrigger.kill();
-      fourthSectionProgressTrigger.kill();
+      triggers.forEach(trigger => trigger.kill());
     };
   }, []);
   
-  // ScrollTrigger直接在useEffect中处理滚动进度和模式切换
   
     // Fullscreen canvas with orthographic camera and orbit controls
     return (
     <div>
       {/* 占位容器 - 提供滚动空间 */}
-      <div className="scroll-space" style={{ height: '1000vh' }} />
+      <div className="scroll-space" style={{ height: '1250vh' }} />
+      
+      {/* 新的固定背景图片 */}
+      <div 
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundImage: 'url(/images/hero_gradient_new.svg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          zIndex: 11,
+          pointerEvents: 'none'
+        }}
+      />
       
       {/* 全局背景图片 - 所有section共用 */}
-      <div 
+      {/* <div 
         ref={backgroundRef}
         style={{
           position: 'fixed',
@@ -396,17 +247,17 @@ export default function BoothPage() {
           left: 0,
           width: '101vw',
           height: '100vh',
-          backgroundImage: 'url(/images/hero_gradient.png)',
+          backgroundImage: 'url(/images/hero_gradient.svg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           zIndex: 1,
           pointerEvents: 'none'
         }}
-      />
+      /> */}
       
       {/* 第二层背景图片 - 用于过渡 */}
-      <div 
+      {/* <div 
         ref={background2Ref}
         style={{
           position: 'fixed',
@@ -414,7 +265,7 @@ export default function BoothPage() {
           left: 0,
           width: '101vw',
           height: '100vh',
-          backgroundImage: 'url(/images/gradient.png)',
+          backgroundImage: 'url(/images/mid_gradient.svg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -422,7 +273,26 @@ export default function BoothPage() {
           pointerEvents: 'none',
           opacity: 0
         }}
-      />
+      /> */}
+      
+      {/* 第三层背景图片 - 预加载 gradient_3.svg 避免动态切换时的重新加载 */}
+      {/* <div 
+        ref={background3Ref}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '101vw',
+          height: '100vh',
+          backgroundImage: 'url(/images/gradient_3.svg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          zIndex: 1,
+          pointerEvents: 'none',
+          opacity: 0
+        }}
+      /> */}
 
       {/* 全局Canvas - 所有section共用 */}
       <Canvas 
@@ -443,7 +313,7 @@ export default function BoothPage() {
         }}
       >
 
-          {/* 动态 Bloom 效果：viewProgress >= 0.70 时启用 */}
+          {/* 动态 Bloom 效果：fourthProgress >= 0.70 时启用 */}
           <BloomFixer enabled={shouldEnableBloom} />
           {shouldEnableBloom && (
             <EffectComposer key={shouldEnableBloom ? "bloom-on" : "bloom-off"} multisampling={0}>
@@ -458,23 +328,24 @@ export default function BoothPage() {
             near={-1000}
             far={1000}
           />
-          <CameraRig isInGallerySection={isInGallerySection} viewProgress={viewProgress} />
+          <CameraRig sectionState={sectionState} />
+
+          {/* 流体渐变背景图层 */}
+          <FluidBackground />
 
           {/* Question GLB 模型（按需加载） */}
-          {viewProgress > 0.0 && (
+          {sectionState.fourthProgress > 0.0 && (
             <QuestionModel />
           )}
 
           
-          {/* Gallery 3D 内容 - 根据滚动进度显示，不干扰HeroScreen */}
-          {isInGallerySection && (
-            <group style={{ opacity: 1 - galleryFadeOut }}>
-              <Gallery3D scrollProgress={galleryScrollProgress} />
-            </group>
+          {/* Gallery 3D 内容 - 根据滚动进度显示，不干扰HeroSection */}
+          {sectionState.currentSection === 'gallery' && (
+            <Gallery3D scrollProgress={sectionState.galleryProgress} />
           )}
   
-          {/* 圆锥台效果 - 只在HeroScreen时显示 */}
-          {!isInGallerySection && (
+          {/* 圆锥台效果 - 只在HeroSection时显示 */}
+          {sectionState.currentSection !== 'gallery' && (
             <CylinderTunnel
               visible={tunnelVisible}
               height={cylinderHeight}
@@ -485,13 +356,12 @@ export default function BoothPage() {
             />
           )}
   
-  
           {/* 光源和环境 */}
           <ambientLight intensity={0.3} />
           <Environment preset="city" />
   
-          {/* LaserSpline - 只在HeroScreen时显示 */}
-          {!isInGallerySection && (
+          {/* LaserSpline - 只在HeroSection时显示 */}
+          {sectionState.currentSection !== 'gallery' && (
             <>
               {/* First LaserSpline */}
               <LaserSpline
@@ -556,9 +426,9 @@ export default function BoothPage() {
           )}
       </Canvas>
 
-      {/* 第一个section - 圆柱体测试 - 固定在屏幕上 */}
+      {/* Hero Section - 固定在屏幕上 */}
       <div
-        ref={heroScreenRef}
+        ref={heroSectionRef}
         style={{ 
           position: 'fixed',
           top: 0,
@@ -570,65 +440,104 @@ export default function BoothPage() {
         }}
         className="relative first-screen-container"
       >
-        {/* HeroScreen HTML内容 */}
+        {/* HeroSection HTML内容 */}
         <div className="absolute inset-0 pointer-events-none">
-          <HeroScreen progress={heroScreenProgress} />
+          <HeroSection localScrollProgress={sectionState.heroProgress} />
         </div>
       </div>
       
-      {/* GalleryScreen 第二个section - 固定定位与第一个屏幕重叠 */}
+      {/* Gallery Section - 固定定位与第一个屏幕重叠 */}
       <div 
-        ref={galleryScreenRef}
+        ref={gallerySectionRef}
         style={{
           position: 'fixed',
           top: 0,
           left: 0,
           width: "100vw", 
-          height: "100vh",
-          opacity: isInGallerySection ? (1 - galleryFadeOut) : 0,
-          visibility: isInGallerySection ? 'visible' : 'hidden',
-          transition: 'opacity 0.5s ease-in-out',
+          height: "200vh",
+          visibility: sectionState.currentSection === 'gallery' ? 'visible' : 'hidden',
           zIndex: 30
         }}
       >
-        <GalleryScreen scrollProgress={galleryScrollProgress} />
+        <GallerySection localScrollProgress={sectionState.galleryProgress} />
       </div>
 
-      {/* ThirdSection - 第三个section，在400vh后出现 */}
+      {/* ChartSection - 图表section，在400vh后出现 */}
       <div
         style={{
           position: 'absolute',
           top: '400vh',
           left: 0,
           width: '100vw',
-          height: '200vh',
+          height: '100vh',
           zIndex: 40
         }}
       >
-        <ThirdSection 
-          sectionRef={thirdSectionRef}
-          chartRef={chartRef}
-          quotesRef={quotesRef}
-          aiChartRef={aiChartRef}
-          trendLineRef={trendLineRef}
-          backgroundPathRef={backgroundPathRef}
-          shouldPlayQuotesAnimation={shouldPlayQuotesAnimation}
-          shouldPlayTitleAnimation={shouldPlayTitleAnimation}
-        />
+        <ChartSection />
       </div>
 
-      {/* FourthSection - 第四个section，500vh高度，5个views */}
+      {/* QuoteSection - 引用section，在500vh后出现 */}
       <div
         style={{
           position: 'absolute',
-          top: '600vh', // 在ThirdSection (200vh) 之后
+          top: '500vh',
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 40
+        }}
+      >
+        <QuoteSection />
+      </div>
+
+      {/* QuestionSection - 第四个section，500vh高度，5个views */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '600vh', // 在ChartSection (100vh) + QuoteSection (100vh) 之后
           left: 0,
           width: '100vw',
           height: '500vh',
           zIndex: 50
         }}
       >
-        <FourthSection sectionRef={fourthSectionRef} viewProgress={viewProgress} />
+        <QuestionSection 
+          onProgress={(progress) => {
+            setSectionState(prev => ({
+              ...prev,
+              fourthProgress: progress,
+              currentSection: 'fourth'
+            }));
+          }}
+        />
+      </div>
+
+      {/* EndingSection - 第五个section，1000vh高度 */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '1100vh',
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 60,
+        }}
+      >
+        <EndingSection />
+      </div>
+
+      {/* EndingSection - 第五个section，1000vh高度 */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '1200vh',
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 60,
+        }}
+      >
+        <VideoSection />
       </div>
 
 
@@ -649,11 +558,13 @@ export default function BoothPage() {
       >
         Scroll: {Math.round(scrollPosition)}px ({typeof window !== 'undefined' ? Math.round(scrollPosition / window.innerHeight * 100) : 0}vh)
         <br />
-        Gallery Mode: {isInGallerySection ? 'ON' : 'OFF'}
+        Current Section: {sectionState.currentSection}
         <br />
-        Gallery Progress: {galleryScrollProgress.toFixed(2)}
+        Gallery Progress: {sectionState.galleryProgress.toFixed(2)}
         <br />
-        View Progress: {viewProgress.toFixed(2)}
+        <br />
+        <br />
+        Fourth Progress: {sectionState.fourthProgress.toFixed(2)}
       </div>
     </div>
     );
@@ -1296,31 +1207,35 @@ const Gallery3D = React.memo(function Gallery3D({ scrollProgress }) {
 });
 
 // 3D场景摄像头控制组件 - 控制摄像头的位置和朝向
-function CameraRig({ isInGallerySection = false, viewProgress = 0 }) {
+function CameraRig({ sectionState }) {
   const lookRef = useRef(new THREE.Vector3(0, 0, 0));
   useFrame((state, delta) => {
     // 统一基于状态计算目标机位与朝向
     let desiredPos;
     let lookTarget;
 
-    if (viewProgress >= 0.01) {
+    const { currentSection, fourthProgress, galleryProgress } = sectionState;
+
+    if (currentSection === 'fourth' && fourthProgress >= 0.3) {
       // Views 阶段：分段下降
       let y = -21; // 基础层
-      if (viewProgress > 0.75) {
+      if (fourthProgress > 0.90) {
+        y -= 40;
+      } else if (fourthProgress > 0.69) {
         y -= 30; // -20 再降 60 => -80
-      } else if (viewProgress > 0.5) {
+      } else if (fourthProgress > 0.56) {
         y -= 20; // -20 再降 40 => -60
-      } else if (viewProgress > 0.25) {
+      } else if (fourthProgress > 0.43) {
         y -= 10; // -20 再降 20 => -40
       }
       desiredPos = [-10, y + 2, 5];
       lookTarget = new THREE.Vector3(-5, y, 0);
-    } else if (isInGallerySection) {
+    } else if (currentSection === 'gallery') {
       // Gallery 模式
       desiredPos = [0, -10, 10];
       lookTarget = new THREE.Vector3(0, -10, 0);
     } else {
-      // HeroScreen 默认模式（基于鼠标的动画）
+      // HeroSection 默认模式（基于鼠标的动画）
       desiredPos = [
         Math.sin(-state.pointer.x) * 5 - 5,
         state.pointer.y * 10,

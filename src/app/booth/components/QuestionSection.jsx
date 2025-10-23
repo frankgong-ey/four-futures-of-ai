@@ -1,9 +1,43 @@
 "use client";
 
-import React, { useMemo, useRef } from "react";
+import React, { useEffect, useRef } from "react";
+import { gsap } from "gsap";
 
-// FourthSection组件 - 500vh高度，分为5个views
-export default function FourthSection({ sectionRef, viewProgress = 0 }) {
+// QuestionSection组件 - 500vh高度，分为100vh + 400vh
+export default function QuestionSection({ onProgress }) {
+  // 内部创建 refs
+  const sectionRef = useRef(null);
+  
+  // 内部状态管理 viewProgress
+  const [viewProgress, setViewProgress] = React.useState(0);
+
+  // ScrollTrigger 管理 - 自包含动画 + 进度回调
+  useEffect(() => {
+    if (!sectionRef.current) return;
+
+    // 创建 ScrollTrigger 来管理进度和动画
+    const trigger = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 1,
+        onUpdate: (self) => {
+          const progress = self.progress;
+          setViewProgress(progress);
+          // 向外部报告进度（用于 3D 相机和模型）
+          if (onProgress) {
+            onProgress(progress);
+          }
+        }
+      }
+    });
+
+    return () => {
+      trigger.kill();
+    };
+  }, [onProgress]);
+
   return (
     <div 
       ref={sectionRef}
@@ -54,16 +88,16 @@ export default function FourthSection({ sectionRef, viewProgress = 0 }) {
                         {/* 标题占据右侧 9-12 列 */}
                         <div className="col-span-5 col-start-1 flex flex-col gap-[16px] items-start">
                             <h2 className="text-4xl md:text-[80px] sm:text-3xl leading-none text-white">
-                            {viewProgress < 0.25 && (
+                            {viewProgress < 0.43 && (
                                 <>Will AI progress be defined by breakdowns or breakthroughs?</>
                             )}
-                            {viewProgress >= 0.25 && viewProgress < 0.5 && (
+                            {viewProgress >= 0.43 && viewProgress < 0.56 && (
                                 <>Will AI progress be controlled by the many or the few?</>
                             )}
-                            {viewProgress >= 0.5 && viewProgress < 0.75 && (
+                            {viewProgress >= 0.56 && viewProgress < 0.69 && (
                                 <>Will AI progress be rapid or stagnate?</>
                             )}
-                            {viewProgress >= 0.75 && (
+                            {viewProgress >= 0.69 && (
                                 <>Will AI manage people or people manage AI?</>
                             )}
                             </h2>

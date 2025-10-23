@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import { gsap } from "gsap";
 
 // Prompt卡片组件
 function PromptCard({ text, isActive, progress }) {
@@ -23,9 +24,22 @@ function PromptCard({ text, isActive, progress }) {
   );
 }
 
-// 主GalleryScreen组件
-export default function GalleryScreen({ scrollProgress = 0 }) {
-  const sectionRef = React.useRef(null);
+// 主GallerySection组件
+export default function GallerySection({ localScrollProgress = 0 }) {
+  const sectionRef = useRef(null);
+
+  // 直接使用localScrollProgress驱动opacity变化：在90%-100%时淡出
+  const opacity = localScrollProgress >= 0.9 ? 1 - (localScrollProgress - 0.9) / 0.1 : 1;
+
+  useEffect(() => {
+    if (sectionRef.current) {
+      gsap.to(sectionRef.current, {
+        opacity: opacity,
+        duration: 0.5,
+        ease: "power2.out"
+      });
+    }
+  }, [opacity]);
 
   const promptCards = [
     "Ethereal forest with glowing lights",
@@ -57,8 +71,8 @@ export default function GalleryScreen({ scrollProgress = 0 }) {
           {/* Prompt卡片轮播 */}
           <div className="relative w-full h-screen flex flex-col justify-center items-center space-y-8">
             {promptCards.map((text, index) => {
-              // 直接使用传入的 GalleryScrollProgress（0-1 区间）
-              const p = scrollProgress;
+              // 直接使用传入的 localScrollProgress（0-1 区间）
+              const p = localScrollProgress;
 
               // 定义每张卡片的高亮区间 [start, end)
               const ranges = [

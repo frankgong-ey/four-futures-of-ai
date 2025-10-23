@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 // 计时器组件
 function CountdownTimer() {
@@ -13,6 +14,9 @@ function CountdownTimer() {
   });
 
   useEffect(() => {
+    console.log('CountdownTimer mounted at:', new Date().toLocaleTimeString());
+    console.log('Current path:', window.location.pathname);
+    
     // 计算到2030年1月1日的时间
     const targetDate = new Date("2030-01-01T00:00:00").getTime();
 
@@ -30,7 +34,10 @@ function CountdownTimer() {
       }
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => {
+      console.log('CountdownTimer unmounted at:', new Date().toLocaleTimeString());
+      clearInterval(timer);
+    };
   }, []);
 
   return (
@@ -91,49 +98,129 @@ function CountdownTimer() {
   );
 }
 
-// 菜单按钮组件
-function MenuButton() {
-  const [isOpen, setIsOpen] = useState(false);
+// 导航菜单数据
+const MENU_ITEMS = [
+  { id: '01', title: 'The Introduction', href: '/booth' },
+  { id: '02', title: 'The Four Futures of AI', href: '/futures' },
+  { id: '03', title: 'Is Your Org Ready?', href: '#' },
+];
 
+// 菜单按钮组件
+function MenuButton({ isOpen, onClick }) {
   return (
     <button
-      onClick={() => setIsOpen(!isOpen)}
-      className="flex flex-col justify-center items-center gap-1 p-2 hover:opacity-80 transition-opacity"
+      onClick={onClick}
+      className="flex flex-col justify-center items-start gap-2 p-2 hover:opacity-80 transition-opacity w-16 h-16 relative cursor-pointer"
+      style={{ zIndex: 150 }}
       aria-label="菜单"
     >
-      <div className="w-6 h-0.5 bg-white"></div>
-      <div className="w-6 h-0.5 bg-white"></div>
-      <div className="w-6 h-0.5 bg-white"></div>
+      {/* 第一条线 - 打开时消失 */}
+      <div 
+        className={`w-12 h-0.5 bg-white absolute transition-all duration-500 ease-in-out ${
+          isOpen ? 'opacity-0 translate-y-[-4px]' : 'opacity-100 translate-y-[-8px]'
+        }`}
+      />
+      
+      {/* 第二条线 - 打开时旋转45度 */}
+      <div 
+        className={`w-6 h-0.5 bg-white absolute transition-all duration-500 ease-in-out origin-center ${
+          isOpen ? 'rotate-45 w-8' : 'rotate-0 translate-x-[-6px]'
+        }`}
+      />
+      
+      {/* 第三条线 - 打开时旋转-45度 */}
+      <div 
+        className={`w-6 h-0.5 bg-white absolute transition-all duration-500 ease-in-out origin-center ${
+          isOpen ? '-rotate-45 w-8 translate-y-0' : 'rotate-0 translate-y-[8px] translate-x-[-6px]'
+        }`}
+      />
     </button>
+  );
+}
+
+// 导航菜单组件
+function NavigationMenu({ isOpen, onClose }) {
+  return (
+    <>
+      {/* 遮罩层 */}
+      <div 
+        className={`fixed inset-0 bg-black/50 z-[100] transition-opacity duration-500 ${
+          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={onClose}
+      />
+      
+      {/* 菜单面板 */}
+      <div 
+        className={`fixed top-0 right-0 h-full w-[400px] bg-black transition-transform duration-500 ease-in-out ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        style={{ zIndex: 105 }}
+      >
+        <div className="flex flex-col justify-center h-full px-12">
+          {MENU_ITEMS.map((item, index) => (
+            <Link
+              key={item.id}
+              href={item.href}
+              className="group py-6 border-b border-white/10 last:border-b-0 transition-all duration-300 hover:pl-4"
+              onClick={onClose}
+            >
+              <div className="flex items-baseline gap-4">
+                {/* 序号 */}
+                <span className="text-white/40 text-lg font-bold transition-colors duration-300 group-hover:text-white/60">
+                  {item.id}
+                </span>
+                {/* 标题 */}
+                <span className="text-white text-xl font-normal transition-all duration-300 group-hover:text-white/90">
+                  {item.title}
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
 
 // 主导航组件
 export default function Navigation() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
-    <nav 
-      className="fixed left-0 right-0 z-99 h-16 flex items-center justify-between px-16 bg-transparent"
-      style={{ height: '64px', marginTop: '16px' }}
-    >
-      {/* Logo */}
-      <div className="flex items-center">
-        <Image
-          src="/images/4f_logo.svg"
-          alt="Four Futures of AI Logo"
-          width={120}
-          height={64}
-          className="h-16"
-        />
+    <>
+      {/* 导航栏 - Logo 和计时器 */}
+      <nav 
+        className="fixed left-0 h-16 flex items-center pl-[64px] justify-between bg-transparent"
+        style={{ height: '64px', marginTop: '16px', zIndex: 99, right: '160px' }}
+      >
+        {/* Logo */}
+        <div className="flex items-center">
+          <Image
+            src="/images/nav_logo.svg"
+            alt="Four Futures of AI Logo"
+            width={120}
+            height={64}
+            className="h-16"
+          />
+        </div>
+
+        {/* 右侧内容 - 计时器 */}
+        <div className="flex items-center gap-8">
+          <CountdownTimer />
+        </div>
+      </nav>
+
+      {/* 菜单按钮 - 独立层级 */}
+      <div 
+        className="fixed right-16 flex items-center"
+        style={{ top: '16px', height: '64px', zIndex: 150 }}
+      >
+        <MenuButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen(!isMenuOpen)} />
       </div>
 
-      {/* 右侧内容 */}
-      <div className="flex items-center gap-8">
-        {/* 计时器 */}
-        <CountdownTimer />
-        
-        {/* 菜单按钮 */}
-        <MenuButton />
-      </div>
-    </nav>
+      {/* 导航菜单 */}
+      <NavigationMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+    </>
   );
 }
