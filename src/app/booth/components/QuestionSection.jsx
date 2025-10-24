@@ -4,14 +4,14 @@ import React, { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 
 // QuestionSection组件 - 500vh高度，分为100vh + 400vh
-export default function QuestionSection({ onProgress }) {
+export default function QuestionSection() {
   // 内部创建 refs
   const sectionRef = useRef(null);
   
   // 内部状态管理 viewProgress
   const [viewProgress, setViewProgress] = React.useState(0);
 
-  // ScrollTrigger 管理 - 自包含动画 + 进度回调
+  // ScrollTrigger 管理 - 自包含动画
   useEffect(() => {
     if (!sectionRef.current) return;
 
@@ -25,10 +25,6 @@ export default function QuestionSection({ onProgress }) {
         onUpdate: (self) => {
           const progress = self.progress;
           setViewProgress(progress);
-          // 向外部报告进度（用于 3D 相机和模型）
-          if (onProgress) {
-            onProgress(progress);
-          }
         }
       }
     });
@@ -36,7 +32,7 @@ export default function QuestionSection({ onProgress }) {
     return () => {
       trigger.kill();
     };
-  }, [onProgress]);
+  }, []);
 
   return (
     <div 
@@ -49,7 +45,7 @@ export default function QuestionSection({ onProgress }) {
           {/* 文字内容占据中间 8 列 */}
           <div className="col-span-8 col-start-3 text-center">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-none">
-              But with <span className="text-[#28C5E7] relative">
+              But with <span className="text-[#FFE600] relative">
                 foresight
                 {/* 蓝色光束效果 */}
                 {/* <div className="absolute -top-4 -right-4 w-32 h-16 bg-gradient-to-r from-blue-400/60 to-transparent transform rotate-12 blur-sm"></div>

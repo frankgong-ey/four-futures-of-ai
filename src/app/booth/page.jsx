@@ -4,11 +4,13 @@ import React, { useMemo, useRef, useEffect, useState } from "react";
 import * as THREE from "three";
 import { CatmullRomCurve3 } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrthographicCamera, Environment, MeshTransmissionMaterial, useTexture, useGLTF} from "@react-three/drei";
+import { OrthographicCamera, Environment, MeshTransmissionMaterial, useTexture, useGLTF, OrbitControls} from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import { easing } from "maath";
+import LayeredStarField from "../../components/StarField";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useControls } from "leva";
 
 import neonVertexShader from "../../shaders/neon.vert.glsl";
 import neonFragmentShader from "../../shaders/neon.frag.glsl";
@@ -39,11 +41,64 @@ import FluidBackground from "../../components/FluidBackground";
 gsap.registerPlugin(ScrollTrigger);
 
 export default function BoothPage() {
+  // Leva控制面板
+  const { enableOrbitControls, newSplineP0, newSplineP1, newSplineP2, newSplineP3, newSplineColor, newSpline2P0, newSpline2P1, newSpline2P2, newSpline2P3, newSpline2Color } = useControls({
+    enableOrbitControls: { value: true, label: "Orbit Controls" },
+    newSplineP0: { 
+      value: { x: 10, y: -12, z: 0 }, 
+      label: "New Spline P0 (Top)" 
+    },
+    newSplineP1: { 
+      value: { x: 5, y: -15, z: 0 }, 
+      label: "New Spline P1" 
+    },
+    newSplineP2: { 
+      value: { x: 5, y: -27, z: 0 }, 
+      label: "New Spline P2" 
+    },
+    newSplineP3: { 
+      value: { x: -20, y: -30, z: 0 }, 
+      label: "New Spline P3 (Bottom)" 
+    },
+    newSplineColor: { 
+      value: "#a4a59e", 
+      label: "New Spline Color" 
+    },
+    newSpline2P0: { 
+      value: { x: 10, y: -13, z: 0 }, 
+      label: "New Spline 2 P0 (Top)" 
+    },
+    newSpline2P1: { 
+      value: { x: 5, y: -15, z: 0 }, 
+      label: "New Spline 2 P1" 
+    },
+    newSpline2P2: { 
+      value: { x: 6, y: -27, z: 0 }, 
+      label: "New Spline 2 P2" 
+    },
+    newSpline2P3: { 
+      value: { x: -20, y: -28, z: 0 }, 
+      label: "New Spline 2 P3 (Bottom)" 
+    },
+    newSpline2Color: { 
+      value: "#8d8e88", 
+      label: "New Spline 2 Color" 
+    }
+  });
+
+  // 摄像头信息状态
+  const [cameraInfo, setCameraInfo] = useState({
+    position: [0, 0, 0],
+    rotation: [0, 0, 0]
+  });
+
   // 统一的状态管理
   const [sectionState, setSectionState] = useState({
     currentSection: 'hero',        // 'hero' | 'gallery' | 'chart' | 'quote' | 'fourth'
     heroProgress: 0,              // 0-1
     galleryProgress: 0,           // 0-1  
+    chartProgress: 0,             // 0-1
+    quoteProgress: 0,             // 0-1
     fourthProgress: 0,            // 0-1
     backgroundLayer: 1,           // 1 | 2 | 3
   });
@@ -52,9 +107,10 @@ export default function BoothPage() {
   // 保留scrollPosition状态用于其他功能
   const [scrollPosition, setScrollPosition] = useState(0);
 
+
   // 计算是否应该启用Bloom
   const shouldEnableBloom = useMemo(() => {
-    return sectionState.fourthProgress >= 0.29;
+    return sectionState.fourthProgress >= 0.17 && sectionState.fourthProgress <= 0.89;
   }, [sectionState.fourthProgress]);
 
   // 调试Bloom状态
@@ -105,25 +161,25 @@ export default function BoothPage() {
   const coneBottomRadius = 1.5;
   
   // 曲线控制点 - 直接定义数组，避免重复
-  const p1_0 = [-20, 0];
-  const p1_1 = [0, 0];
-  const p1_2 = [20, 0];
-  const p1_3 = [40, 0];
+  const p1_0 = [-20, 0.1];
+  const p1_1 = [-10, 0.1];
+  const p1_2 = [0, 0];
+  const p1_3 = [20, 5];
   
-  const p2_0 = [-20, 0];
-  const p2_1 = [0, 0];
-  const p2_2 = [20, 0];
-  const p2_3 = [40, 5];
+  const p2_0 = [-20, 0.0];
+  const p2_1 = [-10, 0];
+  const p2_2 = [0, 0];
+  const p2_3 = [20, 2];
   
-  const p3_0 = [-20, 0];
-  const p3_1 = [0, 0];
-  const p3_2 = [20, 3];
-  const p3_3 = [40, 5];
+  const p3_0 = [-20, -0.1];
+  const p3_1 = [-10, -0.1];
+  const p3_2 = [0, 0];
+  const p3_3 = [20, -2];
   
-  const p4_0 = [-20, 0];
-  const p4_1 = [0, 0];
-  const p4_2 = [20, -3];
-  const p4_3 = [40, -5];
+  const p4_0 = [-20, -0.15];
+  const p4_1 = [-10, -0.15];
+  const p4_2 = [0, 0];
+  const p4_3 = [20, -5];
   
 
   // 使用GSAP控制动画和section切换
@@ -169,7 +225,56 @@ export default function BoothPage() {
     });
     triggers.push(galleryTrigger);
 
+    // ✅ Chart Section (24% - 48%) - 添加chart section检测
+    const chartTrigger = ScrollTrigger.create({
+      trigger: ".scroll-space",
+      start: "24% top",
+      end: "36% top",
+      scrub: 1,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        setSectionState(prev => ({
+          ...prev,
+          chartProgress: progress,
+          currentSection: 'chart'
+        }));
+      }
+    });
+    triggers.push(chartTrigger);
 
+    // ✅ Quote Section (48% - 72%) - 添加quote section检测
+    const quoteTrigger = ScrollTrigger.create({
+      trigger: ".scroll-space",
+      start: "36% top",
+      end: "48% top",
+      scrub: 1,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        setSectionState(prev => ({
+          ...prev,
+          quoteProgress: progress,
+          currentSection: 'quote'
+        }));
+      }
+    });
+    triggers.push(quoteTrigger);
+
+    // ✅ Fourth Section (72% - 100%) - 添加fourth section检测
+    const fourthTrigger = ScrollTrigger.create({
+      trigger: ".scroll-space",
+      start: "48% top",
+      end: "88% top",
+      scrub: 1,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        setSectionState(prev => ({
+          ...prev,
+          fourthProgress: progress,
+          currentSection: 'fourth'
+        }));
+      }
+    });
+    triggers.push(fourthTrigger);
 
     // 背景切换逻辑 - 保持原有的视觉效果
     // const backgroundTrigger = ScrollTrigger.create({
@@ -329,101 +434,137 @@ export default function BoothPage() {
             far={1000}
           />
           <CameraRig sectionState={sectionState} />
+          
+          {/* 摄像头信息收集 */}
+          <CameraInfo onCameraUpdate={setCameraInfo} />
+          
+          {/* OrbitControls - 通过Leva控制开关 */}
+          {enableOrbitControls && (
+            <OrbitControls 
+              enablePan={true}
+              enableZoom={true}
+              enableRotate={true}
+              minDistance={5}
+              maxDistance={20}
+            />
+          )}
 
           {/* 流体渐变背景图层 */}
           <FluidBackground />
 
-          {/* Question GLB 模型（按需加载） */}
-          {sectionState.fourthProgress > 0.0 && (
-            <QuestionModel />
-          )}
+          {/* Question GLB 模型 - 暂时显示所有模型 */}
+          <QuestionModel />
 
           
-          {/* Gallery 3D 内容 - 根据滚动进度显示，不干扰HeroSection */}
-          {sectionState.currentSection === 'gallery' && (
-            <Gallery3D scrollProgress={sectionState.galleryProgress} />
-          )}
+          {/* Gallery 3D 内容 - 暂时显示所有模型 */}
+          <Gallery3D scrollProgress={sectionState.galleryProgress} />
   
-          {/* 圆锥台效果 - 只在HeroSection时显示 */}
-          {sectionState.currentSection !== 'gallery' && (
-            <CylinderTunnel
-              visible={tunnelVisible}
-              height={cylinderHeight}
-              thickness={cylinderThickness}
-              segments={cylinderSegments}
-              topRadius={coneTopRadius}
-              bottomRadius={coneBottomRadius}
-            />
-          )}
+          {/* 圆锥台效果 - 暂时显示所有模型 */}
+          <CylinderTunnel
+            visible={tunnelVisible}
+            height={cylinderHeight}
+            thickness={cylinderThickness}
+            segments={cylinderSegments}
+            topRadius={coneTopRadius}
+            bottomRadius={coneBottomRadius}
+          />
   
           {/* 光源和环境 */}
           <ambientLight intensity={0.3} />
           <Environment preset="city" />
   
-          {/* LaserSpline - 只在HeroSection时显示 */}
-          {sectionState.currentSection !== 'gallery' && (
-            <>
-              {/* First LaserSpline */}
-              <LaserSpline
-                p0={p1_0}
-                p1={p1_1}
-                p2={p1_2}
-                p3={p1_3}
-                width={ribbonWidth}
-                color={new THREE.Color(ribbon1Color)}
-                segments={ribbonSegments}
-                intensity={ribbonIntensity}
-                falloff={ribbonFalloff}
-                shakeIntensity={ribbonShakeIntensity}
-                hoverRadius={hoverRadius}
-              />
+          {/* LaserSpline - 暂时显示所有模型 */}
+          <>
+            {/* First LaserSpline */}
+            <LaserSpline
+              p0={p1_0}
+              p1={p1_1}
+              p2={p1_2}
+              p3={p1_3}
+              width={ribbonWidth}
+              color={new THREE.Color(ribbon1Color)}
+              segments={ribbonSegments}
+              intensity={ribbonIntensity}
+              falloff={ribbonFalloff}
+              shakeIntensity={ribbonShakeIntensity}
+              hoverRadius={hoverRadius}
+            />
 
-              {/* Second LaserSpline */}
-              <LaserSpline
-                p0={p2_0}
-                p1={p2_1}
-                p2={p2_2}
-                p3={p2_3}
-                width={ribbonWidth}
-                color={new THREE.Color(ribbon2Color)}
-                segments={ribbonSegments}
-                intensity={ribbonIntensity}
-                falloff={ribbonFalloff}
-                shakeIntensity={ribbonShakeIntensity}
-                hoverRadius={hoverRadius}
-              />
+            {/* Second LaserSpline */}
+            <LaserSpline
+              p0={p2_0}
+              p1={p2_1}
+              p2={p2_2}
+              p3={p2_3}
+              width={ribbonWidth}
+              color={new THREE.Color(ribbon2Color)}
+              segments={ribbonSegments}
+              intensity={ribbonIntensity}
+              falloff={ribbonFalloff}
+              shakeIntensity={ribbonShakeIntensity}
+              hoverRadius={hoverRadius}
+            />
 
-              {/* Third LaserSpline */}
-              <LaserSpline
-                p0={p3_0}
-                p1={p3_1}
-                p2={p3_2}
-                p3={p3_3}
-                width={ribbonWidth}
-                color={new THREE.Color(ribbon3Color)}
-                segments={ribbonSegments}
-                intensity={ribbonIntensity}
-                falloff={ribbonFalloff}
-                shakeIntensity={ribbonShakeIntensity}
-                hoverRadius={hoverRadius}
-              />
+            {/* Third LaserSpline */}
+            <LaserSpline
+              p0={p3_0}
+              p1={p3_1}
+              p2={p3_2}
+              p3={p3_3}
+              width={ribbonWidth}
+              color={new THREE.Color(ribbon3Color)}
+              segments={ribbonSegments}
+              intensity={ribbonIntensity}
+              falloff={ribbonFalloff}
+              shakeIntensity={ribbonShakeIntensity}
+              hoverRadius={hoverRadius}
+            />
 
-              {/* Fourth LaserSpline */}
-              <LaserSpline
-                p0={p4_0}
-                p1={p4_1}
-                p2={p4_2}
-                p3={p4_3}
-                width={ribbonWidth}
-                color={new THREE.Color(ribbon4Color)}
-                segments={ribbonSegments}
-                intensity={ribbonIntensity}
-                falloff={ribbonFalloff}
-                shakeIntensity={ribbonShakeIntensity}
-                hoverRadius={hoverRadius}
-              />
-            </>
-          )}
+            {/* Fourth LaserSpline */}
+            <LaserSpline
+              p0={p4_0}
+              p1={p4_1}
+              p2={p4_2}
+              p3={p4_3}
+              width={ribbonWidth}
+              color={new THREE.Color(ribbon4Color)}
+              segments={ribbonSegments}
+              intensity={ribbonIntensity}
+              falloff={ribbonFalloff}
+              shakeIntensity={ribbonShakeIntensity}
+              hoverRadius={hoverRadius}
+            />
+
+            {/* New LaserSpline - 可调试的竖向曲线 */}
+            <LaserSpline
+              p0={[newSplineP0.x, newSplineP0.y, newSplineP0.z]}
+              p1={[newSplineP1.x, newSplineP1.y, newSplineP1.z]}
+              p2={[newSplineP2.x, newSplineP2.y, newSplineP2.z]}
+              p3={[newSplineP3.x, newSplineP3.y, newSplineP3.z]}
+              width={ribbonWidth}
+              color={new THREE.Color(newSplineColor)}
+              segments={64}
+              intensity={ribbonIntensity}
+              falloff={ribbonFalloff}
+              shakeIntensity={ribbonShakeIntensity}
+              hoverRadius={hoverRadius}
+            />
+
+            {/* New LaserSpline 2 - 第二条完全一样的曲线 */}
+            <LaserSpline
+              p0={[newSpline2P0.x, newSpline2P0.y, newSpline2P0.z]}
+              p1={[newSpline2P1.x, newSpline2P1.y, newSpline2P1.z]}
+              p2={[newSpline2P2.x, newSpline2P2.y, newSpline2P2.z]}
+              p3={[newSpline2P3.x, newSpline2P3.y, newSpline2P3.z]}
+              width={ribbonWidth}
+              color={new THREE.Color(newSpline2Color)}
+              segments={64}
+              intensity={ribbonIntensity}
+              falloff={ribbonFalloff}
+              shakeIntensity={ribbonShakeIntensity}
+              hoverRadius={hoverRadius}
+            />
+          </>
       </Canvas>
 
       {/* Hero Section - 固定在屏幕上 */}
@@ -501,15 +642,7 @@ export default function BoothPage() {
           zIndex: 50
         }}
       >
-        <QuestionSection 
-          onProgress={(progress) => {
-            setSectionState(prev => ({
-              ...prev,
-              fourthProgress: progress,
-              currentSection: 'fourth'
-            }));
-          }}
-        />
+        <QuestionSection />
       </div>
 
       {/* EndingSection - 第五个section，1000vh高度 */}
@@ -560,14 +693,47 @@ export default function BoothPage() {
         <br />
         Current Section: {sectionState.currentSection}
         <br />
+        Hero Progress: {sectionState.heroProgress.toFixed(2)}
+        <br />
         Gallery Progress: {sectionState.galleryProgress.toFixed(2)}
         <br />
+        Chart Progress: {sectionState.chartProgress.toFixed(2)}
         <br />
+        Quote Progress: {sectionState.quoteProgress.toFixed(2)}
         <br />
         Fourth Progress: {sectionState.fourthProgress.toFixed(2)}
+        <br />
+        <br />
+        Camera Position: ({cameraInfo.position[0]}, {cameraInfo.position[1]}, {cameraInfo.position[2]})
+        <br />
+        Camera Rotation: ({cameraInfo.rotation[0]}°, {cameraInfo.rotation[1]}°, {cameraInfo.rotation[2]}°)
       </div>
     </div>
     );
+}
+
+// 摄像头信息组件
+function CameraInfo({ onCameraUpdate }) {
+  const { camera } = useThree();
+
+  useFrame(() => {
+    if (camera && onCameraUpdate) {
+      onCameraUpdate({
+        position: [
+          camera.position.x.toFixed(2),
+          camera.position.y.toFixed(2),
+          camera.position.z.toFixed(2)
+        ],
+        rotation: [
+          (camera.rotation.x * 180 / Math.PI).toFixed(1),
+          (camera.rotation.y * 180 / Math.PI).toFixed(1),
+          (camera.rotation.z * 180 / Math.PI).toFixed(1)
+        ]
+      });
+    }
+  });
+
+  return null; // 这个组件不渲染任何内容，只用于获取摄像头信息
 }
 
 // Re-render the scene to clear the Bloom cache
@@ -937,7 +1103,7 @@ function QuestionModel() {
   });
 
   return (
-    <group ref={group} position={[0, -20, 0]}>
+    <group ref={group} position={[0, -40, 0]}>
       <primitive object={clonedScene} />
     </group>
   );
@@ -1216,24 +1382,38 @@ function CameraRig({ sectionState }) {
 
     const { currentSection, fourthProgress, galleryProgress } = sectionState;
 
-    if (currentSection === 'fourth' && fourthProgress >= 0.3) {
-      // Views 阶段：分段下降
-      let y = -21; // 基础层
-      if (fourthProgress > 0.90) {
-        y -= 40;
-      } else if (fourthProgress > 0.69) {
-        y -= 30; // -20 再降 60 => -80
-      } else if (fourthProgress > 0.56) {
-        y -= 20; // -20 再降 40 => -60
-      } else if (fourthProgress > 0.43) {
-        y -= 10; // -20 再降 20 => -40
+    if (currentSection === 'fourth') {
+      if (fourthProgress >= 0.16) {
+        // Views 阶段：分段下降
+        let y = -41; // 基础层
+        if (fourthProgress > 0.89) {
+          y -= 40;
+        } else if (fourthProgress > 0.63) {
+          y -= 30; // -20 再降 60 => -80
+        } else if (fourthProgress > 0.47) {
+          y -= 20; // -20 再降 40 => -60
+        } else if (fourthProgress > 0.32) {
+          y -= 10; // -20 再降 20 => -40
+        }
+        desiredPos = [-10, y + 2, 5];
+        lookTarget = new THREE.Vector3(-5, y, 0);
+      } else {
+        // Fourth section但progress < 0.16时，保持在-30位置
+        desiredPos = [0, -30, 10];
+        lookTarget = new THREE.Vector3(0, -30, 0);
       }
-      desiredPos = [-10, y + 2, 5];
-      lookTarget = new THREE.Vector3(-5, y, 0);
     } else if (currentSection === 'gallery') {
       // Gallery 模式
       desiredPos = [0, -10, 10];
       lookTarget = new THREE.Vector3(0, -10, 0);
+    } else if (currentSection === 'chart') {
+      // Chart 模式 - 摄像头y值移动到-20
+      desiredPos = [0, -20, 10];
+      lookTarget = new THREE.Vector3(0, -20, 0);
+    } else if (currentSection === 'quote') {
+      // Quote 模式 - 摄像头y值移动到-30
+      desiredPos = [0, -30, 10];
+      lookTarget = new THREE.Vector3(0, -30, 0);
     } else {
       // HeroSection 默认模式（基于鼠标的动画）
       desiredPos = [

@@ -57,7 +57,7 @@ export default function GallerySection({ localScrollProgress = 0 }) {
             <div className="grid grid-cols-12 gap-[24px]">
             <div className="col-span-4 col-start-1 text-left flex flex-col gap-[16px] items-start">
                 <h2 
-                    className="text-4xl md:text-[80px] sm:text-3xl leading-none text-white"
+                    className="text-4xl md:text-[96px] sm:text-3xl leading-none text-white"
                 >
                     The rapid growth of AI 
                 </h2>

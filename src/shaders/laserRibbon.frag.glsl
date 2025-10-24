@@ -65,6 +65,39 @@ void main() {
   
   float intensity = falloffCurve * uIntensity;
   
+  // 100个随机间隔的小光点
+  float totalLightIntensity = 0.0;
+  
+  // 创建100个光点
+  for(int i = 0; i < 20; i++) {
+    // 随机间隔和速度
+    float randomOffset = float(i) * 0.01; // 基础间隔
+    float randomSpeed = 0.1 + fract(sin(float(i) * 12.9898) * 43758.5453) * 0.01; // 随机速度
+    float randomDelay = fract(sin(float(i) * 7.1234) * 43758.5453) * 2.0; // 随机延迟
+    
+    // 计算光点位置
+    float lightPos = fract(uTime * randomSpeed + randomOffset + randomDelay);
+    
+    // 计算到光点中心的距离（椭圆形）
+    float distU = vU - lightPos; // 沿丝带方向的距离
+    float distV = shakenHalfCoord; // 垂直中心线的距离
+    
+    // 创建椭圆形：x方向更小，y方向更大
+    float ellipseDist = sqrt((distU * distU) / (0.003 * 0.003) + (distV * distV) / (0.03 * 0.03));
+    
+    // 创建椭圆形光点（带过渡效果）
+    float lightIntensity = exp(-ellipseDist * ellipseDist * 2.0); // 使用指数函数创建平滑过渡
+    
+    // 添加随机闪烁
+    float flicker = sin(uTime * 5.0 + float(i) * 1.5) * 0.2 + 0.8;
+    lightIntensity *= flicker;
+    
+    totalLightIntensity += lightIntensity;
+  }
+  
+  // 限制总强度
+  float lightIntensity = min(totalLightIntensity, 1.0);
+  
   // 计算hover效果
   vec3 color = uColor;
   if (uHoverActive > 0.5) {
@@ -78,7 +111,17 @@ void main() {
     }
   }
   
-  gl_FragColor = vec4(color, intensity);
+  // 光点效果：在底色基础上变亮，而不是纯白色
+  if (lightIntensity > 0.01) {
+    // 计算亮度增强
+    float brightnessBoost = 1.0 + lightIntensity * 1.0; // 最多增强3倍亮度
+    color = color * brightnessBoost;
+    
+    // 添加轻微的白色混合
+    color = mix(color, vec3(1.0, 1.0, 1.0), lightIntensity * 0.3);
+  }
+  
+  gl_FragColor = vec4(color, intensity + lightIntensity * 0.5);
 }
 
 
