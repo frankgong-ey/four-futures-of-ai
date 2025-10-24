@@ -285,13 +285,13 @@ function Quotes({ quotesRef }) {
                     }}
                 >
                     <div className="relative w-full h-full p-6 quote-card">
-                        {/* Logo - 相对于最外层容器定位 */}
-                        <img 
-                            src={card.logo} 
-                            alt="Logo" 
+                        {/* Logo - 用16px x 16px的50%透明度白色正方形代替 */}
+                        <div 
                             className="quote-logo absolute"
                             style={{ 
-                                height: '24px',
+                                width: '16px',
+                                height: '16px',
+                                backgroundColor: 'rgba(255, 255, 255, 0.5)',
                                 bottom: '16px',
                                 right: '16px'
                             }}

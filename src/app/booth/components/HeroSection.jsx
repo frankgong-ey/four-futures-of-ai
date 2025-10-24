@@ -8,7 +8,7 @@ import TextReveal from '../../../components/TextReveal';
  * 第一屏HTML内容组件
  * 使用Tailwind的12列grid系统进行布局
  */
-export default function HeroSection({ localScrollProgress = 0 }) {
+export default function HeroSection({ localScrollProgress = 0, isLoaded = false }) {
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
   const bottomTextRef = useRef(null);
@@ -39,6 +39,10 @@ export default function HeroSection({ localScrollProgress = 0 }) {
               className="text-[64px] md:text-[96px] sm:text-4xl leading-[0.9]"
               delay={0.5}
               stagger={0.3}
+              enabled={isLoaded}
+              style={{ 
+                visibility: 'hidden'
+              }}
             >
               <span className="text-white/60">Will you shape </span>the future of AI,
             </TextReveal>
@@ -65,6 +69,10 @@ export default function HeroSection({ localScrollProgress = 0 }) {
               className="text-[64px] md:text-[96px] sm:text-3xl leading-none"
               delay={1.1} // 在标题动画60%时开始
               stagger={0.3}
+              enabled={isLoaded}
+              style={{ 
+                visibility: 'hidden'
+              }}
             >
               or will it shape you?
             </TextReveal>
