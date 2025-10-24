@@ -10,7 +10,7 @@ export default function BackgroundLines() {
   return (
     <div 
       className="fixed inset-0 pointer-events-none"
-      style={{ zIndex: 2 }}
+      style={{ zIndex: 12 }}
     >
       {/* 竖线容器 - 全屏高度，左右padding在desktop下64px */}
       <div className="h-screen px-0 md:px-16 flex justify-between items-stretch">
