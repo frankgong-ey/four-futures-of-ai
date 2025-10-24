@@ -83,8 +83,8 @@ export const useTextReveal = ({
     const tl = gsap.timeline();
     animationTimelineRef.current = tl;
     
-    // 设置初始状态
-    gsap.set(textRef.current, { opacity: 0 });
+    // 使用autoAlpha设置初始状态 - 这会同时设置opacity和visibility
+    gsap.set(textRef.current, { autoAlpha: 0 });
 
     // 等待DOM渲染完成后创建动画
     const timer = setTimeout(() => {
@@ -110,7 +110,7 @@ export const useTextReveal = ({
           // 添加到时间线
           tl.add(animation.timeline)
             .to(textRef.current, {
-              opacity: 1,
+              autoAlpha: 1,
               duration: 0.1,
               ease: "none"
             }, delay);
@@ -146,9 +146,11 @@ export const useTextReveal = ({
     
     // 重置文字状态
     if (textRef.current) {
-      gsap.set(textRef.current, { opacity: 0 });
+      gsap.set(textRef.current, { autoAlpha: 0 });
     }
   }, [stopAnimation]);
+
+  // 初始化时隐藏文字 - 现在由CSS控制，不需要JavaScript设置
 
   // 自动启动动画
   useEffect(() => {
@@ -156,6 +158,7 @@ export const useTextReveal = ({
       const cleanup = startAnimation();
       return cleanup;
     }
+    // 注意：opacity现在由CSS控制，不需要JavaScript设置
   }, [enabled, startAnimation]);
 
   // 清理函数
