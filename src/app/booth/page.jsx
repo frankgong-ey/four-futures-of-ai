@@ -10,7 +10,7 @@ import { easing } from "maath";
 import LayeredStarField from "../../components/StarField";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useControls } from "leva";
+// import { useControls } from "leva";
 
 import neonVertexShader from "../../shaders/neon.vert.glsl";
 import neonFragmentShader from "../../shaders/neon.frag.glsl";
@@ -50,50 +50,63 @@ export default function BoothPage() {
     setIsLoading(false);
   };
 
-  // Leva控制面板
-  const { enableOrbitControls, newSplineP0, newSplineP1, newSplineP2, newSplineP3, newSplineColor, newSpline2P0, newSpline2P1, newSpline2P2, newSpline2P3, newSpline2Color } = useControls({
-    enableOrbitControls: { value: true, label: "Orbit Controls" },
-    newSplineP0: { 
-      value: { x: 10, y: -12, z: 0 }, 
-      label: "New Spline P0 (Top)" 
-    },
-    newSplineP1: { 
-      value: { x: 5, y: -15, z: 0 }, 
-      label: "New Spline P1" 
-    },
-    newSplineP2: { 
-      value: { x: 5, y: -27, z: 0 }, 
-      label: "New Spline P2" 
-    },
-    newSplineP3: { 
-      value: { x: -20, y: -30, z: 0 }, 
-      label: "New Spline P3 (Bottom)" 
-    },
-    newSplineColor: { 
-      value: "#a4a59e", 
-      label: "New Spline Color" 
-    },
-    newSpline2P0: { 
-      value: { x: 10, y: -13, z: 0 }, 
-      label: "New Spline 2 P0 (Top)" 
-    },
-    newSpline2P1: { 
-      value: { x: 5, y: -15, z: 0 }, 
-      label: "New Spline 2 P1" 
-    },
-    newSpline2P2: { 
-      value: { x: 6, y: -27, z: 0 }, 
-      label: "New Spline 2 P2" 
-    },
-    newSpline2P3: { 
-      value: { x: -20, y: -28, z: 0 }, 
-      label: "New Spline 2 P3 (Bottom)" 
-    },
-    newSpline2Color: { 
-      value: "#8d8e88", 
-      label: "New Spline 2 Color" 
-    }
-  });
+  // Leva控制面板 - 已禁用
+  // const { enableOrbitControls, newSplineP0, newSplineP1, newSplineP2, newSplineP3, newSplineColor, newSpline2P0, newSpline2P1, newSpline2P2, newSpline2P3, newSpline2Color } = useControls({
+  //   enableOrbitControls: { value: true, label: "Orbit Controls" },
+  //   newSplineP0: { 
+  //     value: { x: 10, y: -12, z: 0 }, 
+  //     label: "New Spline P0 (Top)" 
+  //   },
+  //   newSplineP1: { 
+  //     value: { x: 5, y: -15, z: 0 }, 
+  //     label: "New Spline P1" 
+  //   },
+  //   newSplineP2: { 
+  //     value: { x: 5, y: -27, z: 0 }, 
+  //     label: "New Spline P2" 
+  //   },
+  //   newSplineP3: { 
+  //     value: { x: -20, y: -30, z: 0 }, 
+  //     label: "New Spline P3 (Bottom)" 
+  //   },
+  //   newSplineColor: { 
+  //     value: "#a4a59e", 
+  //     label: "New Spline Color" 
+  //   },
+  //   newSpline2P0: { 
+  //     value: { x: 10, y: -13, z: 0 }, 
+  //     label: "New Spline 2 P0 (Top)" 
+  //   },
+  //   newSpline2P1: { 
+  //     value: { x: 5, y: -15, z: 0 }, 
+  //     label: "New Spline 2 P1" 
+  //   },
+  //   newSpline2P2: { 
+  //     value: { x: 6, y: -27, z: 0 }, 
+  //     label: "New Spline 2 P2" 
+  //   },
+  //   newSpline2P3: { 
+  //     value: { x: -20, y: -28, z: 0 }, 
+  //     label: "New Spline 2 P3 (Bottom)" 
+  //   },
+  //   newSpline2Color: { 
+  //     value: "#8d8e88", 
+  //     label: "New Spline 2 Color" 
+  //   }
+  // });
+
+  // 使用默认值替代Leva控制
+  const enableOrbitControls = false; // 禁用OrbitControls
+  const newSplineP0 = { x: 10, y: -12, z: 0 };
+  const newSplineP1 = { x: 5, y: -15, z: 0 };
+  const newSplineP2 = { x: 5, y: -27, z: 0 };
+  const newSplineP3 = { x: -20, y: -30, z: 0 };
+  const newSplineColor = "#a4a59e";
+  const newSpline2P0 = { x: 10, y: -13, z: 0 };
+  const newSpline2P1 = { x: 5, y: -15, z: 0 };
+  const newSpline2P2 = { x: 6, y: -27, z: 0 };
+  const newSpline2P3 = { x: -20, y: -28, z: 0 };
+  const newSpline2Color = "#8d8e88";
 
   // 摄像头信息状态
   const [cameraInfo, setCameraInfo] = useState({
@@ -461,7 +474,7 @@ export default function BoothPage() {
           )}
 
           {/* 流体渐变背景图层 */}
-          <FluidBackground />
+          <FluidBackground sectionState={sectionState.currentSection} />
 
           {/* Question GLB 模型 - 暂时显示所有模型 */}
           <QuestionModel />
@@ -688,8 +701,8 @@ export default function BoothPage() {
       </div>
 
 
-      {/* 调试信息 - 显示滚动位置 */}
-      <div
+      {/* 调试信息 - 已隐藏 */}
+      {/* <div
         style={{
           position: 'fixed',
           bottom: '20px',
@@ -721,7 +734,7 @@ export default function BoothPage() {
         Camera Position: ({cameraInfo.position[0]}, {cameraInfo.position[1]}, {cameraInfo.position[2]})
         <br />
         Camera Rotation: ({cameraInfo.rotation[0]}°, {cameraInfo.rotation[1]}°, {cameraInfo.rotation[2]}°)
-      </div>
+      </div> */}
     </div>
     );
 }

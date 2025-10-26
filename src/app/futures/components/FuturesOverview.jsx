@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
-import HeroSection from "./HeroSection";
+import React, { useState, useEffect, useRef } from "react";
 import FutureSection from "./FutureSection";
 import NextChapterSection from "./NextChapterSection";
+import { useScrollSection } from "../../../components/Global3DCanvas";
 
 export default function FuturesOverview({ futures, onFutureClick }) {
   const [currentSection, setCurrentSection] = useState(0);
+  const sectionsRef = useRef([]);
+  const { setCurrentSection: setGlobalSection } = useScrollSection();
 
   const sections = [
-    { type: "hero", id: "hero" },
     ...futures.map((future, index) => ({ 
       type: "future", 
       id: future.id, 
@@ -19,20 +20,56 @@ export default function FuturesOverview({ futures, onFutureClick }) {
     { type: "next-chapter", id: "next-chapter" }
   ];
 
+  // 监听滚动，更新当前 section
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + window.innerHeight / 2;
+      
+      sections.forEach((section, index) => {
+        const element = sectionsRef.current[index];
+        if (element) {
+          const { top, bottom } = element.getBoundingClientRect();
+          const elementTop = top + window.scrollY;
+          const elementBottom = bottom + window.scrollY;
+          
+          if (scrollPosition >= elementTop && scrollPosition < elementBottom) {
+            setCurrentSection(index);
+            if (setGlobalSection) {
+              // 如果是 next-chapter，传递 "nextChapter"
+              if (section.type === "future") {
+                setGlobalSection(section.data.id);
+              } else if (section.type === "next-chapter") {
+                setGlobalSection("nextChapter");
+              } else {
+                setGlobalSection(null);
+              }
+            }
+          }
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    // 初始状态：根据当前滚动位置设置
+    const initScrollPosition = window.scrollY + window.innerHeight / 2;
+    handleScroll(); // 初始调用
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [sections, setGlobalSection]);
+
   return (
     <div className="relative">
-      {/* 背景装饰 */}
-      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/20 via-pink-900/20 to-blue-900/20">
-        <div className="absolute inset-0 bg-[url('/images/hero_gradient.svg')] bg-cover bg-center opacity-30"></div>
-      </div>
-
       {/* 主要内容 */}
       <div className="relative z-10">
         {sections.map((section, index) => (
-          <div key={section.id} className="min-h-screen flex items-center justify-center">
-            {section.type === "hero" && (
-              <HeroSection />
-            )}
+          <div 
+            key={section.id} 
+            ref={(el) => (sectionsRef.current[index] = el)}
+            className="min-h-screen flex items-center justify-start"
+          >
             {section.type === "future" && (
               <FutureSection 
                 future={section.data}

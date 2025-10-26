@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
@@ -13,6 +13,17 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 export default function EndingSection() {
   // 内部创建 refs
   const sectionRef = useRef(null);
+  
+  // 立即隐藏文字元素，防止闪现 - 使用useLayoutEffect确保在DOM渲染后立即执行
+  useLayoutEffect(() => {
+    if (!sectionRef.current) return;
+    
+    // 立即隐藏所有文字元素
+    const textElements = sectionRef.current.querySelectorAll('[data-text-reveal]');
+    textElements.forEach((element) => {
+      gsap.set(element, { autoAlpha: 0 });
+    });
+  }, []);
   
   // EndingSection 动画初始化 - 使用ScrollTrigger控制TextReveal
   useEffect(() => {
@@ -74,8 +85,8 @@ export default function EndingSection() {
             }, 0.5 + (index * 0.2) + (maskIndex * 0.1));
           });
 
-          // 设置元素可见
-          gsap.set(element, { opacity: 1 });
+          // 使用autoAlpha设置元素可见
+          gsap.set(element, { autoAlpha: 1 });
         });
       }
     });

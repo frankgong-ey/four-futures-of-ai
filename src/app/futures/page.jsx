@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import VersionSelector from "./components/VersionSelector";
 import FuturesOverview from "./components/FuturesOverview";
+import HeroSection from "./components/HeroSection";
 
 // 模拟数据 - 后期可以替换为CMS数据
 const versionsData = {
@@ -24,14 +25,14 @@ const versionsData = {
         color: "#4ECDC4"
       },
       {
-        id: "transformation",
-        title: "TRANSFORMATION",
-        description: "AI becomes a core business capability, reshaping industries and creating new opportunities.",
+        id: "transform",
+        title: "TRANSFORM",
+        description: "Progress in AI for the last 5 years has exceeded expectations in almost every dimension.",
         color: "#45B7D1"
       },
       {
-        id: "disruption",
-        title: "DISRUPTION",
+        id: "collapse",
+        title: "COLLAPSE",
         description: "AI fundamentally changes how we work, live, and interact with technology.",
         color: "#96CEB4"
       }
@@ -54,15 +55,15 @@ const versionsData = {
         color: "#4ECDC4"
       },
       {
-        id: "transformation-cp",
-        title: "TRANSFORMATION", 
+        id: "transform-cp",
+        title: "TRANSFORM", 
         description: "Consumer products are completely reimagined with AI at their core.",
         color: "#45B7D1"
       },
       {
-        id: "disruption-cp",
-        title: "DISRUPTION",
-        description: "AI disrupts traditional consumer product categories and creates new markets.",
+        id: "collapse-cp",
+        title: "COLLAPSE",
+        description: "AI collapses traditional consumer product categories and creates new markets.",
         color: "#96CEB4"
       }
     ]
@@ -70,10 +71,10 @@ const versionsData = {
 };
 
 export default function FuturesPage() {
-  const [selectedVersion, setSelectedVersion] = useState("all-industries");
+  const [selectedVersion, setSelectedVersion] = useState(null);
   const router = useRouter();
 
-  const currentVersion = versionsData[selectedVersion];
+  const currentVersion = selectedVersion ? versionsData[selectedVersion] : null;
 
   const handleVersionChange = (versionId) => {
     setSelectedVersion(versionId);
@@ -83,6 +84,16 @@ export default function FuturesPage() {
     router.push(`/futures/${futureId}`);
   };
 
+  // 如果还没有选择版本，显示选择界面
+  if (!selectedVersion) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <HeroSection onVersionSelect={handleVersionChange} />
+      </div>
+    );
+  }
+
+  // 选择了版本后显示内容
   return (
     <div className="min-h-screen bg-black text-white">
       {/* 主要内容区域 */}

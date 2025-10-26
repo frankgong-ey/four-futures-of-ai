@@ -26,7 +26,7 @@ export default function ChartSection() {
           trigger: sectionRef.current,
           start: "top 50%",
           end: "bottom 50%",
-          markers: true,
+          markers: false,
           toggleActions: "play reverse play reverse",
         }
       });

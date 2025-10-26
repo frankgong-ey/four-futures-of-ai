@@ -1,8 +1,14 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
 import Link from "next/link";
+import TextReveal from "../../../components/TextReveal";
+
+// 注册插件
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 // ChartSection组件 - 100vh高度，包含图表和趋势线动画
 export default function VideoSection() {
@@ -10,31 +16,86 @@ export default function VideoSection() {
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
   
-  // VideoSection 动画初始化 - 只对标题部分应用动画
+  // 立即隐藏文字元素，防止闪现 - 使用useLayoutEffect确保在DOM渲染后立即执行
+  useLayoutEffect(() => {
+    if (!sectionRef.current) return;
+    
+    // 立即隐藏所有文字元素
+    const textElements = sectionRef.current.querySelectorAll('[data-text-reveal]');
+    textElements.forEach((element) => {
+      gsap.set(element, { autoAlpha: 0 });
+    });
+  }, []);
+  
+  // VideoSection 动画初始化 - 使用ScrollTrigger控制TextReveal
   useEffect(() => {
-    if (titleRef.current) {
-      // 设置标题初始状态
-      gsap.set(titleRef.current, { opacity: 0 });
-      
-      // 只对标题部分应用淡入淡出动画
-      const titleEntranceTween = gsap.to(titleRef.current, {
-        opacity: 1,
-        duration: 1.5,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 50%",
-          end: "bottom 50%",
-          markers: true,
-          toggleActions: "play reverse play reverse",
-        }
-      });
+    if (!sectionRef.current) return;
 
-      // 清理函数
-      return () => {
-        titleEntranceTween.kill();
-      };
-    }
+    // 创建ScrollTrigger来控制TextReveal动画
+    const trigger = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: "top 80%",
+      onEnter: () => {
+        // 当section进入视口时，触发TextReveal动画
+        const textElements = sectionRef.current.querySelectorAll('[data-text-reveal]');
+        
+        textElements.forEach((element, index) => {
+          // 使用SplitText分割文字
+          const split = new SplitText(element, {
+            type: "lines",
+            linesClass: "reveal-line"
+          });
+
+          // 为每一行创建遮罩效果
+          const masks = split.lines.map((line) => {
+            // 设置行元素的样式
+            Object.assign(line.style, {
+              position: 'relative',
+              overflow: 'hidden'
+            });
+            
+            // 创建遮罩容器
+            const maskContainer = document.createElement('div');
+            Object.assign(maskContainer.style, {
+              position: 'relative',
+              width: '100%',
+              height: '100%',
+              overflow: 'hidden'
+            });
+            
+            // 将文字内容移动到遮罩容器中
+            const textContent = line.innerHTML;
+            line.innerHTML = '';
+            maskContainer.innerHTML = textContent;
+            line.appendChild(maskContainer);
+            
+            // 设置文字初始状态 - 从下方隐藏
+            gsap.set(maskContainer, { y: "100%" });
+            
+            return maskContainer;
+          });
+
+          // 创建动画时间线
+          const tl = gsap.timeline();
+          
+          // 为每个遮罩容器创建动画
+          masks.forEach((mask, maskIndex) => {
+            tl.to(mask, {
+              y: "0%",
+              duration: 0.8,
+              ease: "power3.out"
+            }, 0.5 + (index * 0.2) + (maskIndex * 0.1));
+          });
+
+          // 使用autoAlpha设置元素可见
+          gsap.set(element, { autoAlpha: 1 });
+        });
+      }
+    });
+
+    return () => {
+      trigger.kill();
+    };
   }, []);
 
   return (
@@ -46,10 +107,27 @@ export default function VideoSection() {
         <div className="grid grid-cols-12 gap-[24px]">
           {/* 标题 1-8 列 */}
           <div className="col-span-6 col-start-1 flex flex-col gap-[16px] items-start">
-            <div className="font-bold text-[24px] text-white/80">Introducing</div>
-            <h2 className="text-4xl md:text-[120px] sm:text-3xl leading-none text-white">
+            <TextReveal
+              as="div"
+              className="font-bold text-[24px] text-white/80"
+              delay={0.5}
+              stagger={0.2}
+              enabled={false}
+              data-text-reveal="true"
+            >
+              Introducing
+            </TextReveal>
+            <TextReveal
+              ref={titleRef}
+              as="h2"
+              className="text-4xl md:text-[120px] sm:text-3xl leading-none text-white"
+              delay={0.8}
+              stagger={0.3}
+              enabled={false}
+              data-text-reveal="true"
+            >
               The Four Futures of AI
-            </h2>
+            </TextReveal>
           </div>
         </div>
       </div>
