@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from 'next/navigation';
 
 // 计时器组件
 function CountdownTimer() {
@@ -186,12 +187,18 @@ function NavigationMenu({ isOpen, onClose }) {
 // 主导航组件
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+  
+  // 在 DetailView 页面隐藏导航
+  const isDetailPage = pathname?.startsWith('/futures/') && pathname !== '/futures';
 
   return (
     <>
       {/* 导航栏 - Logo 和计时器 */}
       <nav 
-        className="fixed left-0 h-16 flex items-center pl-[64px] justify-between bg-transparent"
+        className={`fixed left-0 h-16 flex items-center pl-[64px] justify-between bg-transparent transition-opacity duration-300 ${
+          isDetailPage ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
         style={{ height: '64px', marginTop: '16px', zIndex: 99, right: '160px' }}
       >
         {/* Logo */}
@@ -213,7 +220,9 @@ export default function Navigation() {
 
       {/* 菜单按钮 - 独立层级 */}
       <div 
-        className="fixed right-16 flex items-center"
+        className={`fixed right-16 flex items-center transition-opacity duration-300 ${
+          isDetailPage ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
         style={{ top: '16px', height: '64px', zIndex: 150 }}
       >
         <MenuButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen(!isMenuOpen)} />

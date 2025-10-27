@@ -7,20 +7,17 @@ export default function FutureSection({ future, sectionNumber, onExploreClick })
     <div className="pl-16">
       <div className="space-y-8">
         <div className="space-y-4">
-          <div className="text-sm text-white/60 font-medium">
+          <div className="text-[80px] text-white/40 font-bold">
             {String(sectionNumber).padStart(2, '0')}
           </div>
           <h2 
             className="text-5xl md:text-[120px] font-bold leading-tight"
-            style={future.id === 'transform' || future.id === 'transform-cp' 
-              ? { 
-                  background: 'linear-gradient(to right, #FFFFFF, #75B7EC)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }
-              : { color: future.color }
-            }
+            style={{ 
+              background: `linear-gradient(to right, #FFFFFF, ${future.color})`,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}
           >
             {future.title}
           </h2>

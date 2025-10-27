@@ -240,69 +240,446 @@ function ParticleUnit({ index }) {
   );
 }
 
-// Transform 场景的3D效果
-// 单个轨道环，包含10个粒子
-function OrbitRing({ particlesPerRing, ringIndex, totalRings }) {
-  const groupRef = useRef();
-  
-  // 使用 seed 生成随机但稳定的倾斜角度
-  // 为每个环生成不同的随机倾斜，但保持一致性
-  const seed = ringIndex * 1234 + 5678;
-  
-  // 生成伪随机数函数
-  const pseudoRandom = (n) => {
-    const x = Math.sin(n) * 10000;
-    return x - Math.floor(x);
-  };
-  
-  // 随机倾斜到多个轴：x 轴倾斜和 z 轴倾斜
-  const xRotation = (pseudoRandom(seed) - 0.5) * Math.PI; // -90 到 +90 度
-  const zRotation = (pseudoRandom(seed + 1) - 0.5) * Math.PI * 0.5; // -45 到 +45 度
-  const yRotation = (pseudoRandom(seed + 2) - 0.5) * Math.PI * 0.3; // -27 到 +27 度
-
-  useFrame((state, delta) => {
-    if (groupRef.current) {
-      // 轻微旋转每个轨道环 - 使用 delta 实现基于时间的动画
-      groupRef.current.rotation.y += 0.05 * delta;
+// 轨道环 shader 材质 - 使用 fragment shader 实现动画
+const OrbitRingMaterial = {
+  uniforms: {
+    time: { value: 0 },
+    color: { value: new THREE.Color("#198CE6") },
+    highlightColor: { value: new THREE.Color("#ffffff") },
+    ringIndex: { value: 0 },
+    numRings: { value: 10 }
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    varying vec3 vPosition;
+    
+    void main() {
+      vUv = uv;
+      vPosition = position;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
+  `,
+  fragmentShader: `
+    uniform float time;
+    uniform vec3 color;
+    uniform vec3 highlightColor;
+    uniform float ringIndex;
+    uniform float numRings;
+    
+    varying vec2 vUv;
+    varying vec3 vPosition;
+    
+    void main() {
+      // 使用 UV 的 x 坐标，它沿着轨道的方向
+      float progress = vUv.x; // 0 到 1
+      
+      // 高光流动动画 - 参考 neon.frag.glsl
+      float highlightSpeed = 0.2; // 调慢了速度
+      float highlightWidth = 0.02;
+      
+      // 计算两个高光位置（沿轨道移动）
+      float offset1 = ringIndex * 0.3;
+      float offset2 = ringIndex * 0.3 + 0.5; // 第二个高光在轨道对面
+      
+      float highlightPos1 = mod(time * highlightSpeed + offset1, 1.0);
+      float highlightPos2 = mod(time * highlightSpeed + offset2, 1.0);
+      
+      float dist1 = progress - highlightPos1;
+      float dist2 = progress - highlightPos2;
+      
+      // 处理环绕，确保高光连续流动
+      if (dist1 > 0.5) dist1 -= 1.0;
+      if (dist1 < -0.5) dist1 += 1.0;
+      if (dist2 > 0.5) dist2 -= 1.0;
+      if (dist2 < -0.5) dist2 += 1.0;
+      
+      // 计算两个高光的强度 - 使用不对称高斯分布
+      float intensity1 = 0.0;
+      if (dist1 >= 0.0) {
+        intensity1 = exp(-pow(dist1 / 0.003, 3.0)) * 0.9; // 从0.005减小到0.003，让高光更短
+      } else {
+        intensity1 = exp(dist1 * 40.0) * 0.9; // 从30.0增加到40.0，让尾部衰减更快
+      }
+      
+      float intensity2 = 0.0;
+      if (dist2 >= 0.0) {
+        intensity2 = exp(-pow(dist2 / 0.003, 3.0)) * 0.9;
+      } else {
+        intensity2 = exp(dist2 * 40.0) * 0.9;
+      }
+      
+      // 合并两个高光
+      float highlightIntensity = max(intensity1, intensity2);
+      
+      // 计算距离最近高光点的距离
+      float minDist = min(abs(dist1), abs(dist2));
+      
+      // 基础颜色（较暗）
+      vec3 baseColor = color * 0.3;
+      
+      // 头部区域颜色：使用 uniform 传入的高光颜色
+      vec3 blueColor = color * 2.0;
+      
+      // 使用距离来控制高光头部区域，而不是强度
+      // 距离小于 0.004 的区域为高光颜色（极小的头部）
+      vec3 finalHighlightColor;
+      if (minDist < 0.004) {
+        // 头部：使用 uniform 中的高光颜色
+        finalHighlightColor = highlightColor;
+      } else if (highlightIntensity > 0.0) {
+        // 尾部：渐变到蓝色
+        float t = minDist / 0.004; // t 从 1 开始逐渐增大
+        finalHighlightColor = mix(highlightColor, blueColor, clamp(t, 0.0, 1.0));
+      } else {
+        finalHighlightColor = blueColor;
+      }
+      
+      // 只有高光部分可见，其他部分完全透明
+      vec3 finalColor = finalHighlightColor;
+      
+      // 透明度：只有当高光强度大于阈值时才显示
+      float alpha = smoothstep(0.0, 0.05, highlightIntensity) * 0.9;
+      
+      gl_FragColor = vec4(finalColor, alpha);
+    }
+  `
+};
+
+// 单个轨道环 - 使用环形几何体
+function OrbitRing({ ringIndex, position, rotation, radius = 2 }) {
+  const [uniforms] = useState(() => ({
+    time: { value: 0 },
+    color: { value: new THREE.Color("#48A9EE") },
+    highlightColor: { value: new THREE.Color("#BDDFFA") },
+    ringIndex: { value: ringIndex },
+    numRings: { value: 10 }
+  }));
+  
+  useFrame((state, delta) => {
+    // 直接更新 uniform 的 value
+    uniforms.time.value = state.clock.elapsedTime;
   });
 
   return (
-    <group 
-      ref={groupRef} 
-      rotation={[xRotation, yRotation, zRotation]} // 三轴随机倾斜
-    >
-      {/* 10个粒子 units */}
-      {Array.from({ length: particlesPerRing }).map((_, i) => (
-        <ParticleUnit 
-          key={i} 
-          index={i}
+    <mesh position={position} rotation={rotation}>
+      <torusGeometry args={[radius, 0.01, 4, 100]} />
+      <shaderMaterial
+        attach="material"
+        uniforms={uniforms}
+        vertexShader={OrbitRingMaterial.vertexShader}
+        fragmentShader={OrbitRingMaterial.fragmentShader}
+        transparent={true}
+        depthWrite={false}
+        depthTest={false}
+      />
+    </mesh>
+  );
+}
+
+// 生成伪随机数的工具函数
+function pseudoRandom(n) {
+  const x = Math.sin(n) * 10000;
+  return x - Math.floor(x);
+}
+
+function TransformScene({ position }) {
+  const containerRef = useRef();
+  const ringsCount = 30; // 20个轨道环
+  
+  useFrame((state, delta) => {
+    if (containerRef.current) {
+      // 轻微旋转整个场景容器
+      containerRef.current.rotation.y += 0.05 * delta;
+    }
+  });
+
+  // 生成不同倾角的轨道
+  const orbits = Array.from({ length: ringsCount }).map((_, i) => {
+    const seed = i * 1234 + 5678;
+    const xRotation = (pseudoRandom(seed) - 0.5) * Math.PI;
+    const zRotation = (pseudoRandom(seed + 1) - 0.5) * Math.PI * 0.5;
+    const yRotation = (pseudoRandom(seed + 2) - 0.5) * Math.PI * 0.3;
+    
+    return {
+      index: i,
+      rotation: [xRotation, yRotation, zRotation],
+      position: [0, 0, 0]
+    };
+  });
+
+  return (
+    <group position={position} ref={containerRef}>
+      {orbits.map((orbit) => (
+        <OrbitRing
+          key={orbit.index}
+          ringIndex={orbit.index}
+          position={orbit.position}
+          rotation={orbit.rotation}
         />
       ))}
     </group>
   );
 }
 
-function TransformScene({ position }) {
+// 单个管子段 - 使用 tubeGeometry
+function TubeSegment({ segmentIndex, position, height }) {
+  const [uniforms] = useState(() => ({
+    time: { value: 0 },
+    color: { value: new THREE.Color("#2BB856") },
+    highlightColor: { value: new THREE.Color("#B6EBC6") },
+    ringIndex: { value: segmentIndex },
+    numRings: { value: 50 }
+  }));
+  
+  useFrame((state, delta) => {
+    uniforms.time.value = state.clock.elapsedTime;
+  });
+
+  return (
+    <mesh position={position}>
+      {/* tubeGeometry: pathPoints, tubularSegments, radius, radialSegments */}
+      {/* 创建一条垂直的线作为path */}
+      <tubeGeometry args={[
+        new THREE.CatmullRomCurve3([
+          new THREE.Vector3(0, 0, 0),
+          new THREE.Vector3(0, height, 0)
+        ]),
+        100, // tubularSegments - 沿着曲线的段数
+        0.01, // radius - 管子半径
+        8, // radialSegments - 径向段数
+        false // closed
+      ]} />
+      <shaderMaterial
+        attach="material"
+        uniforms={uniforms}
+        vertexShader={OrbitRingMaterial.vertexShader}
+        fragmentShader={OrbitRingMaterial.fragmentShader}
+        transparent={true}
+        depthWrite={false}
+        depthTest={false}
+      />
+    </mesh>
+  );
+}
+
+function GrowthScene({ position }) {
   const containerRef = useRef();
-  const ringsCount = 10; // 10个轨道环，每个倾角不同
+  const tubesCount = 50;
   
   useFrame((state, delta) => {
     if (containerRef.current) {
-      // 轻微旋转整个场景容器 - 使用 delta 实现基于时间的动画
+      // 轻微旋转整个场景容器
       containerRef.current.rotation.y += 0.025 * delta;
     }
   });
 
+  // 生成不同位置的管子
+  const tubes = Array.from({ length: tubesCount }).map((_, i) => {
+    const seed = i * 789 + 123;
+    const x = (pseudoRandom(seed) - 0.5) * 4; // -2 到 2
+    const z = (pseudoRandom(seed + 1) - 0.5) * 4; // -2 到 2
+    const height = 1.0 + pseudoRandom(seed + 2) * 2; // 0.5 到 2.5
+    
+    return {
+      index: i,
+      position: [x, 0, z],
+      height: height
+    };
+  });
+
   return (
     <group position={position} ref={containerRef}>
-      {/* 10个不同倾角的轨道环 */}
-      {Array.from({ length: ringsCount }).map((_, i) => (
-        <OrbitRing 
-          key={i}
-          particlesPerRing={10}
-          ringIndex={i}
-          totalRings={ringsCount}
+      {tubes.map((tube) => (
+        <TubeSegment
+          key={tube.index}
+          segmentIndex={tube.index}
+          position={tube.position}
+          height={tube.height}
+        />
+      ))}
+    </group>
+  );
+}
+
+// 单个约束管子 - 水平方向的螺旋曲线
+function ConstraintTube({ tubeIndex, position, curve }) {
+  const [uniforms] = useState(() => ({
+    time: { value: 0 },
+    color: { value: new THREE.Color("#C567AF") },
+    highlightColor: { value: new THREE.Color("#F4D1EC") },
+    ringIndex: { value: tubeIndex },
+    numRings: { value: 8 }
+  }));
+  
+  useFrame((state, delta) => {
+    uniforms.time.value = state.clock.elapsedTime;
+  });
+
+  return (
+    <mesh position={position}>
+      <tubeGeometry args={[
+        curve,
+        100, // tubularSegments
+        0.02, // radius
+        8, // radialSegments
+        false
+      ]} />
+      <shaderMaterial
+        attach="material"
+        uniforms={uniforms}
+        vertexShader={OrbitRingMaterial.vertexShader}
+        fragmentShader={OrbitRingMaterial.fragmentShader}
+        transparent={true}
+        depthWrite={false}
+        depthTest={false}
+      />
+    </mesh>
+  );
+}
+
+function ConstraintScene({ position }) {
+  const tubesCount = 8;
+  const helixRadius = 0.8; // 螺旋半径
+  const helixLength = 8; // 从左到右的长度
+
+  // 生成8根互相环绕的管子
+  const tubes = Array.from({ length: tubesCount }).map((_, i) => {
+    const angleOffset = (i / tubesCount) * Math.PI * 2; // 每根管子角度偏移
+    
+    // 创建螺旋曲线路径
+    const points = [];
+    for (let j = 0; j <= 50; j++) {
+      const t = j / 50; // 0 到 1
+      const x = -helixLength / 2 + t * helixLength; // 从左到右
+      const angle = t * Math.PI * 2 * 3 + angleOffset; // 3圈螺旋 + 初始偏移
+      const y = Math.cos(angle) * helixRadius;
+      const z = Math.sin(angle) * helixRadius;
+      points.push(new THREE.Vector3(x, y, z));
+    }
+    
+    const curve = new THREE.CatmullRomCurve3(points);
+    
+    return {
+      index: i,
+      curve: curve
+    };
+  });
+
+  return (
+    <group position={position} rotation={[0, Math.PI / 4, 0]}>
+      {tubes.map((tube) => (
+        <ConstraintTube
+          key={tube.index}
+          tubeIndex={tube.index}
+          position={[0, 0, 0]}
+          curve={tube.curve}
+        />
+      ))}
+    </group>
+  );
+}
+
+// 单个火山口管子
+function CollapseTube({ tubeIndex, angle }) {
+  const [uniforms] = useState(() => ({
+    time: { value: 0 },
+    color: { value: new THREE.Color("#FF4136") },
+    highlightColor: { value: new THREE.Color("#FFBFBC") },
+    ringIndex: { value: tubeIndex },
+    numRings: { value: 20 }
+  }));
+  
+  useFrame((state, delta) => {
+    uniforms.time.value = state.clock.elapsedTime;
+  });
+
+  // 创建火山口曲线：从外围上涨，然后下降 - 使用4个关键点
+  const outerRadius = 3; // 外围半径
+  const innerRadius = 0.5; // 火山口内部半径
+  const rimHeight = 1.0; // 火山口边缘高度
+  const centerDepth = -0.6; // 中心深度（从-0.3降低到-0.6）
+  
+  // 定义4个关键点：起点（外围低）、上升点（中部中等高度）、顶点（边缘）、终点（中心低）
+  const points = [
+    // 点1：外围起点（地面）
+    new THREE.Vector3(
+      Math.cos(angle) * outerRadius,
+      0,
+      Math.sin(angle) * outerRadius
+    ),
+    // 点2：中途上升点（中等高度）
+    new THREE.Vector3(
+      Math.cos(angle) * (outerRadius + innerRadius) / 1.5,
+      rimHeight * 0.4,
+      Math.sin(angle) * (outerRadius + innerRadius) / 1.5
+    ),
+    // 点3：边缘顶点（最高）
+    new THREE.Vector3(
+      Math.cos(angle) * innerRadius,
+      rimHeight,
+      Math.sin(angle) * innerRadius
+    ),
+    // 点4：中心终点（最低）
+    new THREE.Vector3(
+      Math.cos(angle) * innerRadius,
+      centerDepth,
+      Math.sin(angle) * innerRadius
+    )
+  ];
+  
+  // 用4个点创建CatmullRom曲线，会自动生成平滑过渡
+  const curve = new THREE.CatmullRomCurve3(points);
+
+  return (
+    <mesh>
+      <tubeGeometry args={[
+        curve,
+        100, // tubularSegments
+        0.01, // radius
+        8, // radialSegments
+        false
+      ]} />
+      <shaderMaterial
+        attach="material"
+        uniforms={uniforms}
+        vertexShader={OrbitRingMaterial.vertexShader}
+        fragmentShader={OrbitRingMaterial.fragmentShader}
+        transparent={true}
+        depthWrite={false}
+        depthTest={false}
+      />
+    </mesh>
+  );
+}
+
+function CollapseScene({ position }) {
+  const containerRef = useRef();
+  const tubesCount = 20; // 20根管子围成一圈形成火山口
+  
+  useFrame((state, delta) => {
+    if (containerRef.current) {
+      // 轻微旋转整个场景容器
+      containerRef.current.rotation.y += 0.1 * delta;
+    }
+  });
+
+  // 生成围绕中心的管子
+  const tubes = Array.from({ length: tubesCount }).map((_, i) => {
+    const angle = (i / tubesCount) * Math.PI * 2;
+    
+    return {
+      index: i,
+      angle: angle
+    };
+  });
+
+  return (
+    <group position={position} ref={containerRef}>
+      {tubes.map((tube) => (
+        <CollapseTube
+          key={tube.index}
+          tubeIndex={tube.index}
+          angle={tube.angle}
         />
       ))}
     </group>
@@ -331,22 +708,20 @@ function Scene3D({ targetSection }) {
   // 特殊处理 hero 和 nextChapter 的相机位置
   let cameraPosition;
   if (targetSection === 'hero') {
-    cameraPosition = [-10, 0, 4]; // 从 5 改为 3，让物体更大
+    cameraPosition = [-10, 0, 3]; // 从 5 改为 3，让物体更大
   } else if (targetSection === 'nextChapter') {
-    cameraPosition = [40, 0, 4]; // 从 5 改为 3，让物体更大
+    cameraPosition = [40, 0, 3]; // 从 5 改为 3，让物体更大
   } else {
     cameraPosition = [
       currentPosition[0],
       currentPosition[1] + 2,
-      currentPosition[2] + 4 // 从 5 改为 3，让物体更大
+      currentPosition[2] + 3 // 从 5 改为 3，让物体更大
     ];
   }
 
   return (
     <>
-      <ambientLight intensity={0.3} />
-      <pointLight position={[0, 10, 10]} intensity={0.5} />
-      
+
       {/* 相机控制器 */}
       <CameraController 
         targetSection={targetSection}
@@ -354,31 +729,22 @@ function Scene3D({ targetSection }) {
         targetLookAt={currentLookAt}
       />
 
-      {/* 占位符平面 - Constraint, Growth, Disruption */}
-      <PlaceholderPlane 
-        position={scenePositions.constraint} 
-        color="#FF6B6B" 
-        futureName="Constraint"
-      />
-      <PlaceholderPlane 
-        position={scenePositions.growth} 
-        color="#4ECDC4" 
-        futureName="Growth"
-      />
+      {/* Constraint 场景 - 3D效果 */}
+      <ConstraintScene position={scenePositions.constraint} />
+      
+      {/* Growth 场景 - 3D效果 */}
+      <GrowthScene position={scenePositions.growth} />
       
       {/* Transform 场景 - 3D效果 */}
       <TransformScene position={scenePositions.transform} />
       
-      <PlaceholderPlane 
-        position={scenePositions.collapse} 
-        color="#96CEB4" 
-        futureName="Collapse"
-      />
+      {/* Collapse 场景 - 3D效果 */}
+      <CollapseScene position={scenePositions.collapse} />
       
       {/* Bloom 后处理效果 */}
       <EffectComposer>
         <Bloom 
-          intensity={3.0} 
+          intensity={5.0} 
           luminanceThreshold={0.0}
           luminanceSmoothing={0.9}
           mipmapBlur={true}
@@ -443,17 +809,18 @@ export default function Global3DCanvas({ currentSection }) {
   }
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0">
+    <div className="fixed inset-0 pointer-events-none z-20">
       <Canvas 
         camera={{ position: [-10, 0, 4], fov: 75 }}
         gl={{ 
           alpha: true,
           antialias: true,
           stencil: false,
-          depth: true
+          depth: true,
+          premultipliedAlpha: false,
+          preserveDrawingBuffer: true
         }}
       >
-        <color attach="background" args={['#000000']} />
         <Scene3D targetSection={targetSection} />
       </Canvas>
     </div>
