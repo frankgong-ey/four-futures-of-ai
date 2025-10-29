@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import * as THREE from "three";
 import { easing } from "maath";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
+import LargeFluidBackground from "./LargeFluidBackground";
 
 // 创建 Context 用于共享当前 section
 export const ScrollSectionContext = createContext(null);
@@ -274,7 +275,7 @@ const OrbitRingMaterial = {
       float progress = vUv.x; // 0 到 1
       
       // 高光流动动画 - 参考 neon.frag.glsl
-      float highlightSpeed = 0.2; // 调慢了速度
+      float highlightSpeed = 0.1; // 调慢了速度
       float highlightWidth = 0.02;
       
       // 计算两个高光位置（沿轨道移动）
@@ -708,7 +709,7 @@ function Scene3D({ targetSection }) {
   // 特殊处理 hero 和 nextChapter 的相机位置
   let cameraPosition;
   if (targetSection === 'hero') {
-    cameraPosition = [-10, 0, 3]; // 从 5 改为 3，让物体更大
+    cameraPosition = [0, 0, 3]; // hero section 相机位置
   } else if (targetSection === 'nextChapter') {
     cameraPosition = [40, 0, 3]; // 从 5 改为 3，让物体更大
   } else {
@@ -734,6 +735,9 @@ function Scene3D({ targetSection }) {
       
       {/* Growth 场景 - 3D效果 */}
       <GrowthScene position={scenePositions.growth} />
+      
+      {/* 流体渐变背景图层 - 始终朝向摄像机 */}
+      <LargeFluidBackground sectionState={targetSection} />
       
       {/* Transform 场景 - 3D效果 */}
       <TransformScene position={scenePositions.transform} />
@@ -811,7 +815,7 @@ export default function Global3DCanvas({ currentSection }) {
   return (
     <div className="fixed inset-0 pointer-events-none z-20">
       <Canvas 
-        camera={{ position: [-10, 0, 4], fov: 75 }}
+        camera={{ position: [0, 0, 3], fov: 75 }}
         gl={{ 
           alpha: true,
           antialias: true,

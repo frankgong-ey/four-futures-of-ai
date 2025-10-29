@@ -21,9 +21,15 @@ export default function FutureSection({ future, sectionNumber, onExploreClick })
           >
             {future.title}
           </h2>
-          <p className="text-xl text-white/80 leading-relaxed">
-            {future.description}
-          </p>
+          <div className="text-xl text-white/80 leading-relaxed space-y-4">
+            {Array.isArray(future.description) ? (
+              future.description.map((para, idx) => (
+                <p key={idx}>{para}</p>
+              ))
+            ) : (
+              <p>{future.description}</p>
+            )}
+          </div>
         </div>
 
         <button

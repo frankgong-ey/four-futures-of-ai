@@ -5,253 +5,60 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import FuturesOverview from "./components/FuturesOverview";
 import HeroSection from "./components/HeroSection";
+import DetailView from "./components/DetailView";
+// 导入所有 detailData
+import { detailData } from "./data/detailData.js";
 
-// 模拟数据 - 后期可以替换为CMS数据
+// 从 detailData 生成版本数据
+const generateVersionData = (versionId, versionName, futureIds) => ({
+  id: versionId,
+  name: versionName,
+  futures: futureIds
+    .map(id => {
+      const data = detailData[id];
+      if (data) {
+        return {
+          id: data.id,
+          title: data.title,
+          description: data.description,
+          color: data.color
+        };
+      }
+      return null;
+    })
+    .filter(Boolean)
+});
+
 const versionsData = {
-  "all-industries": {
-    id: "all-industries",
-    name: "All Industries",
-    futures: [
-      {
-        id: "constraint",
-        title: "CONSTRAINT",
-        description: "AI stalls – scaled and common, but no gains in accuracy, reliability, training, or efficiency.",
-        color: "#750D5D"
-      },
-      {
-        id: "growth",
-        title: "GROWTH", 
-        description: "Barriers drop; AI is everywhere, driving mostly positive business and social impact.",
-        color: "#2BB856"
-      },
-      {
-        id: "transform",
-        title: "TRANSFORM",
-        description: "Progress in AI for the last 5 years has exceeded expectations in almost every dimension.",
-        color: "#198CE6"
-      },
-      {
-        id: "collapse",
-        title: "COLLAPSE",
-        description: "AI fundamentally changes how we work, live, and interact with technology.",
-        color: "#FF4136"
-      }
-    ]
-  },
-  "consumer-products": {
-    id: "consumer-products",
-    name: "Consumer Products",
-    futures: [
-      {
-        id: "constraint-cp",
-        title: "CONSTRAINT",
-        description: "Consumer AI products plateau with limited innovation and user adoption challenges.",
-        color: "#750D5D"
-      },
-      {
-        id: "growth-cp",
-        title: "GROWTH",
-        description: "AI-powered consumer products become mainstream, enhancing daily life experiences.",
-        color: "#2BB856"
-      },
-      {
-        id: "transform-cp",
-        title: "TRANSFORM", 
-        description: "Consumer products are completely reimagined with AI at their core.",
-        color: "#198CE6"
-      },
-      {
-        id: "collapse-cp",
-        title: "COLLAPSE",
-        description: "AI collapses traditional consumer product categories and creates new markets.",
-        color: "#FF4136"
-      }
-    ]
-  },
-  "industrial-products": {
-    id: "industrial-products",
-    name: "Industrial Products",
-    futures: [
-      {
-        id: "constraint-ip",
-        title: "CONSTRAINT",
-        description: "[Enter description]",
-        color: "#750D5D"
-      },
-      {
-        id: "growth-ip",
-        title: "GROWTH",
-        description: "[Enter description]",
-        color: "#2BB856"
-      },
-      {
-        id: "transform-ip",
-        title: "TRANSFORM",
-        description: "[Enter description]",
-        color: "#198CE6"
-      },
-      {
-        id: "collapse-ip",
-        title: "COLLAPSE",
-        description: "[Enter description]",
-        color: "#FF4136"
-      }
-    ]
-  },
-  "oil-gas": {
-    id: "oil-gas",
-    name: "Oil & Gas",
-    futures: [
-      {
-        id: "constraint-og",
-        title: "CONSTRAINT",
-        description: "[Enter description]",
-        color: "#750D5D"
-      },
-      {
-        id: "growth-og",
-        title: "GROWTH",
-        description: "[Enter description]",
-        color: "#2BB856"
-      },
-      {
-        id: "transform-og",
-        title: "TRANSFORM",
-        description: "[Enter description]",
-        color: "#198CE6"
-      },
-      {
-        id: "collapse-og",
-        title: "COLLAPSE",
-        description: "[Enter description]",
-        color: "#FF4136"
-      }
-    ]
-  },
-  "defense": {
-    id: "defense",
-    name: "Defense",
-    futures: [
-      {
-        id: "constraint-d",
-        title: "CONSTRAINT",
-        description: "[Enter description]",
-        color: "#750D5D"
-      },
-      {
-        id: "growth-d",
-        title: "GROWTH",
-        description: "[Enter description]",
-        color: "#2BB856"
-      },
-      {
-        id: "transform-d",
-        title: "TRANSFORM",
-        description: "[Enter description]",
-        color: "#198CE6"
-      },
-      {
-        id: "collapse-d",
-        title: "COLLAPSE",
-        description: "[Enter description]",
-        color: "#FF4136"
-      }
-    ]
-  },
-  "banking-capital-markets": {
-    id: "banking-capital-markets",
-    name: "Banking & Capital Markets",
-    futures: [
-      {
-        id: "constraint-bcm",
-        title: "CONSTRAINT",
-        description: "[Enter description]",
-        color: "#750D5D"
-      },
-      {
-        id: "growth-bcm",
-        title: "GROWTH",
-        description: "[Enter description]",
-        color: "#2BB856"
-      },
-      {
-        id: "transform-bcm",
-        title: "TRANSFORM",
-        description: "[Enter description]",
-        color: "#198CE6"
-      },
-      {
-        id: "collapse-bcm",
-        title: "COLLAPSE",
-        description: "[Enter description]",
-        color: "#FF4136"
-      }
-    ]
-  },
-  "retail": {
-    id: "retail",
-    name: "Retail",
-    futures: [
-      {
-        id: "constraint-r",
-        title: "CONSTRAINT",
-        description: "[Enter description]",
-        color: "#750D5D"
-      },
-      {
-        id: "growth-r",
-        title: "GROWTH",
-        description: "[Enter description]",
-        color: "#2BB856"
-      },
-      {
-        id: "transform-r",
-        title: "TRANSFORM",
-        description: "[Enter description]",
-        color: "#198CE6"
-      },
-      {
-        id: "collapse-r",
-        title: "COLLAPSE",
-        description: "[Enter description]",
-        color: "#FF4136"
-      }
-    ]
-  },
-  "life-sciences": {
-    id: "life-sciences",
-    name: "Life Sciences",
-    futures: [
-      {
-        id: "constraint-ls",
-        title: "CONSTRAINT",
-        description: "[Enter description]",
-        color: "#750D5D"
-      },
-      {
-        id: "growth-ls",
-        title: "GROWTH",
-        description: "[Enter description]",
-        color: "#2BB856"
-      },
-      {
-        id: "transform-ls",
-        title: "TRANSFORM",
-        description: "[Enter description]",
-        color: "#198CE6"
-      },
-      {
-        id: "collapse-ls",
-        title: "COLLAPSE",
-        description: "[Enter description]",
-        color: "#FF4136"
-      }
-    ]
-  }
+  "all-industries": generateVersionData("all-industries", "All Industries", [
+    "constraint", "growth", "transform", "collapse"
+  ]),
+  "consumer-products": generateVersionData("consumer-products", "Consumer Products", [
+    "constraint-cp", "growth-cp", "transform-cp", "collapse-cp"
+  ]),
+  "industrial-products": generateVersionData("industrial-products", "Industrial Products", [
+    "constraint-ip", "growth-ip", "transform-ip", "collapse-ip"
+  ]),
+  "oil-gas": generateVersionData("oil-gas", "Oil & Gas", [
+    "constraint-og", "growth-og", "transform-og", "collapse-og"
+  ]),
+  "defense": generateVersionData("defense", "Defense", [
+    "constraint-d", "growth-d", "transform-d", "collapse-d"
+  ]),
+  "banking-capital-markets": generateVersionData("banking-capital-markets", "Banking & Capital Markets", [
+    "constraint-bcm", "growth-bcm", "transform-bcm", "collapse-bcm"
+  ]),
+  "retail": generateVersionData("retail", "Retail", [
+    "constraint-r", "growth-r", "transform-r", "collapse-r"
+  ]),
+  "life-sciences": generateVersionData("life-sciences", "Life Sciences", [
+    "constraint-ls", "growth-ls", "transform-ls", "collapse-ls"
+  ])
 };
 
 export default function FuturesPage() {
   const [selectedVersion, setSelectedVersion] = useState(null);
+  const [selectedFuture, setSelectedFuture] = useState(null);
   const router = useRouter();
 
   const currentVersion = selectedVersion ? versionsData[selectedVersion] : null;
@@ -279,7 +86,14 @@ export default function FuturesPage() {
   };
 
   const handleFutureClick = (futureId) => {
-    router.push(`/futures/${futureId}`);
+    const futureData = detailData[futureId];
+    if (futureData) {
+      setSelectedFuture(futureData);
+    }
+  };
+
+  const handleCloseDetailView = () => {
+    setSelectedFuture(null);
   };
 
   // 如果还没有选择版本，显示选择界面
@@ -303,6 +117,14 @@ export default function FuturesPage() {
           onFutureClick={handleFutureClick}
         />
       </div>
+
+      {/* DetailView Modal */}
+      {selectedFuture && (
+        <DetailView 
+          future={selectedFuture}
+          onClose={handleCloseDetailView}
+        />
+      )}
     </div>
   );
 }

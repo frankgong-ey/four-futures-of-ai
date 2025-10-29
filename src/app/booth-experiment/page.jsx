@@ -4,35 +4,36 @@ import React, { useMemo, useRef, useEffect, useState } from "react";
 import * as THREE from "three";
 import { CatmullRomCurve3 } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrthographicCamera, Environment, MeshTransmissionMaterial, useTexture, useGLTF, OrbitControls} from "@react-three/drei";
+import { OrthographicCamera, Environment, MeshTransmissionMaterial, useTexture, useGLTF, OrbitControls, Text} from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import { easing } from "maath";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 // import { useControls } from "leva";
 
-import neonVertexShader from "../../shaders/neon.vert.glsl";
-import neonFragmentShader from "../../shaders/neon.frag.glsl";
-import questionLineVertexShader from "../../shaders/questionLine.vert.glsl";
-import questionLineFragmentShader from "../../shaders/questionLine.frag.glsl";
-import torusPointsVertexShader from "../../shaders/torusPoints.vert.glsl";
-import torusPointsFragmentShader from "../../shaders/torusPoints.frag.glsl";
-import geometryLinesVertexShader from "../../shaders/geometryLines.vert.glsl";
-import geometryLinesFragmentShader from "../../shaders/geometryLines.frag.glsl";
-import circlePlaneVertexShader from "../../shaders/circlePlane.vert.glsl";
-import circlePlaneFragmentShader from "../../shaders/circlePlane.frag.glsl";
+
 import ribbonVertexShader from "../../shaders/laserRibbon.vert.glsl";
 import ribbonFragmentShader from "../../shaders/laserRibbon.frag.glsl";
+import laserRibbonVertexShader from "./shaders/laserRibbon.vert.glsl";
+import laserRibbonFragmentShader from "./shaders/laserRibbon.frag.glsl";
+import uvDebugVertexShader from "./shaders/uvDebug.vert.glsl";
+import uvDebugFragmentShader from "./shaders/uvDebug.frag.glsl";
+import laserEffectVertexShader from "./shaders/laserEffect.vert.glsl";
+import laserEffectFragmentShader from "./shaders/laserEffect.frag.glsl";
+import circlePlaneVertexShader from "./shaders/circlePlane.vert.glsl";
+import circlePlaneFragmentShader from "./shaders/circlePlane.frag.glsl";
+import neonVertexShader from "./shaders/neon.vert.glsl";
+import neonFragmentShader from "./shaders/neon.frag.glsl";
 import imageCardVertexShader from "../../shaders/imageCard.vert.glsl";
 import imageCardFragmentShader from "../../shaders/imageCard.frag.glsl";
 
-import HeroSection from "./components/HeroSection";
-import GallerySection from "./components/GallerySection";
-import ChartSection from "./components/ChartSection";
-import QuoteSection from "./components/QuoteSection";
-import QuestionSection from "./components/QuestionSection";
-import EndingSection from "./components/EndingSection";
-import VideoSection from "./components/VideoSection";
+import HeroSection from "../booth/components/HeroSection";
+import GallerySection from "../booth/components/GallerySection";
+import ChartSection from "../booth/components/ChartSection";
+import QuoteSection from "../booth/components/QuoteSection";
+import QuestionSection from "../booth/components/QuestionSection";
+import EndingSection from "../booth/components/EndingSection";
+import VideoSection from "../booth/components/VideoSection";
 import FluidBackground from "../../components/FluidBackground";
 import LoadingScreen from "../../components/LoadingScreen";
 
@@ -49,62 +50,22 @@ export default function BoothPage() {
     setIsLoading(false);
   };
 
-  // Leva控制面板 - 已禁用
-  // const { enableOrbitControls, newSplineP0, newSplineP1, newSplineP2, newSplineP3, newSplineColor, newSpline2P0, newSpline2P1, newSpline2P2, newSpline2P3, newSpline2Color } = useControls({
-  //   enableOrbitControls: { value: true, label: "Orbit Controls" },
-  //   newSplineP0: { 
-  //     value: { x: 10, y: -12, z: 0 }, 
-  //     label: "New Spline P0 (Top)" 
-  //   },
-  //   newSplineP1: { 
-  //     value: { x: 5, y: -15, z: 0 }, 
-  //     label: "New Spline P1" 
-  //   },
-  //   newSplineP2: { 
-  //     value: { x: 5, y: -27, z: 0 }, 
-  //     label: "New Spline P2" 
-  //   },
-  //   newSplineP3: { 
-  //     value: { x: -20, y: -30, z: 0 }, 
-  //     label: "New Spline P3 (Bottom)" 
-  //   },
-  //   newSplineColor: { 
-  //     value: "#a4a59e", 
-  //     label: "New Spline Color" 
-  //   },
-  //   newSpline2P0: { 
-  //     value: { x: 10, y: -13, z: 0 }, 
-  //     label: "New Spline 2 P0 (Top)" 
-  //   },
-  //   newSpline2P1: { 
-  //     value: { x: 5, y: -15, z: 0 }, 
-  //     label: "New Spline 2 P1" 
-  //   },
-  //   newSpline2P2: { 
-  //     value: { x: 6, y: -27, z: 0 }, 
-  //     label: "New Spline 2 P2" 
-  //   },
-  //   newSpline2P3: { 
-  //     value: { x: -20, y: -28, z: 0 }, 
-  //     label: "New Spline 2 P3 (Bottom)" 
-  //   },
-  //   newSpline2Color: { 
-  //     value: "#8d8e88", 
-  //     label: "New Spline 2 Color" 
-  //   }
-  // });
+  // 手动控制激光参数
+  const laserIntensity = 4.0;  // 激光亮度
+  const laserFalloff = 12.0;    // 衰减强度
+  const laserColor = "#ffffff"; // 激光颜色
+  const enableOrbitControls = false;
 
   // 使用默认值替代Leva控制
-  const enableOrbitControls = false; // 禁用OrbitControls
   const newSplineP0 = { x: 10, y: -12, z: 0 };
   const newSplineP1 = { x: 5, y: -15, z: 0 };
   const newSplineP2 = { x: 5, y: -27, z: 0 };
-  const newSplineP3 = { x: -20, y: -30, z: 0 };
+  const newSplineP3 = { x: 20, y: -30, z: 0 };
   const newSplineColor = "#a4a59e";
   const newSpline2P0 = { x: 10, y: -13, z: 0 };
   const newSpline2P1 = { x: 5, y: -15, z: 0 };
   const newSpline2P2 = { x: 6, y: -27, z: 0 };
-  const newSpline2P3 = { x: -20, y: -28, z: 0 };
+  const newSpline2P3 = { x: 20, y: -28, z: 0 };
   const newSpline2Color = "#8d8e88";
 
   // 摄像头信息状态
@@ -131,7 +92,7 @@ export default function BoothPage() {
 
   // 计算是否应该启用Bloom
   const shouldEnableBloom = useMemo(() => {
-    return sectionState.fourthProgress >= 0.17 && sectionState.fourthProgress <= 0.89;
+    return sectionState.fourthProgress >= 0.20 && sectionState.fourthProgress <= 0.89;
   }, [sectionState.fourthProgress]);
 
   // 调试Bloom状态
@@ -178,22 +139,22 @@ export default function BoothPage() {
   const coneBottomRadius = 1.5;
   
   // 曲线控制点 - 直接定义数组，避免重复
-  const p1_0 = [-20, 0.1];
+  const p1_0 = [-15, 0.1];
   const p1_1 = [-10, 0.1];
   const p1_2 = [0, 0];
   const p1_3 = [20, 5];
   
-  const p2_0 = [-20, 0.0];
+  const p2_0 = [-15, 0.0];
   const p2_1 = [-10, 0];
   const p2_2 = [0, 0];
   const p2_3 = [20, 2];
   
-  const p3_0 = [-20, -0.1];
+  const p3_0 = [-15, -0.1];
   const p3_1 = [-10, -0.1];
   const p3_2 = [0, 0];
   const p3_3 = [20, -2];
   
-  const p4_0 = [-20, -0.15];
+  const p4_0 = [-15, -0.15];
   const p4_1 = [-10, -0.15];
   const p4_2 = [0, 0];
   const p4_3 = [20, -5];
@@ -362,61 +323,7 @@ export default function BoothPage() {
         }}
       />
       
-      {/* 全局背景图片 - 所有section共用 */}
-      {/* <div 
-        ref={backgroundRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '101vw',
-          height: '100vh',
-          backgroundImage: 'url(/images/hero_gradient.svg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          zIndex: 1,
-          pointerEvents: 'none'
-        }}
-      /> */}
-      
-      {/* 第二层背景图片 - 用于过渡 */}
-      {/* <div 
-        ref={background2Ref}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '101vw',
-          height: '100vh',
-          backgroundImage: 'url(/images/mid_gradient.svg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          zIndex: 1,
-          pointerEvents: 'none',
-          opacity: 0
-        }}
-      /> */}
-      
-      {/* 第三层背景图片 - 预加载 gradient_3.svg 避免动态切换时的重新加载 */}
-      {/* <div 
-        ref={background3Ref}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '101vw',
-          height: '100vh',
-          backgroundImage: 'url(/images/gradient_3.svg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          zIndex: 1,
-          pointerEvents: 'none',
-          opacity: 0
-        }}
-      /> */}
+
 
       {/* 全局Canvas - 所有section共用 */}
       <Canvas 
@@ -441,14 +348,14 @@ export default function BoothPage() {
           <BloomFixer enabled={shouldEnableBloom} />
           {shouldEnableBloom && (
             <EffectComposer key={shouldEnableBloom ? "bloom-on" : "bloom-off"} multisampling={0}>
-              <Bloom intensity={0.3} luminanceThreshold={1} luminanceSmoothing={0} mipmapBlur />
+              <Bloom intensity={2.0} luminanceThreshold={1} luminanceSmoothing={0.5} />
             </EffectComposer>
           )}
 
           <OrthographicCamera 
             makeDefault 
             position={[-3, 0, 8]}
-            zoom={100}
+            zoom={120}
             near={-1000}
             far={1000}
           />
@@ -469,10 +376,17 @@ export default function BoothPage() {
           )}
 
           {/* 流体渐变背景图层 */}
-          <FluidBackground sectionState={sectionState.currentSection} />
+          <FluidBackground 
+            sectionState={sectionState.currentSection} 
+            fourthProgress={sectionState.fourthProgress}
+          />
 
           {/* Question GLB 模型 - 暂时显示所有模型 */}
-          <QuestionModel />
+          <QuestionModel 
+            laserColor={laserColor}
+            laserIntensity={laserIntensity}
+            laserFalloff={laserFalloff}
+          />
 
           
           {/* Gallery 3D 内容 - 暂时显示所有模型 */}
@@ -696,40 +610,42 @@ export default function BoothPage() {
       </div>
 
 
-      {/* 调试信息 - 已隐藏 */}
-      {/* <div
+      {/* 调试信息面板 */}
+      <div
         style={{
           position: 'fixed',
           bottom: '20px',
-          left: '64px',
-          fontSize: '8px',
+          left: '20px',
+          fontSize: '10px',
           color: 'white',
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          padding: '4px 8px',
-          borderRadius: '4px',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          padding: '8px 12px',
+          borderRadius: '6px',
           zIndex: 1000,
-          fontFamily: 'monospace'
+          fontFamily: 'monospace',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          backdropFilter: 'blur(10px)',
+          minWidth: '200px'
         }}
       >
-        Scroll: {Math.round(scrollPosition)}px ({typeof window !== 'undefined' ? Math.round(scrollPosition / window.innerHeight * 100) : 0}vh)
-        <br />
-        Current Section: {sectionState.currentSection}
-        <br />
-        Hero Progress: {sectionState.heroProgress.toFixed(2)}
-        <br />
-        Gallery Progress: {sectionState.galleryProgress.toFixed(2)}
-        <br />
-        Chart Progress: {sectionState.chartProgress.toFixed(2)}
-        <br />
-        Quote Progress: {sectionState.quoteProgress.toFixed(2)}
-        <br />
-        Fourth Progress: {sectionState.fourthProgress.toFixed(2)}
-        <br />
-        <br />
-        Camera Position: ({cameraInfo.position[0]}, {cameraInfo.position[1]}, {cameraInfo.position[2]})
-        <br />
-        Camera Rotation: ({cameraInfo.rotation[0]}°, {cameraInfo.rotation[1]}°, {cameraInfo.rotation[2]}°)
-      </div> */}
+        <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#00ff00' }}>
+          🎮 调试面板
+        </div>
+        <div>滚动: {Math.round(scrollPosition)}px ({typeof window !== 'undefined' ? Math.round(scrollPosition / window.innerHeight * 100) : 0}vh)</div>
+        <div>当前区域: <span style={{ color: '#ffff00' }}>{sectionState.currentSection}</span></div>
+        <div>Hero进度: {sectionState.heroProgress.toFixed(2)}</div>
+        <div>Gallery进度: {sectionState.galleryProgress.toFixed(2)}</div>
+        <div>Chart进度: {sectionState.chartProgress.toFixed(2)}</div>
+        <div>Quote进度: {sectionState.quoteProgress.toFixed(2)}</div>
+        <div>Fourth进度: {sectionState.fourthProgress.toFixed(2)}</div>
+        <div style={{ marginTop: '6px', borderTop: '1px solid rgba(255, 255, 255, 0.2)', paddingTop: '4px' }}>
+          <div>摄像头位置: ({cameraInfo.position[0]}, {cameraInfo.position[1]}, {cameraInfo.position[2]})</div>
+          <div>摄像头旋转: ({cameraInfo.rotation[0]}°, {cameraInfo.rotation[1]}°, {cameraInfo.rotation[2]}°)</div>
+        </div>
+        <div style={{ marginTop: '4px', fontSize: '8px', color: '#888' }}>
+          Bloom: {shouldEnableBloom ? '✅ 启用' : '❌ 禁用'}
+        </div>
+      </div>
     </div>
     );
 }
@@ -809,10 +725,10 @@ function CylinderTunnel({
 }
 
 // Load Question Model
-function QuestionModel() {
+function QuestionModel({ laserColor, laserIntensity, laserFalloff }) {
 
   // 加载
-  const { scene } = useGLTF('/models/question_consolidated_v5.glb');
+  const { scene } = useGLTF('/models/question.glb');
 
   // 创建组
   const group = useRef(null);
@@ -820,301 +736,248 @@ function QuestionModel() {
 
   // 克隆并为所有 Mesh 应用统一 shader（示例采用 neon）
   const clonedScene = useMemo(() => {
+    
     const cloned = scene.clone();
-    const torusNames = ['torus', 'icosphere', 'cube', 'box', 'cone'];
-    cloned.traverse((child) => {
-      if (!child.isMesh) return;
-      const name = (child.name || '').toLowerCase();
-
-      // 1) 所有名称包含 line / circle / path / stagnate 的对象统一使用 questionLine shader
-      if (name.includes('line') || name.includes('circle') || name.includes('path') || name.includes('stagnate')) {
-        // 为每个line物体生成随机时间偏移
-        const randomTimeOffset = Math.random() * 10.0;
-        const isFullVisible = name.includes('lined');
-        
-        child.material = new THREE.ShaderMaterial({
-          transparent: true,
-          depthWrite: false,
-          side: THREE.DoubleSide,
-          uniforms: {
-            time: { value: 0 },
-            color: { value: new THREE.Color(1.0, 0.902, 0.0) },
-            progress: { value: 1.0 },
-            timeOffset: { value: randomTimeOffset },
-            fogNear: { value: 100.0 },
-            fogFar: { value: 200.0 },
-            fullVisible: { value: isFullVisible ? 1.0 : 0.0 }
-          },
-          vertexShader: questionLineVertexShader,
-          fragmentShader: questionLineFragmentShader,
-          blending: THREE.AdditiveBlending,
-          toneMapped: false
-        });
-        return;
-      }
-
-      // 2) icosphere/cube/box/cone/human 使用 torusPoints shader
-      if (name.includes('icosphere') || name.includes('cube') || name.includes('box') || name.includes('cone') || name.includes('human')) {
-        // 根据对象类型设置不同的点大小
-        let pointSize = 12.0; // 默认大小
-        
-        if (name.includes('human')) {
-          // human 仅显示连线，不显示点：将点大小设为 0
-          pointSize = 0.0;
-        } else if (name.includes('icosphere') || name.includes('cube') || name.includes('box') || name.includes('cone')) {
-          pointSize = 12.0; // Icosphere/Cube/Box/Cone 使用更大的点
-        }
-
-        const pointsMaterial = new THREE.ShaderMaterial({
-          transparent: true,
-          depthWrite: false,
-          uniforms: {
-            color: { value: new THREE.Color('#ffffff') }, // 白色
-            time: { value: 0 },
-            pointSize: { value: pointSize }
-          },
-          vertexShader: torusPointsVertexShader,
-          fragmentShader: torusPointsFragmentShader,
-        });
-
-        // 如果是 Mesh，转换为 Points 以支持 gl_PointSize
-        if (child.isMesh) {
-          const parent = child.parent;
-          const points = new THREE.Points(child.geometry, pointsMaterial);
-          points.position.copy(child.position);
-          points.rotation.copy(child.rotation);
-          points.scale.copy(child.scale);
-          points.name = child.name + "__points";
-          parent.add(points);
-          child.visible = false; // 保留原节点但隐藏
-        } else {
-          child.material = pointsMaterial;
-        }
-        return;
-      }
-
-      // 3) torus 使用不同的处理（如果需要的话）
-      if (name.includes('torus')) {
-        const pointSize = 6.0; // torus 使用较小的点
-
-        const pointsMaterial = new THREE.ShaderMaterial({
-          transparent: true,
-          depthWrite: false,
-          uniforms: {
-            color: { value: new THREE.Color('#ffffff') }, // 白色
-            time: { value: 0 },
-            pointSize: { value: pointSize }
-          },
-          vertexShader: torusPointsVertexShader,
-          fragmentShader: torusPointsFragmentShader,
-        });
-
-        // 如果是 Mesh，转换为 Points 以支持 gl_PointSize
-        if (child.isMesh) {
-          const parent = child.parent;
-          const points = new THREE.Points(child.geometry, pointsMaterial);
-          points.position.copy(child.position);
-          points.rotation.copy(child.rotation);
-          points.scale.copy(child.scale);
-          points.name = child.name + "__points";
-          parent.add(points);
-          child.visible = false; // 保留原节点但隐藏
-        } else {
-          child.material = pointsMaterial;
-        }
-        return;
-      }
-
-      // 4) plane（Plane） — circle 已在上方被归入 questionLine
-      if (name.includes('plane')) {
-        child.material = new THREE.ShaderMaterial({
-          transparent: true,
-          depthWrite: false,
-          side: THREE.DoubleSide,
-          uniforms: {
-            time: { value: 0 },
-            color: { value: new THREE.Color(1.0, 1.0, 1.0) },
-          },
-          vertexShader: circlePlaneVertexShader,
-          fragmentShader: circlePlaneFragmentShader,
-          blending: THREE.AdditiveBlending
-        });
-        return;
-      }
-
-      // 5) 其它：使用 neon 基础发光
-      child.material = new THREE.ShaderMaterial({
-        transparent: true,
-        depthWrite: false,
-        side: THREE.DoubleSide,
-        uniforms: {
-          time: { value: 0 },
-          color: { value: new THREE.Color(0.16, 0.77, 0.91) },
-          fogNear: { value: 0.0 },
-          fogFar: { value: 1000.0 },
-          progress: { value: 1.0 },
-        },
-        vertexShader: neonVertexShader,
-        fragmentShader: neonFragmentShader,
-        blending: THREE.AdditiveBlending,
-        toneMapped: false
-      });
-    });
     
-    // 完全重写连线创建逻辑 - 确保只创建一次
-    
-    // 查找目标对象（只包括cube, box, cone, icosphere）
-    const targetObjects = [];
+    const basePlaneMatches = [];
+
+    // 简化：根据mesh名称应用不同材质
     cloned.traverse((child) => {
-      if (child.isMesh || child.isPoints) {
+      if (child.isMesh) {
         const name = (child.name || '').toLowerCase();
-        if (name.includes('icosphere') || name.includes('cube') || name.includes('box') || name.includes('cone')) {
-          targetObjects.push(child);
+        if (name.includes('base-plane')) {
+          basePlaneMatches.push(child.name || '(unnamed)');
+        }
+        
+        // rapid / stream 使用 neon shader
+        if (name.includes('rapid') || name.includes('stream')) {
+          child.material = new THREE.ShaderMaterial({
+            vertexShader: neonVertexShader,
+            fragmentShader: neonFragmentShader,
+            uniforms: {
+              color: { value: new THREE.Color("#FEE600") },
+              progress: { value: 1.0 },
+              time: { value: 0.0 },
+              fogNear: { value: 0.0 },
+              fogFar: { value: 60.0 }
+            },
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            side: THREE.DoubleSide
+          });
+        }
+        // 如果名称包含"laser"，使用激光效果shader
+        else if (name.includes('laser')) {
+          child.material = new THREE.ShaderMaterial({
+            vertexShader: laserEffectVertexShader,
+            fragmentShader: laserEffectFragmentShader,
+            uniforms: {
+              uColor: { value: new THREE.Color(laserColor) },
+              uIntensity: { value: laserIntensity },
+              uFalloff: { value: laserFalloff },
+              uTime: { value: 0.0 }
+            },
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            side: THREE.DoubleSide
+          });
+        }
+        // 如果名称包含"fluid"，使用circlePlane shader
+        else if (name.includes('fluid')) {
+          child.material = new THREE.ShaderMaterial({
+            vertexShader: circlePlaneVertexShader,
+            fragmentShader: circlePlaneFragmentShader,
+            uniforms: {
+              time: { value: 0 }, // 匹配shader中的uniform名称
+              color: { value: new THREE.Color("#ffffff") } // 匹配shader中的uniform名称
+            },
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            side: THREE.DoubleSide
+          });
+        }
+        // 如果名称包含"gate"，使用环境贴图材质
+        else if (name.includes('gate')) {
+          child.material = new THREE.MeshStandardMaterial({
+            color: "#FEE600",
+            metalness: 0.1,        // 高金属度，增强反射
+            roughness: 0.1,        // 低粗糙度，产生强烈镜面反射
+            envMapIntensity: 1.5,   // 环境贴图强度
+            transparent: false,
+            side: THREE.DoubleSide
+          });
+        }
+        // stand 使用 #FEE600
+        else if (name.includes('stand')) {
+          child.material = new THREE.MeshStandardMaterial({
+            color: "#2E2E38",
+            metalness: 0.1,
+            roughness: 0.9,
+            side: THREE.DoubleSide
+          });
+        }
+        // icon 使用深灰色
+        else if (name.includes('icon')) {
+          child.material = new THREE.MeshBasicMaterial({ 
+            color: "#FEE600",
+            side: THREE.DoubleSide,
+          });
+        }
+        // ai-cube 使用黄色自发光（旋转逻辑在 useFrame，emissive超过1.0以触发Bloom）
+        else if (name.includes('ai-cube')) {
+          child.material = new THREE.MeshStandardMaterial({ 
+            color: "#FEE600",
+            emissive: new THREE.Color("#FEE600"), // 自发光颜色
+            emissiveIntensity: 1.0, // 自发光强度超过1.0，触发Bloom
+            side: THREE.DoubleSide,
+          });
+        }
+        // base-plane 需要先检查，因为它包含 "plane"
+        else if (name.includes('base-plane')) {
+          child.material = new THREE.MeshBasicMaterial({ 
+            color: "#2E2E38",
+            side: THREE.DoubleSide,
+          });      
+        }
+        else if (name.includes('stagnate')) {
+          child.material = new THREE.MeshBasicMaterial({ 
+            color: "#FEE600",
+            side: THREE.DoubleSide,
+          });   
+        }
+        else {
+          // 其他mesh保持原材质
+        }
+
+        // 在 sphere-few 位置生成 3 个大立方体
+        if (name.includes('sphere-few')) {
+          const parent = child.parent || cloned;
+          const basePos = child.position.clone();
+          for (let i = 0; i < 3; i++) {
+            const size = 0.2;
+            const geom = new THREE.BoxGeometry(size, size, size);
+            const mat = new THREE.MeshBasicMaterial({ color: "#FEE600" });
+            const cube = new THREE.Mesh(geom, mat);
+            cube.position.copy(basePos).add(new THREE.Vector3((i - 1) * (size * 1.5), 0, 0));
+            parent.add(cube);
+          }
+          child.visible = false;
+        }
+
+        // 在 sphere-many 位置生成 10 个不同大小的小立方体，均匀分布在圆周上
+        if (name.includes('sphere-many')) {
+          const parent = child.parent || cloned;
+          const basePos = child.position.clone();
+          const radius = 0.5; // 圆周半径
+          const angleStep = (Math.PI * 2) / 10; // 每个立方体之间的角度间隔
+          
+          for (let i = 0; i < 10; i++) {
+            const size = 0.05 + Math.random() * 0.05; // 0.05 ~ 0.1
+            const geom = new THREE.BoxGeometry(size, size, size);
+            const mat = new THREE.MeshBasicMaterial({ color: "#FEE600" });
+            const cube = new THREE.Mesh(geom, mat);
+            
+            // 计算圆周上的位置（XZ 平面）
+            const angle = i * angleStep;
+            const x = Math.cos(angle) * radius;
+            const z = Math.sin(angle) * radius;
+            // Y 坐标可以稍微随机，或者设为0
+            const y = (Math.random() - 0.5) * 0.1; // 小的垂直随机偏移
+            
+            cube.position.copy(basePos).add(new THREE.Vector3(x, y, z));
+            parent.add(cube);
+          }
+          child.visible = false;
         }
       }
     });
     
-    // 如果找到目标对象，创建连线数据
-    if (targetObjects.length > 0) {
-      // 创建连线数据
-      const linePositions = [];
-      const lineFadeOffsets = [];
-      let linesCreated = 0;
-      const MAX_TOTAL_SEGMENTS = 8000;
-      
-      // 遍历目标对象，创建连线数据
-      targetObjects.forEach((obj) => {
-        if (linesCreated >= MAX_TOTAL_SEGMENTS) return;
-        
-        const geometry = obj.geometry;
-        if (!geometry || !geometry.attributes || !geometry.attributes.position) return;
-        
-        const positionAttribute = geometry.attributes.position;
-        const uvAttribute = geometry.attributes.uv;
-        
-        // 获取cloned对象的逆矩阵，用于将世界坐标转换回cloned的本地坐标
-        const clonedInverseMatrix = new THREE.Matrix4();
-        cloned.updateMatrixWorld();
-        clonedInverseMatrix.copy(cloned.matrixWorld).invert();
-        
-        // 收集顶点 - 使用本地坐标，不进行世界变换
-        const vertices = [];
-        for (let i = 0; i < positionAttribute.count; i++) {
-          const temp = new THREE.Vector3();
-          temp.fromBufferAttribute(positionAttribute, i);
-          
-          // 先变换到世界坐标
-          temp.applyMatrix4(obj.matrixWorld);
-          // 然后变换回cloned的本地坐标
-          temp.applyMatrix4(clonedInverseMatrix);
-          
-          const uvx = uvAttribute ? uvAttribute.getX(i) : 0;
-          const uvy = uvAttribute ? uvAttribute.getY(i) : 0;
-          vertices.push({ x: temp.x, y: temp.y, z: temp.z, uvx, uvy });
-        }
-        
-        // 按UV.Y分组
-        const uvYGroups = {};
-        const tolerance = 0.02;
-        vertices.forEach((vertexData) => {
-          const uvY = vertexData.uvy;
-          const key = Math.round(uvY / tolerance) * tolerance;
-          if (!uvYGroups[key]) uvYGroups[key] = [];
-          uvYGroups[key].push(vertexData);
-        });
-        
-        // 连接相邻顶点
-        Object.values(uvYGroups).forEach((group) => {
-          if (linesCreated >= MAX_TOTAL_SEGMENTS) return;
-          if (group.length < 2) return;
-          
-          group.sort((a, b) => a.uvx - b.uvx);
-          const sharedFadeOffset = Math.random() * Math.PI * 2;
-          
-          for (let j = 0; j < group.length - 1; j++) {
-            if (linesCreated >= MAX_TOTAL_SEGMENTS) break;
-            const v1 = group[j];
-            const v2 = group[j + 1];
-            
-            const dx = v1.x - v2.x; const dy = v1.y - v2.y; const dz = v1.z - v2.z;
-            const dist = Math.hypot(dx, dy, dz);
-            if (dist < 0.01 || dist > 3.0) continue;
-            
-            linePositions.push(v1.x, v1.y, v1.z);
-            linePositions.push(v2.x, v2.y, v2.z);
-            lineFadeOffsets.push(sharedFadeOffset);
-            linesCreated++;
-          }
-        });
-      });
-      
-      // 创建连线几何体
-      if (linePositions.length > 0) {
-        const validLength = Math.floor(linePositions.length / 6) * 6;
-        const validPositions = linePositions.slice(0, validLength);
-        const segmentCount = validPositions.length / 6;
-        
-        const lineGeometry = new THREE.BufferGeometry();
-        lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(validPositions, 3));
-        
-        // UV坐标
-        const uvs = new Float32Array(segmentCount * 4);
-        for (let s = 0; s < segmentCount; s++) {
-          uvs[s * 4 + 0] = 0.0; uvs[s * 4 + 1] = 0.0;
-          uvs[s * 4 + 2] = 1.0; uvs[s * 4 + 3] = 0.0;
-        }
-        lineGeometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-        
-        // Fade偏移
-        const fadeAttr = new Float32Array(segmentCount * 2);
-        for (let s = 0; s < segmentCount; s++) {
-          const off = lineFadeOffsets[s] || 0;
-          fadeAttr[s * 2 + 0] = off;
-          fadeAttr[s * 2 + 1] = off;
-        }
-        lineGeometry.setAttribute('fadeOffset', new THREE.BufferAttribute(fadeAttr, 1));
-        
-        // 连线材质
-        const lineMaterial = new THREE.ShaderMaterial({
-          transparent: true,
-          depthWrite: false,
-          blending: THREE.AdditiveBlending,
-          uniforms: {
-            color: { value: new THREE.Color('#ffffff') },
-            time: { value: 0 }
-          },
-          vertexShader: geometryLinesVertexShader,
-          fragmentShader: geometryLinesFragmentShader,
-        });
-        
-        // 创建连线对象
-        const lineSegments = new THREE.LineSegments(lineGeometry, lineMaterial);
-        lineSegments.name = 'DynamicLines';
-        
-        // 添加到场景
-        cloned.add(lineSegments);
-      }
+    // 调试输出 base-plane 匹配情况
+    if (basePlaneMatches.length > 0) {
+      console.log('[QuestionModel] base-plane meshes found:', basePlaneMatches, 'count =', basePlaneMatches.length);
+    } else {
+      console.log('[QuestionModel] base-plane meshes not found');
     }
-    
+
     return cloned;
   }, [scene]);
 
-  // 更新所有材质的 time（用于 shader 动画）
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime();
+  // 缓存需要更新的mesh，避免每帧遍历整个场景
+  const laserMeshesRef = useRef([]);
+  const fluidMeshesRef = useRef([]);
+  const neonMeshesRef = useRef([]);
+  const aiCubeMeshesRef = useRef([]);
+  
+  // 初始化mesh缓存 - 只在clonedScene变化时执行一次
+  useEffect(() => {
+    laserMeshesRef.current = [];
+    fluidMeshesRef.current = [];
+    neonMeshesRef.current = [];
+    aiCubeMeshesRef.current = [];
+    
     clonedScene.traverse((child) => {
-      if ((child.isMesh || child.isLineSegments) && child.material && child.material.uniforms && child.material.uniforms.time) {
-        child.material.uniforms.time.value = t;
+      if (child.isMesh && child.name) {
+        const name = child.name.toLowerCase();
+        if (name.includes('laser')) {
+          laserMeshesRef.current.push(child);
+        } else if (name.includes('fluid')) {
+          fluidMeshesRef.current.push(child);
+        } else if (name.includes('rapid') || name.includes('stream')) {
+          neonMeshesRef.current.push(child);
+        } else if (name.includes('ai-cube')) {
+          aiCubeMeshesRef.current.push(child);
+        }
       }
-      // 动态更新具有 resolution 的材质，避免缩放/高DPI下线宽异常
-      if (child && child.material && child.material.resolution && typeof child.material.resolution.set === 'function') {
-        child.material.resolution.set(window.innerWidth, window.innerHeight);
+    });
+  }, [clonedScene]);
+
+  // 优化后的useFrame - 直接遍历缓存的数组
+  useFrame((state) => {
+    const elapsedTime = state.clock.getElapsedTime();
+    
+    // 更新laser meshes
+    laserMeshesRef.current.forEach(child => {
+      if (child.material && child.material.uniforms) {
+        const uniforms = child.material.uniforms;
+        
+        if (uniforms.uColor) uniforms.uColor.value.set(laserColor);
+        if (uniforms.uIntensity) uniforms.uIntensity.value = laserIntensity;
+        if (uniforms.uFalloff) uniforms.uFalloff.value = laserFalloff;
+        if (uniforms.uTime) uniforms.uTime.value = elapsedTime;
       }
+    });
+    
+    // 更新fluid meshes
+    fluidMeshesRef.current.forEach(child => {
+      if (child.material && child.material.uniforms && child.material.uniforms.time) {
+        child.material.uniforms.time.value += 0.016; // 约60fps
+      }
+    });
+
+    // 更新neon meshes 时间与雾参数
+    neonMeshesRef.current.forEach(child => {
+      if (child.material && child.material.uniforms) {
+        const uniforms = child.material.uniforms;
+        if (uniforms.time) uniforms.time.value = elapsedTime;
+        if (uniforms.progress && typeof uniforms.progress.value === 'number' && uniforms.progress.value < 1.0) {
+          uniforms.progress.value = 1.0;
+        }
+        if (uniforms.fogNear) uniforms.fogNear.value = 0.0;
+        if (uniforms.fogFar) uniforms.fogFar.value = 60.0;
+      }
+    });
+
+    // 让 ai-cube 自动旋转（基于时间）
+    aiCubeMeshesRef.current.forEach(child => {
+      child.rotation.y = elapsedTime * 0.5; // 每秒旋转 0.5 弧度（约28.6度/秒）
     });
   });
 
   return (
-    <group ref={group} position={[0, -40, 0]}>
+    <group ref={group} position={[0, -42, 0]}>
       <primitive object={clonedScene} />
     </group>
   );
@@ -1148,11 +1011,12 @@ const LaserSpline = React.memo(function LaserSpline({ p0, p1, p2, p3, width = 0.
   // 几何体缓存ref
   const geometryCacheRef = useRef(null);
 
-  // 优化几何体计算 - 减少不必要的重构
+  // 优化的几何体计算 - 避免每帧JSON.stringify
   const geometry = useMemo(() => {
-    // 检查是否真的需要重构
-    const currentParams = JSON.stringify([p0, p1, p2, p3, width, segments]);
-    if (geometryCacheRef.current?.currentParams === currentParams) {
+    // 使用简单的参数比较，避免JSON.stringify
+    const paramsKey = `${p0[0]},${p0[1]},${p1[0]},${p1[1]},${p2[0]},${p2[1]},${p3[0]},${p3[1]},${width},${segments}`;
+    
+    if (geometryCacheRef.current?.paramsKey === paramsKey) {
       return geometryCacheRef.current.geometry;
     }
 
@@ -1217,7 +1081,7 @@ const LaserSpline = React.memo(function LaserSpline({ p0, p1, p2, p3, width = 0.
     
     // 缓存几何体和参数
     geometryCacheRef.current = {
-      currentParams,
+      paramsKey,
       geometry: geo
     };
     
@@ -1386,6 +1250,9 @@ const Gallery3D = React.memo(function Gallery3D({ scrollProgress }) {
 // 3D场景摄像头控制组件 - 控制摄像头的位置和朝向
 function CameraRig({ sectionState }) {
   const lookRef = useRef(new THREE.Vector3(0, 0, 0));
+  // 缓存Vector3对象以避免每帧创建新对象
+  const tempVectorRef = useRef(new THREE.Vector3());
+  
   useFrame((state, delta) => {
     // 统一基于状态计算目标机位与朝向
     let desiredPos;
@@ -1396,35 +1263,39 @@ function CameraRig({ sectionState }) {
     if (currentSection === 'fourth') {
       if (fourthProgress >= 0.16) {
         // Views 阶段：分段下降
-        let y = -41; // 基础层
+        let y = -40; // 基础层
+        let x = -5;
+        let z = 2;
         if (fourthProgress > 0.89) {
-          y -= 40;
+          z -= 50;
+          y -= 20;
         } else if (fourthProgress > 0.63) {
-          y -= 30; // -20 再降 60 => -80
+          z -= 35; // -20 再降 60 => -80
         } else if (fourthProgress > 0.47) {
-          y -= 20; // -20 再降 40 => -60
+          z -= 20; // -20 再降 40 => -60
         } else if (fourthProgress > 0.32) {
-          y -= 10; // -20 再降 20 => -40
+          x -= 0; // -20 再降 20 => -40
+          z -= 10;
         }
-        desiredPos = [-10, y + 2, 5];
-        lookTarget = new THREE.Vector3(-5, y, 0);
+        desiredPos = [x, y + 2, z];
+        lookTarget = tempVectorRef.current.set(-4, y, z - 2);
       } else {
         // Fourth section但progress < 0.16时，保持在-30位置
         desiredPos = [0, -30, 10];
-        lookTarget = new THREE.Vector3(0, -30, 0);
+        lookTarget = tempVectorRef.current.set(0, -30, 0);
       }
     } else if (currentSection === 'gallery') {
       // Gallery 模式
       desiredPos = [0, -10, 10];
-      lookTarget = new THREE.Vector3(0, -10, 0);
+      lookTarget = tempVectorRef.current.set(0, -10, 0);
     } else if (currentSection === 'chart') {
       // Chart 模式 - 摄像头y值移动到-20
       desiredPos = [0, -20, 10];
-      lookTarget = new THREE.Vector3(0, -20, 0);
+      lookTarget = tempVectorRef.current.set(0, -20, 0);
     } else if (currentSection === 'quote') {
       // Quote 模式 - 摄像头y值移动到-30
       desiredPos = [0, -30, 10];
-      lookTarget = new THREE.Vector3(0, -30, 0);
+      lookTarget = tempVectorRef.current.set(0, -30, 0);
     } else {
       // HeroSection 默认模式（基于鼠标的动画）
       desiredPos = [
@@ -1432,7 +1303,7 @@ function CameraRig({ sectionState }) {
         state.pointer.y * 10,
         8 + Math.cos(state.pointer.x) * 3,
       ];
-      lookTarget = new THREE.Vector3(0, 0, 0);
+      lookTarget = tempVectorRef.current.set(0, 0, 0);
     }
 
     // 惯性缓动到目标机位与目标朝向，同步推进

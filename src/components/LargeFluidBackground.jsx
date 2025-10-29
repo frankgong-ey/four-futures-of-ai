@@ -9,10 +9,10 @@ import { gsap } from 'gsap';
 import fluidBackgroundVertexShader from '../shaders/fluidBackground.vert.glsl';
 import fluidBackgroundFragmentShader from '../shaders/fluidBackground.frag.glsl';
 
-export default function FluidBackground({ sectionState, fourthProgress = 0 }) {
+export default function LargeFluidBackground({ sectionState }) {
   const meshRef = useRef();
   const { camera } = useThree();
-  const color1Ref = useRef('#0a0a0a'); // 固定为接近黑色
+  const color1Ref = useRef('#4762c4'); // 默认颜色
   
   // Leva 调试面板 - 已禁用
   // const {
@@ -45,29 +45,32 @@ export default function FluidBackground({ sectionState, fourthProgress = 0 }) {
   const opacity = 0.8;
   const distance = 25;
 
-  // 移除动态颜色变化，保持恒定颜色
-  // useEffect(() => {
-  //   let targetColor = '#4762c4'; // 默认蓝色
-  //   
-  //   // 检查是否在指定范围内
-  //   if (fourthProgress >= 0.17 && fourthProgress <= 0.89) {
-  //     targetColor = '#0a0a0a'; // 接近黑色
-  //   } else if (sectionState === 'fourth') {
-  //     targetColor = '#bea852'; // 金色
-  //   }
-  //   
-  //   // 使用GSAP进行颜色过渡
-  //   gsap.to(color1Ref, {
-  //     current: targetColor,
-  //     duration: 1.5,
-  //     ease: "power2.inOut",
-  //     onUpdate: () => {
-  //       // 颜色更新会在useFrame中处理
-  //     }
-  //   });
-  // }, [sectionState, fourthProgress]);
+  // 根据sectionState动态改变color1
+  useEffect(() => {
+    // 定义每个 future section 对应的颜色
+    const sectionColors = {
+      'hero': '#4762c4',        // 默认蓝色
+      'constraint': '#750D5D',  // 紫色 - 对应 constraint 的颜色
+      'growth': '#2BB856',       // 绿色 - 对应 growth 的颜色  
+      'transform': '#198CE6',    // 蓝色 - 对应 transform 的颜色
+      'collapse': '#FF4136',     // 红色 - 对应 collapse 的颜色
+      'nextChapter': '#bea852'   // 金色 - 对应 next chapter
+    };
+    
+    const targetColor = sectionColors[sectionState] || '#4762c4';
+    
+    // 使用GSAP进行颜色过渡
+    gsap.to(color1Ref, {
+      current: targetColor,
+      duration: 1.5,
+      ease: "power2.inOut",
+      onUpdate: () => {
+        // 颜色更新会在useFrame中处理
+      }
+    });
+  }, [sectionState]);
 
-  // 创建shader材质 - 彻底避免Bloom影响
+  // 创建shader材质
   const shaderMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       vertexShader: fluidBackgroundVertexShader,
@@ -84,18 +87,13 @@ export default function FluidBackground({ sectionState, fourthProgress = 0 }) {
         uOpacity: { value: opacity }
       },
       transparent: true,
-      side: THREE.DoubleSide,
-      toneMapped: true, // 确保颜色被色调映射
-      depthWrite: false, // 避免深度写入问题
-      depthTest: true, // 启用深度测试
-      blending: THREE.NormalBlending, // 使用正常混合模式
-      premultipliedAlpha: false // 禁用预乘alpha
+      side: THREE.DoubleSide
     });
   }, [color2, color3, color4, speed, noiseScale, intensity, opacity]);
 
-  // 创建几何体 - 大平面
+  // 创建几何体 - 超大平面确保覆盖全屏
   const geometry = useMemo(() => {
-    return new THREE.PlaneGeometry(20, 20, 32, 32);
+    return new THREE.PlaneGeometry(100, 100, 32, 32);
   }, []);
 
   // 更新材质uniforms
@@ -137,9 +135,6 @@ export default function FluidBackground({ sectionState, fourthProgress = 0 }) {
       material={shaderMaterial}
       renderOrder={-1000} // 确保在最底层渲染
       frustumCulled={false} // 禁用视锥体剔除，确保始终渲染
-      visible={true} // 确保可见
-      castShadow={false} // 不投射阴影
-      receiveShadow={false} // 不接收阴影
     />
   );
 }

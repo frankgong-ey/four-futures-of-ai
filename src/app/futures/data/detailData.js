@@ -1,11 +1,4 @@
-"use client";
-
-import React from "react";
-import { useRouter } from "next/navigation";
-import DetailView from "../components/DetailView";
-
-// 模拟详情数据 - 后期可以替换为CMS数据
-const detailData = {
+export const detailData = {
   "constraint": {
     id: "constraint",
     title: "CONSTRAINT",
@@ -14,7 +7,10 @@ const detailData = {
     content: {
       about: {
         title: "About This Future",
-        description: "In the CONSTRAINT future, AI development hits a plateau. While AI systems become widespread and commonly used, they fail to deliver significant improvements in accuracy, reliability, training efficiency, or overall performance. This scenario represents a world where AI adoption is high, but innovation stagnates.",
+        description: [
+          "Imagine AI freezes at today's level—fully scaled, widely used, but without breakthroughs in accuracy, reliability, training, or energy efficiency to realize the big promises of 2025.",
+          `Aggressive regulation in North America and the EU is slowing AI development in western markets. "Grey market" AIs are emerging, and enterprise AI tools have only incremental impact. Employees are resistant, feeling burdened by mediocre tools. Companies are cautious with AI investments, leading to slower adoption, except in a few industries with notable AI impact.`
+        ],
         video: {
           thumbnail: "/images/video_thumbnail.jpg",
           duration: "2:45"
@@ -24,29 +20,39 @@ const detailData = {
         title: "Forces of Change",
         items: [
           {
-            title: "Demand for compute remains high, fueling a ramp in chip production",
-            icon: "chip",
+            title: "Restrictive regulatory environment",
+            icon: "shield",
             trend: "up"
           },
           {
-            title: "AI costs continue along downward trajectory", 
+            title: "Public skepticism due to previous AI mishaps", 
+            icon: "user",
+            trend: "down"
+          },
+          {
+            title: "Reduced AI corporate budgets",
             icon: "money",
             trend: "down"
           },
           {
-            title: "Government investment fuels sustained research",
-            icon: "building",
-            trend: "up"
+            title: "Employee fatigue / morale",
+            icon: "users",
+            trend: "down"
+          },
+          {
+            title: "Fragmented AI adoption",
+            icon: "pie-chart",
+            trend: "down"
           }
         ]
       },
       strategicPlays: {
         title: "Strategic Plays",
         items: [
-          "Focus on operational efficiency over innovation",
-          "Invest in proven AI applications",
-          "Build robust data infrastructure",
-          "Develop human-AI collaboration frameworks"
+          "Risk-Managed Innovation",
+          "COEs",
+          "Employee Upskilling Initiatives",
+          "Contingency Planning"
         ]
       }
     }
@@ -59,7 +65,10 @@ const detailData = {
     content: {
       about: {
         title: "About This Future",
-        description: "The GROWTH future represents a world where AI barriers fall away, and artificial intelligence becomes ubiquitous across all sectors. This scenario is characterized by widespread positive impact on both business and society, with AI driving innovation, efficiency, and improved quality of life.",
+        description: [
+          "The barriers to entry into AI continue to come down. AI is everywhere, with largely positive impacts on business and society.",
+          "Companies using AI have significantly improved efficiency, reducing costs while boosting revenue and innovation. Families rely on AI for tasks like vacation planning and daily scheduling. AI regulation is minimal and varies by region. In workplaces, human-AI partnerships enhance employee contributions and reduce burnout. Some organizations are testing 4-day workweeks, sharing AI benefits with employees. The demand for niche skills has decreased, intensifying the competition for talent."
+        ],
         video: {
           thumbnail: "/images/video_thumbnail.jpg",
           duration: "3:12"
@@ -69,18 +78,38 @@ const detailData = {
         title: "Forces of Change",
         items: [
           {
-            title: "AI becomes accessible to small businesses and individuals",
-            icon: "accessibility",
+            title: "Demand for compute remains high, fueling a ramp in chip production",
+            icon: "chip",
             trend: "up"
           },
           {
-            title: "Regulatory frameworks enable rapid AI adoption",
-            icon: "shield",
+            title: "AI costs continue along downward trajectory",
+            icon: "money",
+            trend: "down"
+          },
+          {
+            title: "Government investment fuels sustained research",
+            icon: "building",
             trend: "up"
           },
           {
-            title: "AI-human collaboration becomes seamless",
-            icon: "collaboration",
+            title: "Companies and individuals see early winners and adopt AI",
+            icon: "trending-up",
+            trend: "up"
+          },
+          {
+            title: "Incremental advancements in model capability continue, preventing a boom/bust cycle",
+            icon: "chart-line",
+            trend: "up"
+          },
+          {
+            title: "AI becomes a major tool in education, fueling adoption for younger workers",
+            icon: "school",
+            trend: "up"
+          },
+          {
+            title: "Verticalized AI applications grow in popularity and reshape enterprise software",
+            icon: "layers",
             trend: "up"
           }
         ]
@@ -88,10 +117,10 @@ const detailData = {
       strategicPlays: {
         title: "Strategic Plays",
         items: [
-          "Embrace AI-first business models",
-          "Invest in AI talent and training",
-          "Build ethical AI frameworks",
-          "Create AI-powered customer experiences"
+          "Enterprise Transformation",
+          "AI-Native BUs",
+          "AI Factories",
+          "Challenger Models"
         ]
       }
     }
@@ -105,7 +134,10 @@ const detailData = {
     content: {
       about: {
         title: "About This Future",
-        description: "[Enter description for Transform]",
+        description: [
+          "Progress in AI for the last 5 years has exceeded expectations in almost every dimension.",
+          "Today, most companies use AI extensively to enhance efficiency and automate tasks, which employees generally welcome. Regulators have balanced safety and innovation effectively. This has led to increased productivity and growth, with AI-native firms outperforming traditional ones in the S&P 500. The most successful companies are those that have reinvented their business models, achieving unprecedented results."
+        ],
         video: {
           thumbnail: "/images/video_thumbnail.jpg",
           duration: "0:00"
@@ -115,18 +147,38 @@ const detailData = {
         title: "Forces of Change",
         items: [
           {
-            title: "[Enter force 1]",
-            icon: "chip",
+            title: "Economic growth through AI R&D",
+            icon: "chart-line",
             trend: "up"
           },
           {
-            title: "[Enter force 2]", 
+            title: "Significant automation and workforce change",
+            icon: "cpu",
+            trend: "up"
+          },
+          {
+            title: "Significant model capability growth as adoption ramps",
+            icon: "trending-up",
+            trend: "up"
+          },
+          {
+            title: "Cost of intelligence reduces asymptotically towards zero",
             icon: "money",
+            trend: "down"
+          },
+          {
+            title: "AI becomes ubiquitous for people and organizations",
+            icon: "globe",
             trend: "up"
           },
           {
-            title: "[Enter force 3]",
-            icon: "building",
+            title: "AI trust increases as benefits outweigh mistakes",
+            icon: "shield",
+            trend: "up"
+          },
+          {
+            title: "AI enables organizations to scale instantaneously and almost infinitely",
+            icon: "rocket",
             trend: "up"
           }
         ]
@@ -134,10 +186,10 @@ const detailData = {
       strategicPlays: {
         title: "Strategic Plays",
         items: [
-          "[Enter strategic play 1]",
-          "[Enter strategic play 2]",
-          "[Enter strategic play 3]",
-          "[Enter strategic play 4]"
+          "Ecosystem Plays",
+          "Challenger Models",
+          "Strategic Portfolio Evaluation",
+          "Business Model Innovation"
         ]
       }
     }
@@ -151,7 +203,10 @@ const detailData = {
     content: {
       about: {
         title: "About This Future",
-        description: "[Enter description for Collapse]",
+        description: [
+          "By 2030, the number of companies building AI has collapsed into a handful of mega-players.",
+          "Over the past five years, the gap between \"AI winners\" and \"AI losers\" has widened. Prices for top-tier AI have skyrocketed, limiting access to a few \"VIP\" companies. The progress of AI has slowed due to major players and regulations affecting smaller builders. Companies without top-tier models must partner with market leaders, spend heavily, or face challenges. Public backlash has led to brand boycotts. New AI classes are emerging, but their value and control dynamics remain uncertain."
+        ],
         video: {
           thumbnail: "/images/video_thumbnail.jpg",
           duration: "0:00"
@@ -161,18 +216,28 @@ const detailData = {
         title: "Forces of Change",
         items: [
           {
-            title: "[Enter force 1]",
-            icon: "chip",
+            title: "Decline of open-source",
+            icon: "lock",
             trend: "down"
           },
           {
-            title: "[Enter force 2]", 
+            title: "Increase in cost of AI",
             icon: "money",
+            trend: "up"
+          },
+          {
+            title: "Aging populations",
+            icon: "users",
             trend: "down"
           },
           {
-            title: "[Enter force 3]",
-            icon: "building",
+            title: "Recession",
+            icon: "chart-down",
+            trend: "down"
+          },
+          {
+            title: "Unknowns on who to trust",
+            icon: "question",
             trend: "down"
           }
         ]
@@ -180,10 +245,10 @@ const detailData = {
       strategicPlays: {
         title: "Strategic Plays",
         items: [
-          "[Enter strategic play 1]",
-          "[Enter strategic play 2]",
-          "[Enter strategic play 3]",
-          "[Enter strategic play 4]"
+          "Deep Partnerships",
+          "Proprietary AI",
+          "IP Protection",
+          "Portfolio Rationalization"
         ]
       }
     }
@@ -1477,48 +1542,3 @@ const detailData = {
     }
   }
 };
-
-export default function FutureDetailPage({ params }) {
-  const router = useRouter();
-  const { futureId } = React.use(params);
-  
-  const futureData = detailData[futureId];
-
-  if (!futureData) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Future not found</h1>
-          <button 
-            onClick={() => router.push('/futures')}
-            className="px-6 py-3 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
-          >
-            Back to Futures
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const handleClose = () => {
-    // 从 futureId 提取版本，例如 "transform-og" -> "oil-gas"
-    let versionId = 'all-industries'; // 默认值
-    
-    if (futureId.includes('-cp')) versionId = 'consumer-products';
-    else if (futureId.includes('-ip')) versionId = 'industrial-products';
-    else if (futureId.includes('-og')) versionId = 'oil-gas';
-    else if (futureId.includes('-d')) versionId = 'defense';
-    else if (futureId.includes('-bcm')) versionId = 'banking-capital-markets';
-    else if (futureId.includes('-r')) versionId = 'retail';
-    else if (futureId.includes('-ls')) versionId = 'life-sciences';
-    
-    router.push(`/futures?version=${versionId}#${futureId}`);
-  };
-
-  return (
-    <DetailView 
-      future={futureData}
-      onClose={handleClose}
-    />
-  );
-}

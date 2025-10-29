@@ -80,9 +80,15 @@ void main() {
     // 应用强度
     color *= uIntensity;
     
+    // 强制限制颜色值在0-1范围内，彻底避免Bloom影响
+    color = clamp(color, vec3(0.0), vec3(1.0));
+    
     // 边缘衰减
     float edgeFade = 1.0 - smoothstep(0.8, 1.0, dist);
     color *= edgeFade;
+    
+    // 最终颜色限制
+    color = clamp(color, vec3(0.0), vec3(1.0));
     
     gl_FragColor = vec4(color, uOpacity);
 }

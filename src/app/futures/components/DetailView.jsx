@@ -6,6 +6,14 @@ export default function DetailView({ future, onClose }) {
   const [activeSection, setActiveSection] = useState("about");
   const contentRef = useRef(null);
 
+  // 阻止背景页面滚动
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
   const sections = [
     { id: "about", title: "About This Future" },
     { id: "forces", title: "Forces of Change" },
@@ -14,19 +22,15 @@ export default function DetailView({ future, onClose }) {
 
   // 滚动到指定section
   const scrollToSection = (sectionId) => {
-    console.log('scrollToSection called with:', sectionId);
     setActiveSection(sectionId);
     
     setTimeout(() => {
       const element = document.getElementById(sectionId);
-      console.log('Element found:', element);
-      
-      if (element) {
-        console.log('Calling scrollIntoView');
-        element.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'nearest'
+      if (element && contentRef.current) {
+        const elementTop = element.offsetTop - 64; // 64px距离顶部
+        contentRef.current.scrollTo({
+          top: elementTop,
+          behavior: 'smooth'
         });
       }
     }, 50);
@@ -34,33 +38,53 @@ export default function DetailView({ future, onClose }) {
 
   // 监听滚动，更新active section
   useEffect(() => {
+    let timeoutId = null;
+
     const handleScroll = () => {
       if (!contentRef.current) return;
 
-      const scrollTop = contentRef.current.scrollTop;
-      const sections = document.querySelectorAll('[data-section]');
-      
-      sections.forEach((section) => {
-        const sectionTop = section.offsetTop - 100;
-        const sectionBottom = sectionTop + section.offsetHeight;
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        const scrollTop = contentRef.current.scrollTop;
+        const threshold = scrollTop + 200; // 触发偏移
         
-        if (scrollTop >= sectionTop && scrollTop < sectionBottom) {
-          setActiveSection(section.id);
-        }
-      });
+        // 找到当前滚动位置经过的最后一个section（考虑64px偏移）
+        let currentSection = sections[0].id;
+        
+        sections.forEach((section) => {
+          const element = document.getElementById(section.id);
+          if (element) {
+            const sectionTop = element.offsetTop - 64; // 减去64px偏移
+            if (sectionTop <= threshold) {
+              currentSection = section.id;
+            }
+          }
+        });
+
+        setActiveSection(currentSection);
+      }, 50);
     };
 
     const content = contentRef.current;
     if (content) {
       content.addEventListener('scroll', handleScroll);
-      return () => content.removeEventListener('scroll', handleScroll);
+      handleScroll();
+      return () => {
+        content.removeEventListener('scroll', handleScroll);
+        clearTimeout(timeoutId);
+      };
     }
   }, []);
 
   return (
-    <div className="min-h-screen bg-transparent text-white flex relative z-[100]">
-      {/* 左侧导航 */}
-      <div className="fixed left-0 top-0 w-80 bg-transparent border-r border-white/10 z-[101] h-screen overflow-hidden pointer-events-none">
+    <>
+      {/* 背景遮罩 */}
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99]"></div>
+      
+      {/* Modal 内容 */}
+      <div className="fixed inset-0 text-white flex z-[100]">
+        {/* 左侧导航 */}
+        <div className="fixed left-0 top-0 w-80 bg-transparent border-r border-white/10 z-[101] h-full overflow-hidden pointer-events-none">
         <div className="p-8 h-full flex flex-col pointer-events-auto">
           {/* Close按钮 - 带白色圆圈 */}
           <button
@@ -149,12 +173,12 @@ export default function DetailView({ future, onClose }) {
       </div>
 
       {/* 右侧内容 - 可滚动 */}
-      <div className="flex-1 ml-80 overflow-hidden">
+      <div className="fixed right-0 top-0 w-[calc(100%-20rem)] h-full overflow-hidden z-[101]">
         <div 
           ref={contentRef}
           className="h-full overflow-y-auto"
         >
-          <div className="max-w-4xl mx-auto px-8 py-16 space-y-8">
+          <div className="max-w-4xl mx-auto px-8 pt-16 pb-160 space-y-8">
             {/* About Section */}
             <section id="about" data-section>
               <div className="bg-white/10 backdrop-blur-lg p-8 outline outline-1 outline-white/20">
@@ -165,9 +189,15 @@ export default function DetailView({ future, onClose }) {
                   About This Future
                 </h2>
                 
-                <p className="text-lg leading-relaxed text-white/80 mb-12">
-                  {future.content.about.description}
-                </p>
+                <div className="text-lg leading-relaxed text-white/80 mb-12 space-y-4">
+                  {Array.isArray(future.content.about.description) ? (
+                    future.content.about.description.map((para, idx) => (
+                      <p key={idx}>{para}</p>
+                    ))
+                  ) : (
+                    <p>{future.content.about.description}</p>
+                  )}
+                </div>
                 
                 {/* 视频部分 */}
                 <div className="relative aspect-video bg-gray-900 rounded-xl overflow-hidden">
@@ -251,6 +281,7 @@ export default function DetailView({ future, onClose }) {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

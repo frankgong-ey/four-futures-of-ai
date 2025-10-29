@@ -19,7 +19,7 @@ void main() {
   visibility *= edgeFade;
   
   // 多高光流动动画
-  float highlightSpeed = 0.1; // 流动速度（更慢了）
+  float highlightSpeed = 0.05; // 流动速度（更慢了）
   float highlightWidth = 0.015; // 单个高光宽度（更小了）
   float highlightStrength = 0.3; // 高光强度（更暗了）
   
