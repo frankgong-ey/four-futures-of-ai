@@ -377,12 +377,8 @@ export default function ResultsSummarySection({ results }) {
             </div>
           </div>
 
-          {/* Right Side - Donut Chart */}
-          <DonutChart 
-            votes={votes} 
-            totalParticipants={totalParticipants} 
-            userVote={userVote} 
-          />
+        {/* 右侧占位（已将 3D Canvas 移至 results/page.jsx 背景层） */}
+        <div className="relative flex-1 flex justify-center lg:justify-end" />
         </div>
       </div>
     </div>

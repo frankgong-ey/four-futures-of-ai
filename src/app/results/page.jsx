@@ -1,8 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import ResultsSummarySection from "./ResultsSummarySection";
 import { useSearchParams } from "next/navigation";
+
+// 禁用 SSR，只在客户端渲染（需要 WebGL）
+const LiveVotesGlobe = dynamic(() => import("./LiveVotesGlobe"), { ssr: false });
 
 export default function ResultsPage() {
   const searchParams = useSearchParams();
@@ -46,15 +50,17 @@ export default function ResultsPage() {
   }
 
   return (
-    <div 
-      className="bg-black relative min-h-screen"
-      style={{
-        backgroundImage: 'url(/images/hero_gradient.svg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
-    >
+    <div className="bg-black relative min-h-screen">
+      {/* 背景图层 */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url(/images/hero_gradient.svg)', opacity: 0.5 }}
+      />
+
+      {/* 全屏 3D Canvas 图层 */}
+      <LiveVotesGlobe />
+
+      {/* 内容层 */}
       <div className="relative z-10">
         <ResultsSummarySection results={results} />
       </div>

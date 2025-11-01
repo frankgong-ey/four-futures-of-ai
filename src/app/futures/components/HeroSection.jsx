@@ -93,7 +93,7 @@ export default function HeroSection({ onVersionSelect }) {
         {/* 左侧标题区域 */}
         <div className="flex-1 flex flex-col justify-start max-w-[640px]">
           <div className="text-[24px] font-bold text-white/60 mb-4">Four Futures of AI</div>
-          <h1 className="text-7xl font-bold text-white leading-none">
+          <h1 className="text-[96px] font-light text-white leading-none">
             Choose your industry to explore
           </h1>
         </div>
@@ -106,13 +106,13 @@ export default function HeroSection({ onVersionSelect }) {
             {/* All Industries 选项 - 单独一行 */}
             <button
               onClick={() => handleVersionClick("all-industries")}
-              className="w-full h-[120px] p-6 mb-4 border border-white/10 bg-white/10 backdrop-blur-[4px] hover:border-white/50 hover:bg-white/20 transition-all duration-300 cursor-pointer"
+              className="w-full h-[120px] p-6 mb-4 border border-white/10 bg-white/10 backdrop-blur-[16px] hover:border-white/50 hover:bg-white/20 transition-all duration-300 cursor-pointer"
             >
               <div className="text-white text-[18px] font-medium">All Industries</div>
             </button>
 
             {/* 行业特定选项 - 3x3 网格 */}
-            <div className="grid grid-cols-3 border border-white/10 bg-white/10 backdrop-blur-[4px] overflow-hidden">
+            <div className="grid grid-cols-3 border border-white/10 bg-white/10 backdrop-blur-[16px] overflow-hidden">
               {versions.slice(1, 10).map((version, index) => (
                 <button
                   key={version.id}

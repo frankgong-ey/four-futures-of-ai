@@ -18,35 +18,21 @@ export const useScrollSection = () => useContext(ScrollSectionContext);
 function CameraController({ targetSection, targetPosition, targetLookAt }) {
   const { camera } = useThree();
   const cameraRef = useRef(camera);
+  const lookAtRef = useRef(new THREE.Vector3(...targetLookAt));
 
   useFrame((state, delta) => {
     if (!cameraRef.current) return;
-
-    // 使用 easing 让摄像机移动平滑
-    const currentPos = cameraRef.current.position;
-    const currentTarget = new THREE.Vector3();
-
-    // 获取当前的 look-at 目标（使用相机前方的一个点）
-    const cameraDirection = new THREE.Vector3();
-    cameraRef.current.getWorldDirection(cameraDirection);
-    currentTarget.copy(currentPos).add(cameraDirection.multiplyScalar(5));
 
     // 目标位置和看向的点
     const targetPos = new THREE.Vector3(...targetPosition);
     const targetLookAtPos = new THREE.Vector3(...targetLookAt);
 
-    // 平滑移动到目标位置
-    easing.damp3(currentPos, targetPos, 0.3, delta);
-    
-    // 计算相机应该看向的方向
-    const direction = new THREE.Vector3().subVectors(targetLookAtPos, currentPos).normalize();
-    const targetQuaternion = new THREE.Quaternion().setFromUnitVectors(
-      new THREE.Vector3(0, 0, -1),
-      direction
-    );
-    
-    // 平滑旋转到目标方向
-    cameraRef.current.quaternion.slerp(targetQuaternion, 0.1);
+    // 平滑移动到目标位置与目标lookAt点（同时缓动）
+    easing.damp3(cameraRef.current.position, targetPos, 0.3, delta);
+    easing.damp3(lookAtRef.current, targetLookAtPos, 0.3, delta);
+
+    // 直接lookAt同步缓动后的目标点，避免先后移动造成的延迟错位
+    cameraRef.current.lookAt(lookAtRef.current);
   });
 
   return null;
@@ -57,7 +43,7 @@ function PlaceholderPlane({ position, color, futureName }) {
   return (
     <mesh position={position} rotation={[-Math.PI / 2, 0, 0]}>
       <planeGeometry args={[8, 8]} />
-      <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.2} />
+      <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.2} side={THREE.DoubleSide} />
     </mesh>
   );
 };
@@ -223,6 +209,7 @@ function ParticleUnit({ index }) {
           color="#ffffff" 
           emissive="#48A9EE" 
           emissiveIntensity={1.0}
+          side={THREE.DoubleSide}
         />
       </mesh>
       
@@ -235,6 +222,7 @@ function ParticleUnit({ index }) {
           vertexShader={FadeTrailMaterial.vertexShader}
           fragmentShader={FadeTrailMaterial.fragmentShader}
           transparent={true}
+          side={THREE.DoubleSide}
         />
       </line>
     </group>
@@ -314,6 +302,8 @@ const OrbitRingMaterial = {
       
       // 计算距离最近高光点的距离
       float minDist = min(abs(dist1), abs(dist2));
+      // 获取更近的高光的带符号距离（正数表示在前方）
+      float closestDist = abs(dist1) < abs(dist2) ? dist1 : dist2;
       
       // 基础颜色（较暗）
       vec3 baseColor = color * 0.3;
@@ -321,15 +311,14 @@ const OrbitRingMaterial = {
       // 头部区域颜色：使用 uniform 传入的高光颜色
       vec3 blueColor = color * 2.0;
       
-      // 使用距离来控制高光头部区域，而不是强度
-      // 距离小于 0.004 的区域为高光颜色（极小的头部）
+      // 简化逻辑：头部区域在前方（closestDist >= 0）且距离较小时显示
       vec3 finalHighlightColor;
-      if (minDist < 0.004) {
-        // 头部：使用 uniform 中的高光颜色
+      if (closestDist >= 0.0 && closestDist < 0.006) {
+        // 前方头部区域：使用高光颜色
         finalHighlightColor = highlightColor;
       } else if (highlightIntensity > 0.0) {
         // 尾部：渐变到蓝色
-        float t = minDist / 0.004; // t 从 1 开始逐渐增大
+        float t = minDist / 0.006;
         finalHighlightColor = mix(highlightColor, blueColor, clamp(t, 0.0, 1.0));
       } else {
         finalHighlightColor = blueColor;
@@ -372,6 +361,7 @@ function OrbitRing({ ringIndex, position, rotation, radius = 2 }) {
         transparent={true}
         depthWrite={false}
         depthTest={false}
+        side={THREE.DoubleSide}
       />
     </mesh>
   );
@@ -458,6 +448,7 @@ function TubeSegment({ segmentIndex, position, height }) {
         transparent={true}
         depthWrite={false}
         depthTest={false}
+        side={THREE.DoubleSide}
       />
     </mesh>
   );
@@ -533,6 +524,7 @@ function ConstraintTube({ tubeIndex, position, curve }) {
         transparent={true}
         depthWrite={false}
         depthTest={false}
+        side={THREE.DoubleSide}
       />
     </mesh>
   );
@@ -648,6 +640,7 @@ function CollapseTube({ tubeIndex, angle }) {
         transparent={true}
         depthWrite={false}
         depthTest={false}
+        side={THREE.DoubleSide}
       />
     </mesh>
   );
@@ -689,14 +682,14 @@ function CollapseScene({ position }) {
 
 // 3D场景组件
 function Scene3D({ targetSection }) {
-  // 定义每个场景的位置
+  // 定义每个场景的位置（间隔20）
   const scenePositions = {
-    hero: [-10, 0, 0],
+    hero: [-20, 0, 0],
     constraint: [0, 0, 0],
-    growth: [10, 0, 0],
-    transform: [20, 0, 0],
-    collapse: [30, 0, 0],
-    nextChapter: [40, 0, 0]
+    growth: [20, 0, 0],
+    transform: [40, 0, 0],
+    collapse: [60, 0, 0],
+    nextChapter: [80, 0, 0]
   };
 
   const currentPosition = scenePositions[targetSection] || scenePositions.hero;
@@ -711,7 +704,7 @@ function Scene3D({ targetSection }) {
   if (targetSection === 'hero') {
     cameraPosition = [0, 0, 3]; // hero section 相机位置
   } else if (targetSection === 'nextChapter') {
-    cameraPosition = [40, 0, 3]; // 从 5 改为 3，让物体更大
+    cameraPosition = [80, 0, 3]; // 间隔改为20，nextChapter位置改为80
   } else {
     cameraPosition = [
       currentPosition[0],
@@ -761,6 +754,7 @@ function Scene3D({ targetSection }) {
 // 全局3D Canvas组件
 export default function Global3DCanvas({ currentSection }) {
   const [shouldRender, setShouldRender] = useState(false);
+  const [paused, setPaused] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const [targetSection, setTargetSection] = useState('hero');
@@ -807,6 +801,18 @@ export default function Global3DCanvas({ currentSection }) {
     }
   }, [currentSection]);
 
+  // 监听 DetailView 打开/关闭事件以暂停/恢复渲染
+  useEffect(() => {
+    const handleOpen = () => setPaused(true);
+    const handleClose = () => setPaused(false);
+    window.addEventListener('detailview-open', handleOpen);
+    window.addEventListener('detailview-close', handleClose);
+    return () => {
+      window.removeEventListener('detailview-open', handleOpen);
+      window.removeEventListener('detailview-close', handleClose);
+    };
+  }, []);
+
   // 只在需要时渲染3D Canvas
   if (!shouldRender) {
     return null;
@@ -824,6 +830,7 @@ export default function Global3DCanvas({ currentSection }) {
           premultipliedAlpha: false,
           preserveDrawingBuffer: true
         }}
+        frameloop={paused ? 'never' : 'always'}
       >
         <Scene3D targetSection={targetSection} />
       </Canvas>

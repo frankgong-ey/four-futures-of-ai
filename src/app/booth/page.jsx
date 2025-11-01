@@ -610,7 +610,8 @@ export default function BoothPage() {
       </div>
 
 
-      {/* 调试信息面板 */}
+      {/* 调试信息面板 - 已隐藏 */}
+      {false && (
       <div
         style={{
           position: 'fixed',
@@ -646,6 +647,7 @@ export default function BoothPage() {
           Bloom: {shouldEnableBloom ? '✅ 启用' : '❌ 禁用'}
         </div>
       </div>
+      )}
     </div>
     );
 }

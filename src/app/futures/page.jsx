@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import FuturesOverview from "./components/FuturesOverview";
@@ -8,6 +8,7 @@ import HeroSection from "./components/HeroSection";
 import DetailView from "./components/DetailView";
 // 导入所有 detailData
 import { detailData } from "./data/detailData.js";
+import { ScrollSectionContext } from "../../components/Global3DCanvas";
 
 // 从 detailData 生成版本数据
 const generateVersionData = (versionId, versionName, futureIds) => ({
@@ -60,8 +61,16 @@ export default function FuturesPage() {
   const [selectedVersion, setSelectedVersion] = useState(null);
   const [selectedFuture, setSelectedFuture] = useState(null);
   const router = useRouter();
+  const { setCurrentSection } = useContext(ScrollSectionContext) || {};
 
   const currentVersion = selectedVersion ? versionsData[selectedVersion] : null;
+
+  // 进入 /futures 页面时重置 3D 相机到初始（hero）
+  useEffect(() => {
+    if (typeof setCurrentSection === 'function') {
+      setCurrentSection(null); // Global3DCanvas 会将 null 映射为 hero
+    }
+  }, []);
 
   // 检查 URL 参数和 hash
   useEffect(() => {

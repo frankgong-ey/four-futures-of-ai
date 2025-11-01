@@ -10,9 +10,15 @@ export default function LayoutClient() {
   const isBoothPage = pathname === '/booth';
   const isFuturesPage = pathname?.startsWith('/futures');
   const isDetailPage = pathname?.startsWith('/futures/') && pathname !== '/futures';
+  const isDashboardPage = pathname?.startsWith('/dashboard');
 
   // 在 DetailView 页面不显示任何组件
   if (isDetailPage) {
+    return null;
+  }
+
+  // 在 dashboard 页面不显示任何组件
+  if (isDashboardPage) {
     return null;
   }
 
