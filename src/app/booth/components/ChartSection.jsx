@@ -3,21 +3,21 @@
 import React, { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 
-// ChartSection组件 - 100vh高度，包含图表和趋势线动画
+// ChartSection - 100vh height, includes chart and trend line animations
 export default function ChartSection() {
-  // 内部创建 refs
+  // Local refs
   const sectionRef = useRef(null);
   const aiChartRef = useRef(null);
   const trendLineRef = useRef(null);
   const backgroundPathRef = useRef(null);
   
-  // ChartSection 动画初始化 - 整合所有 ScrollTrigger 动画
+  // Initialize ChartSection animations - integrates ScrollTrigger animations
   useEffect(() => {
     if (sectionRef.current) {
-      // 设置 ChartSection 初始状态
+      // Set initial state
       gsap.set(sectionRef.current, { opacity: 0 });
       
-      // 1. ChartSection 淡入淡出动画
+      // 1) Fade in/out for section
       const sectionEntranceTween = gsap.to(sectionRef.current, {
         opacity: 1,
         duration: 1.5,
@@ -31,7 +31,7 @@ export default function ChartSection() {
         }
       });
 
-      // 2. 趋势线动画（如果 ref 存在）
+      // 2) Trend line animation (if refs exist)
       let chartTween = null;
       if (trendLineRef.current && backgroundPathRef.current) {
         chartTween = gsap.timeline({
@@ -42,7 +42,7 @@ export default function ChartSection() {
           }
         });
         
-        // 趋势线动画序列
+        // Trendline sequence
         chartTween.to(".data-point", {
           opacity: 1,
           duration: 0.1,
@@ -63,7 +63,7 @@ export default function ChartSection() {
         });
       }
 
-      // 清理函数
+      // Cleanup
       return () => {
         sectionEntranceTween.kill();
         if (chartTween) {
@@ -80,11 +80,11 @@ export default function ChartSection() {
     >
       <div className="pt-[240px] px-[16px] md:px-[64px] sm:px-[16px] z-10">
         <div className="grid grid-cols-12 gap-[24px]">
-          {/* AIChart 占据左侧 1-6 列 */}
+          {/* AIChart occupies left columns 1-8 */}
           <div className="col-span-8 col-start-1 mt-15">
             <AIChart aiChartRef={aiChartRef} trendLineRef={trendLineRef} backgroundPathRef={backgroundPathRef} />
           </div>
-          {/* 标题占据右侧 9-12 列 */}
+          {/* Title occupies right columns 9-12 */}
           <div className="col-span-4 col-start-9 flex flex-col gap-[16px] items-start">
             <div className="font-light text-white/80">AI's Accuracy on Humanity's Last Exam</div>
             <h2 className="text-4xl md:text-[80px] sm:text-3xl leading-none text-white">

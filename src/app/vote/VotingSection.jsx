@@ -2,138 +2,321 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "../../lib/supabase";
 
 const futures = [
   {
     id: "constraint",
-    title: "CONSTRAINT",
+    title: "Constraint",
     description: "AI stalls – scaled and common, but no gains in accuracy, reliability, training, or efficiency.",
-    icon: "🔗", // Constraint icon - intertwined loops
-    color: "#750D5D"
+    icon: "/images/constraint-logo.svg",
+    color: "#C37EB3"
   },
   {
     id: "growth",
-    title: "GROWTH",
+    title: "Growth",
     description: "Barriers drop; AI is everywhere, driving mostly positive business and social impact.",
-    icon: "⚡", // Growth icon - starburst
+    icon: "/images/growth-logo.svg",
     color: "#2BB856"
   },
   {
     id: "transform",
-    title: "TRANSFORM",
+    title: "Transform",
     description: "Progress in AI for the last 5 years has exceeded expectations in almost every dimension.",
-    icon: "🌟", // Transform icon - complex star
+    icon: "/images/transform-logo.svg",
     color: "#198CE6"
   },
   {
     id: "collapse",
-    title: "COLLAPSE",
+    title: "Collapse",
     description: "The number of companies building AI collapse into a handful of mega-players.",
-    icon: "⭕", // Collapse icon - circle
+    icon: "/images/collapse-logo.svg",
     color: "#FF4136"
+  }
+];
+
+const industries = [
+  {
+    id: "consumer-products",
+    name: "Consumer Products",
+    icon: "/images/industry/consumer-products.svg"
+  },
+  {
+    id: "industrial-products",
+    name: "Industrial Products",
+    icon: "/images/industry/industrial-products.svg"
+  },
+  {
+    id: "oil-gas",
+    name: "Oil & Gas",
+    icon: "/images/industry/oil-gas.svg"
+  },
+  {
+    id: "defense",
+    name: "Defense",
+    icon: "/images/industry/defense.svg"
+  },
+  {
+    id: "banking-capital-markets",
+    name: "Banking & Capital Markets",
+    icon: "/images/industry/banking.svg"
+  },
+  {
+    id: "retail",
+    name: "Retail",
+    icon: "/images/industry/retail.svg"
+  },
+  {
+    id: "life-sciences",
+    name: "Life Sciences",
+    icon: "/images/industry/life-sciences.svg"
+  },
+  {
+    id: "other",
+    name: "Other",
+    icon: null
   }
 ];
 
 export default function VotingSection() {
   const router = useRouter();
+  const [currentStep, setCurrentStep] = useState(1);
   const [selectedFuture, setSelectedFuture] = useState(null);
-  const [isVoting, setIsVoting] = useState(false);
+  const [selectedIndustry, setSelectedIndustry] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleVote = async () => {
-    if (!selectedFuture) return;
-
-    setIsVoting(true);
-    
-    try {
-      // TODO: 连接到 Supabase 并保存投票
-      // const { data, error } = await supabase
-      //   .from('votes')
-      //   .insert([{ future_id: selectedFuture, created_at: new Date() }]);
-      
-      // 模拟 API 调用
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // 跳转到结果页面
-      router.push(`/results?vote=${selectedFuture}`);
-      
-    } catch (error) {
-      console.error('Error submitting vote:', error);
-    } finally {
-      setIsVoting(false);
+  const handleNext = () => {
+    if (selectedFuture) {
+      setCurrentStep(2);
     }
   };
 
+  const handleSkip = () => {
+    handleSubmit();
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    
+    try {
+      // Use poll_id and choice according to the original schema
+      // choice should be the future title (e.g., "Constraint", "Growth", etc.)
+      const DEFAULT_POLL_ID = "test-2025-08-12";
+      
+      // Resolve selected future title
+      const selectedFutureData = futures.find(f => f.id === selectedFuture);
+      const choice = selectedFutureData ? selectedFutureData.title : null;
+      
+      // Resolve selected industry name
+      const selectedIndustryData = industries.find(i => i.id === selectedIndustry);
+      const industry = selectedIndustryData ? selectedIndustryData.name : null;
+      
+      // Insert poll_id, choice and industry
+      const voteData = {
+        poll_id: DEFAULT_POLL_ID,
+        choice: choice,
+        industry: industry
+      };
+
+      const { data, error } = await supabase
+        .from('votes')
+        .insert([voteData]);
+
+      if (error) {
+        console.error('Supabase insert error:', error);
+        // 打印更详细的错误信息
+        console.error('Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw error;
+      }
+
+      console.log('Vote submitted successfully:', data);
+      
+      // 跳转到结果页面
+      const params = new URLSearchParams();
+      if (selectedFuture) params.set('future', selectedFuture);
+      if (selectedIndustry) params.set('industry', selectedIndustry);
+      router.push(`/results?${params.toString()}`);
+      
+    } catch (error) {
+      console.error('Error submitting vote:', error);
+      alert('Failed to submit vote. Please try again.');
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleQuit = () => {
+    router.back();
+  };
+
   return (
-    <div className="min-h-screen bg-black px-6 py-20">
-      <div className="max-w-7xl mx-auto">
-        {/* Title Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6">
-            <span className="text-[#198CE6]">Four distinct future paths ahead.</span>
-          </h1>
-          <h2 className="text-4xl md:text-6xl font-bold mb-8">
-            <span className="text-[#198CE6]">What future are you preparing for?</span>
-          </h2>
-          <p className="text-xl text-white/80">
-            Cast your vote and explore <span className="text-[#198CE6] font-bold">2,103</span> participants' choices
-          </p>
+    <div className="min-h-screen bg-black text-white relative">
+      {/* Quit Button */}
+      <button
+        onClick={handleQuit}
+        className="absolute top-[120px] left-8 text-white hover:opacity-80 transition-opacity z-10 cursor-pointer"
+      >
+        Quit
+      </button>
+
+      <div className="flex flex-col items-center justify-center min-h-screen px-6 py-20">
+        {/* Progress Bar */}
+        <div className="mb-8 flex gap-2">
+          <div className={`h-1 w-16 transition-all duration-300 ${currentStep >= 1 ? 'bg-white' : 'bg-white/20'}`}></div>
+          <div className={`h-1 w-16 transition-all duration-300 ${currentStep >= 2 ? 'bg-white' : 'bg-white/20'}`}></div>
         </div>
 
-        {/* Voting Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {futures.map((future) => (
+        {/* Progress Indicator */}
+        <div className="mb-12 text-center">
+          <div className="text-white text-base">
+            Question {currentStep}/2
+          </div>
+        </div>
+
+        {/* Question 1: Select Future */}
+        {currentStep === 1 && (
+          <>
+            {/* Question Title */}
+            <h1 
+              className="text-4xl md:text-5xl font-bold text-center mb-12"
+              style={{
+                background: 'linear-gradient(to right, #FFFFFF, #FFE600)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}
+            >
+              Which future do you think we're heading towards?
+            </h1>
+
+            {/* Future Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 max-w-7xl w-full">
+              {futures.map((future) => (
+                <button
+                  key={future.id}
+                  onClick={() => setSelectedFuture(future.id)}
+                  className={`
+                    relative p-8 bg-white/5 backdrop-blur-lg outline outline-1 transition-all duration-300 cursor-pointer
+                    hover:bg-white/10
+                    ${selectedFuture === future.id ? 'outline-white' : 'outline-white/20'}
+                  `}
+                >
+                  {/* Icon */}
+                  <div className="flex justify-center mb-6">
+                    <img 
+                      src={future.icon} 
+                      alt={future.title}
+                      className="w-20 h-20 object-contain filter brightness-0 invert"
+                    />
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-xl font-bold text-white mb-4 text-center">
+                    {future.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-sm text-white/70 leading-relaxed text-center">
+                    {future.description}
+                  </p>
+                </button>
+              ))}
+            </div>
+
+            {/* Next Button */}
             <button
-              key={future.id}
-              onClick={() => setSelectedFuture(future.id)}
+              onClick={handleNext}
+              disabled={!selectedFuture}
               className={`
-                relative p-8 bg-white/5 backdrop-blur-md border-2 rounded-xl transition-all duration-300
-                hover:bg-white/10 hover:scale-105
-                ${selectedFuture === future.id ? 'border-white' : 'border-white/20'}
+                px-12 py-4 text-base font-normal transition-all duration-300
+                ${selectedFuture
+                  ? 'bg-white text-black hover:bg-white/90 cursor-pointer'
+                  : 'bg-white/30 text-white/30 cursor-not-allowed'
+                }
               `}
             >
-              {/* Selected Indicator */}
-              {selectedFuture === future.id && (
-                <div className="absolute top-4 right-4 w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-black" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              )}
-
-              {/* Icon */}
-              <div className="text-6xl mb-4">{future.icon}</div>
-
-              {/* Title */}
-              <h3 className="text-2xl font-bold mb-3" style={{ color: future.color }}>
-                {future.title}
-              </h3>
-
-              {/* Description */}
-              <p className="text-sm text-white/80 leading-relaxed">
-                {future.description}
-              </p>
+              Next question
             </button>
-          ))}
-        </div>
+          </>
+        )}
 
-        {/* Vote Button */}
-        <div className="text-center">
-          <button
-            onClick={handleVote}
-            disabled={!selectedFuture || isVoting}
-            className={`
-              px-12 py-4 border-2 rounded-xl font-semibold text-xl transition-all duration-300
-              ${selectedFuture && !isVoting
-                ? 'border-white hover:bg-white hover:text-black bg-transparent'
-                : 'border-white/30 text-white/30 cursor-not-allowed'
-              }
-            `}
-          >
-            {isVoting ? 'Submitting...' : 'Vote Now'}
-          </button>
-        </div>
+        {/* Question 2: Select Industry */}
+        {currentStep === 2 && (
+          <>
+            {/* Question Title */}
+            <h1 
+              className="text-4xl md:text-5xl font-bold text-center mb-12"
+              style={{
+                background: 'linear-gradient(to right, #FFFFFF, #FFE600)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}
+            >
+              Which industry are you from?
+            </h1>
+
+            {/* Industry Grid */}
+            <div className="grid grid-cols-4 gap-px mb-12 max-w-6xl w-full bg-white/20">
+              {industries.map((industry) => (
+                <button
+                  key={industry.id}
+                  onClick={() => setSelectedIndustry(industry.id)}
+                  className={`
+                    relative p-8 bg-black outline outline-1 transition-all duration-300 cursor-pointer
+                    hover:bg-white/5 flex flex-col items-center justify-center min-h-[160px]
+                    ${selectedIndustry === industry.id ? 'outline-white' : 'outline-white/20'}
+                  `}
+                >
+                  {/* Icon */}
+                  {industry.id !== 'other' && (
+                    <div className="flex justify-center mb-5">
+                      <img 
+                        src={industry.icon} 
+                        alt={industry.name}
+                        className="w-8 h-8 object-contain filter brightness-0 invert"
+                      />
+                    </div>
+                  )}
+
+                  {/* Name */}
+                  <p className="text-white text-center text-sm font-normal">
+                    {industry.name}
+                  </p>
+                </button>
+              ))}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4">
+              <button
+                onClick={handleSkip}
+                disabled={isSubmitting}
+                className="px-12 py-4 text-base font-normal bg-white/5 outline outline-1 outline-white/20 text-white hover:bg-white/10 transition-all duration-300"
+              >
+                Skip
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className={`
+                  px-12 py-4 text-base font-normal transition-all duration-300
+                  ${isSubmitting
+                    ? 'bg-white/30 text-white/30 cursor-not-allowed'
+                    : 'bg-white text-black hover:bg-white/90 cursor-pointer'
+                  }
+                `}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit'}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 }
-

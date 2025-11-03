@@ -5,18 +5,18 @@ import { gsap } from 'gsap';
 import TextReveal from '../../../components/TextReveal';
 
 /**
- * 第一屏HTML内容组件
- * 使用Tailwind的12列grid系统进行布局
+ * First screen HTML content component
+ * Layout uses Tailwind's 12-column grid system
  */
 export default function HeroSection({ localScrollProgress = 0, isLoaded = false }) {
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
   const bottomTextRef = useRef(null);
 
-  // 直接使用localScrollProgress驱动opacity变化：在95%-100%时淡出
+  // Drive opacity using localScrollProgress: fade between 95%-100%
   const opacity = localScrollProgress >= 0.95 ? 1 - (localScrollProgress - 0.95) / 0.05 : 1;
 
-  // 滚动时的淡出效果
+  // Fade-out while scrolling
   useEffect(() => {
     if (titleRef.current && subtitleRef.current && bottomTextRef.current) {
       gsap.to([titleRef.current, subtitleRef.current, bottomTextRef.current], {
@@ -29,7 +29,7 @@ export default function HeroSection({ localScrollProgress = 0, isLoaded = false 
 
   return (
     <div className="h-screen text-white relative pointer-events-none">
-      {/* 主标题区域 - 使用TextReveal组件 */}
+      {/* Main title - uses TextReveal */}
       <div className="absolute top-[164px] left-0 right-0 px-[16px] md:px-[64px] sm:px-[16px] z-10">
         <div className="grid grid-cols-12 gap-[24px]">
           <div className="col-span-8 col-start-3 md:col-span-4 md:col-start-2 sm:col-span-12 sm:col-start-1 text-left">
@@ -50,7 +50,7 @@ export default function HeroSection({ localScrollProgress = 0, isLoaded = false 
         </div>
       </div>
 
-      {/* 底部标题 - 使用TextReveal组件 */}
+      {/* Bottom title - uses TextReveal */}
       <div className="absolute bottom-[120px] left-0 right-0 px-[16px] md:px-[64px] sm:px-[16px] z-10">
         <div className="grid grid-cols-12 gap-[24px]">
           <div className="col-span-2 col-start-2 text-left flex items-end">
@@ -67,7 +67,7 @@ export default function HeroSection({ localScrollProgress = 0, isLoaded = false 
               ref={bottomTextRef}
               as="h2"
               className="text-[64px] md:text-[96px] sm:text-3xl leading-none"
-              delay={1.1} // 在标题动画60%时开始
+              delay={1.1} // start around 60% of the title animation
               stagger={0.3}
               enabled={isLoaded}
               style={{ 

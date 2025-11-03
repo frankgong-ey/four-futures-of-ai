@@ -21,6 +21,28 @@ export default function ScrollProgress() {
   const [scrollProgress, setScrollProgress] = useState(0); // 0-1 当前section内的进度
   const [isHeroSection, setIsHeroSection] = useState(false);
 
+  // 初始化时检查是否在HeroSection
+  useEffect(() => {
+    if (isFuturesPage) {
+      const checkHeroSection = () => {
+        const sections = document.querySelectorAll('[data-futures-section]');
+        const heroSection = document.querySelector('[data-hero-section]');
+        // 如果没有futures sections但有hero section，说明在HeroSection
+        if (sections.length === 0 && heroSection) {
+          setIsHeroSection(true);
+        } else {
+          setIsHeroSection(false);
+        }
+      };
+      
+      // 立即检查一次
+      checkHeroSection();
+      // 延迟检查，确保DOM已渲染
+      const timer = setTimeout(checkHeroSection, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isFuturesPage]);
+
   useEffect(() => {
     const handleScroll = () => {
       if (isFuturesPage) {

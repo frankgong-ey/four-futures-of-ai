@@ -16,8 +16,6 @@ import ribbonVertexShader from "../../shaders/laserRibbon.vert.glsl";
 import ribbonFragmentShader from "../../shaders/laserRibbon.frag.glsl";
 import laserRibbonVertexShader from "../../shaders/laserRibbon.vert.glsl";
 import laserRibbonFragmentShader from "../../shaders/laserRibbon.frag.glsl";
-import uvDebugVertexShader from "../../shaders/uvDebug.vert.glsl";
-import uvDebugFragmentShader from "../../shaders/uvDebug.frag.glsl";
 import laserEffectVertexShader from "../../shaders/laserEffect.vert.glsl";
 import laserEffectFragmentShader from "../../shaders/laserEffect.frag.glsl";
 import circlePlaneVertexShader from "../../shaders/circlePlane.vert.glsl";
@@ -41,13 +39,135 @@ import LoadingScreen from "../../components/LoadingScreen";
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
 
+// Video playback Modal component
+function VideoModal({ onClose }) {
+  const [isVideoLoading, setIsVideoLoading] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+  const videoRef = useRef(null);
+
+  // Fade-in effect
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsVisible(true);
+      });
+    });
+  }, []);
+
+  // When modal opens, start loading the video
+  useEffect(() => {
+    if (videoRef.current) {
+      setIsVideoLoading(true);
+      videoRef.current.load();
+    }
+  }, []);
+
+  // Prevent background scrolling
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
+  // Video ready to play
+  const handleVideoCanPlay = () => {
+    setIsVideoLoading(false);
+    if (videoRef.current) {
+      videoRef.current.play().catch(err => {
+        console.error('Playback failed:', err);
+        setIsVideoLoading(false);
+      });
+    }
+  };
+
+  // Video load start
+  const handleVideoLoadStart = () => {
+    setIsVideoLoading(true);
+  };
+
+  // Video load error
+  const handleVideoError = () => {
+    setIsVideoLoading(false);
+    console.error('Video failed to load');
+  };
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div 
+        className={`fixed inset-0 z-[9999] transition-opacity duration-500 ease-out ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.95)' }}
+        onClick={onClose}
+      >
+      </div>
+      
+      {/* Modal content */}
+      <div 
+        className={`fixed inset-0 z-[10000] flex items-center justify-center transition-opacity duration-500 ease-out ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        <div className="relative w-full max-w-6xl mx-auto px-4">
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute -top-16 right-0 w-12 h-12 flex items-center justify-center text-white hover:opacity-80 transition-opacity cursor-pointer z-10"
+          >
+            <div className="w-12 h-12 rounded-full border border-white flex items-center justify-center">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+          </button>
+
+          {/* 视频容器 */}
+          <div className="relative aspect-video bg-gray-900 overflow-hidden">
+            {isVideoLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
+                <div className="text-center">
+                  <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-white text-sm">Loading video...</p>
+                </div>
+              </div>
+            )}
+            <video
+              ref={videoRef}
+              src="/videos/intro.mp4"
+              controls
+              preload="none"
+              className="w-full h-full object-cover"
+              onLoadStart={handleVideoLoadStart}
+              onCanPlay={handleVideoCanPlay}
+              onError={handleVideoError}
+            />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function BoothPage() {
   // Loading状态管理
   const [isLoading, setIsLoading] = useState(true);
+  // 视频播放 Modal 状态
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   // LoadingScreen完成处理
   const handleLoadingComplete = () => {
     setIsLoading(false);
+  };
+
+  // 视频播放 Modal 处理
+  const handleOpenVideoModal = () => {
+    setIsVideoModalOpen(true);
+  };
+
+  const handleCloseVideoModal = () => {
+    setIsVideoModalOpen(false);
   };
 
   // 手动控制激光参数
@@ -606,7 +726,7 @@ export default function BoothPage() {
           zIndex: 60,
         }}
       >
-        <VideoSection />
+        <VideoSection onPlayClick={handleOpenVideoModal} />
       </div>
 
 
@@ -647,6 +767,11 @@ export default function BoothPage() {
           Bloom: {shouldEnableBloom ? '✅ 启用' : '❌ 禁用'}
         </div>
       </div>
+      )}
+
+      {/* 视频播放 Modal */}
+      {isVideoModalOpen && (
+        <VideoModal onClose={handleCloseVideoModal} />
       )}
     </div>
     );

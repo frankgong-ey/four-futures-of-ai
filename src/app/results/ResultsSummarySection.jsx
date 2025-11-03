@@ -9,23 +9,23 @@ const futureNames = {
   collapse: "Collapse"
 };
 
-// Donut Chart 组件
+// Donut Chart component
 function DonutChart({ votes, totalParticipants, userVote }) {
   const calculateAngle = (percentage) => (percentage / 100) * 360;
   
-  // 间隙设置
-  const GAP_ANGLE = 8; // slice 之间的间隙角度（度）- 增加间隙使其更明显
-  const TOTAL_GAPS = votes.length; // 间隙数量
-  const GAP_SUM = TOTAL_GAPS * GAP_ANGLE; // 总间隙角度
-  const AVAILABLE_ANGLE = 360 - GAP_SUM; // 可用于 slice 的总角度
+  // Gap configuration
+  const GAP_ANGLE = 8; // gap angle between slices (deg) — larger gap for readability
+  const TOTAL_GAPS = votes.length; // number of gaps
+  const GAP_SUM = TOTAL_GAPS * GAP_ANGLE; // total gap angle
+  const AVAILABLE_ANGLE = 360 - GAP_SUM; // angle available for slices
   
-  // 计算调整后的角度
+  // Compute adjusted angle for each slice
   const getAdjustedAngle = (percentage) => {
     const totalPercentage = votes.reduce((sum, v) => sum + v.percentage, 0);
     return (AVAILABLE_ANGLE * percentage) / totalPercentage;
   };
   
-  // 计算起始角度（带间隙）
+  // Compute start angle with gaps
   const getStartAngle = (index) => {
     let startAngle = 0;
     for (let i = 0; i < index; i++) {
@@ -34,7 +34,7 @@ function DonutChart({ votes, totalParticipants, userVote }) {
     return startAngle;
   };
 
-  // 计算用户投票在图表中的位置
+  // Compute the user vote marker position on the ring
   const getUserVotePosition = () => {
     if (!userVote) return null;
     
@@ -46,7 +46,7 @@ function DonutChart({ votes, totalParticipants, userVote }) {
     const angle = getAdjustedAngle(userResult.percentage);
     const centerAngle = startAngle + angle / 2;
     
-    // 计算 donut 环中心点的坐标（200x200 坐标系）
+    // Compute coordinates of the ring center point (200x200 viewBox)
     const outerRadius = 85;
     const innerRadius = 72;
     const ringCenterRadius = (outerRadius + innerRadius) / 2; // 75
@@ -55,7 +55,7 @@ function DonutChart({ votes, totalParticipants, userVote }) {
     const x_coord = 100 + ringCenterRadius * Math.cos(centerRad);
     const y_coord = 100 + ringCenterRadius * Math.sin(centerRad);
     
-    // 转换为百分比坐标
+    // Convert to percentage coordinates
     const x = (x_coord / 200) * 100;
     const y = (y_coord / 200) * 100;
     
@@ -66,9 +66,9 @@ function DonutChart({ votes, totalParticipants, userVote }) {
     <div className="relative flex-1 flex justify-center lg:justify-end">
         <div className="relative" style={{ width: '500px', height: '500px', minWidth: '500px' }}>
           <svg className="w-full h-full" viewBox="0 0 200 200">
-          {/* 定义每个 slice 的渐变和发光效果 */}
+          {/* Define gradient and glow for each slice */}
           <defs>
-            {/* Glow 滤镜 */}
+            {/* Glow filter */}
             <filter id="glow">
               <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
               <feMerge>
@@ -78,12 +78,12 @@ function DonutChart({ votes, totalParticipants, userVote }) {
             </filter>
             
             {votes.map((result, index) => {
-              // 计算该 slice 的中心角
+              // Calculate slice center angle
               const startAngle = getStartAngle(index);
               const angle = getAdjustedAngle(result.percentage);
               const centerAngle = startAngle + angle / 2;
               
-              // 计算中心点在外圈的位置
+              // Compute center point on the outer ring
               const centerRad = (centerAngle - 90) * Math.PI / 180;
               const centerX = 100 + 85 * Math.cos(centerRad);
               const centerY = 100 + 85 * Math.sin(centerRad);
@@ -105,7 +105,7 @@ function DonutChart({ votes, totalParticipants, userVote }) {
             })}
           </defs>
           
-          {/* 绘制细线（从圆弧向圆心，带渐变效果） */}
+          {/* Render thin lines (arc to center, with gradient) */}
           {votes.map((result, index) => {
             const startAngle = getStartAngle(index);
             const angle = getAdjustedAngle(result.percentage);
@@ -113,8 +113,8 @@ function DonutChart({ votes, totalParticipants, userVote }) {
             const outerRadius = 85;
             const innerRadius = 72; // 更细的环
             
-            // 根据 slice 的百分比分配线数（总共 100 根）
-            // 例如：56% 的 slice 会有 56 根线
+            // Number of lines proportional to percentage (total up to 100)
+            // e.g., 56% -> 56 lines
             const numPoints = Math.round(result.percentage);
             const points = [];
             
@@ -128,7 +128,7 @@ function DonutChart({ votes, totalParticipants, userVote }) {
               points.push({ x: outerX, y: outerY });
             }
             
-            // 绘制扭曲的线条（使用贝塞尔曲线）
+            // Render curved lines using cubic Bézier
             return (
               <g key={`lines-${result.id}`}>
                 {points.map((point, pointIdx) => {

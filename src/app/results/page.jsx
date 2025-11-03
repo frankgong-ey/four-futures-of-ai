@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import ResultsSummarySection from "./ResultsSummarySection";
 import { useSearchParams } from "next/navigation";
 
-// 禁用 SSR，只在客户端渲染（需要 WebGL）
+// Disable SSR, only render on client (requires WebGL)
 const LiveVotesGlobe = dynamic(() => import("./LiveVotesGlobe"), { ssr: false });
 
 export default function ResultsPage() {
@@ -15,16 +15,16 @@ export default function ResultsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: 从 Supabase 获取实际结果
+    // TODO: Fetch actual results from Supabase
     // const fetchResults = async () => {
     //   const { data } = await supabase
     //     .from('votes')
     //     .select('future_id')
-    //   // ... 处理数据
+    //   // ... process data
     //   setResults(mockResults);
     // };
     
-    // 暂时使用模拟数据
+    // Temporarily use mock data
     setTimeout(() => {
       setResults({
         totalParticipants: 2103,
@@ -51,16 +51,16 @@ export default function ResultsPage() {
 
   return (
     <div className="bg-black relative min-h-screen">
-      {/* 背景图层 */}
+      {/* Background layer */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: 'url(/images/hero_gradient.svg)', opacity: 0.5 }}
       />
 
-      {/* 全屏 3D Canvas 图层 */}
+      {/* Fullscreen 3D Canvas layer */}
       <LiveVotesGlobe />
 
-      {/* 内容层 */}
+      {/* Content layer */}
       <div className="relative z-10">
         <ResultsSummarySection results={results} />
       </div>

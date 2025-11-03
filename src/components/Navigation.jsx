@@ -167,11 +167,11 @@ function NavigationMenu({ isOpen, onClose }) {
               onClick={onClose}
             >
               <div className="flex items-baseline gap-4">
-                {/* 序号 */}
+                {/* Index */}
                 <span className="text-white/40 text-lg font-bold transition-colors duration-300 group-hover:text-white/60">
                   {item.id}
                 </span>
-                {/* 标题 */}
+                {/* Title */}
                 <span className="text-white text-xl font-normal transition-all duration-300 group-hover:text-white/90">
                   {item.title}
                 </span>
@@ -184,17 +184,17 @@ function NavigationMenu({ isOpen, onClose }) {
   );
 }
 
-// 主导航组件
+// Main navigation component
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   
-  // 在 DetailView 页面隐藏导航
+  // Hide navigation on DetailView pages
   const isDetailPage = pathname?.startsWith('/futures/') && pathname !== '/futures';
 
   return (
     <>
-      {/* 导航栏 - Logo 和计时器 */}
+      {/* Top bar - Logo and timer */}
       <nav 
         className={`fixed left-0 h-16 flex items-center pl-[64px] justify-between bg-transparent transition-opacity duration-300 ${
           isDetailPage ? 'opacity-0 pointer-events-none' : 'opacity-100'
@@ -206,19 +206,19 @@ export default function Navigation() {
           <Image
             src="/images/nav_logo.svg"
             alt="Four Futures of AI Logo"
-            width={120}
+            width={64}
             height={64}
             className="h-16"
           />
         </div>
 
-        {/* 右侧内容 - 计时器 */}
+        {/* Right content - timer */}
         <div className="flex items-center gap-8">
           <CountdownTimer />
         </div>
       </nav>
 
-      {/* 菜单按钮 - 独立层级 */}
+      {/* Menu button - separate layer */}
       <div 
         className={`fixed right-16 flex items-center transition-opacity duration-300 ${
           isDetailPage ? 'opacity-0 pointer-events-none' : 'opacity-100'
@@ -228,7 +228,7 @@ export default function Navigation() {
         <MenuButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen(!isMenuOpen)} />
       </div>
 
-      {/* 导航菜单 */}
+      {/* Navigation menu */}
       <NavigationMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </>
   );

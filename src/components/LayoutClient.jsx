@@ -10,21 +10,27 @@ export default function LayoutClient() {
   const isBoothPage = pathname === '/booth';
   const isFuturesPage = pathname?.startsWith('/futures');
   const isDetailPage = pathname?.startsWith('/futures/') && pathname !== '/futures';
-  const isDashboardPage = pathname?.startsWith('/dashboard');
+  const isDashboardPage = pathname?.startsWith('/booth-dashboard');
+  const isVotePage = pathname === '/vote';
 
-  // 在 DetailView 页面不显示任何组件
+  // Do not render any global components on DetailView pages
   if (isDetailPage) {
     return null;
   }
 
-  // 在 dashboard 页面不显示任何组件
+  // Do not render any global components on dashboard pages
   if (isDashboardPage) {
     return null;
   }
 
-  // 只在 booth 页面显示组件
+  // Do not render any global components on vote page
+  if (isVotePage) {
+    return null;
+  }
+
+  // Only render these components on the booth page
   if (!isBoothPage) {
-    // 在 futures 页面只显示 ScrollProgress，不显示 NextButton
+    // On futures pages, only show ScrollProgress and hide NextButton
     if (isFuturesPage) {
       return <ScrollProgress />;
     }

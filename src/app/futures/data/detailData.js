@@ -49,10 +49,10 @@ export const detailData = {
       strategicPlays: {
         title: "Strategic Plays",
         items: [
-          "Risk-Managed Innovation",
-          "COEs",
-          "Employee Upskilling Initiatives",
-          "Contingency Planning"
+          "coe",
+          "up",
+          "rmi",
+          "cp"
         ]
       }
     }
@@ -117,10 +117,10 @@ export const detailData = {
       strategicPlays: {
         title: "Strategic Plays",
         items: [
-          "Enterprise Transformation",
-          "AI-Native BUs",
-          "AI Factories",
-          "Challenger Models"
+          "et",
+          "bu",
+          "aif",
+          "ip"
         ]
       }
     }
@@ -186,10 +186,10 @@ export const detailData = {
       strategicPlays: {
         title: "Strategic Plays",
         items: [
-          "Ecosystem Plays",
-          "Challenger Models",
-          "Strategic Portfolio Evaluation",
-          "Business Model Innovation"
+          "eco",
+          "cm",
+          "spe",
+          "bmi"
         ]
       }
     }
@@ -245,10 +245,10 @@ export const detailData = {
       strategicPlays: {
         title: "Strategic Plays",
         items: [
-          "Deep Partnerships",
-          "Proprietary AI",
-          "IP Protection",
-          "Portfolio Rationalization"
+          "dp",
+          "pai",
+          "ipp",
+          "pr"
         ]
       }
     }
@@ -290,9 +290,18 @@ export const detailData = {
         title: "Strategic Response",
         description: "In a constraint scenario, strategies are typical. More traditional approaches to business strategy remain primary as AI has failed to become widespread:",
         items: [
-          "Centers of excellence (COEs)",
-          "Employee upskilling",
-          "Functional transformation"
+          {
+            text: "Centers of excellence (COEs)",
+            icon: "/images/industry/icons/cp-constraint-coe.svg"
+          },
+          {
+            text: "Employee upskilling",
+            icon: "/images/industry/icons/cp-constraint-eu.svg"
+          },
+          {
+            text: "Functional transformation",
+            icon: "/images/industry/icons/cp-constraint-ft.svg"
+          }
         ]
       }
     }

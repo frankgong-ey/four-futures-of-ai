@@ -1,10 +1,146 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { PLAY_CONTENT } from "../data/strategicPlaysContent";
 
 export default function DetailView({ future, onClose }) {
   const [activeSection, setActiveSection] = useState("about");
+  const [isVisible, setIsVisible] = useState(false);
+  const [bgOpacity, setBgOpacity] = useState(0.01);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
+  const [selectedPlay, setSelectedPlay] = useState(null);
+  const [isPlayOverlayVisible, setIsPlayOverlayVisible] = useState(false);
+  const videoRef = useRef(null);
   const contentRef = useRef(null);
+
+  // Detect future type and resolve its background image path
+  const getFutureType = () => {
+    if (!future?.id) return null;
+    const id = future.id;
+    if (id.startsWith('collapse')) return 'collapse';
+    if (id.startsWith('constraint')) return 'constraint';
+    if (id.startsWith('growth')) return 'growth';
+    if (id.startsWith('transform')) return 'transform';
+    return null;
+  };
+
+  const futureType = getFutureType();
+  const hasBackgroundImage = futureType !== null;
+
+  // Get the future logo path
+  const getFutureLogo = (futureId) => {
+    if (!futureId) return null;
+    const parts = futureId.split('-');
+    const baseType = parts[0]; // constraint, growth, transform, collapse
+    const logoMap = {
+      'constraint': 'constraint-logo',
+      'growth': 'growth-logo',
+      'transform': 'transform-logo',
+      'collapse': 'collapse-logo'
+    };
+    const logoName = logoMap[baseType];
+    return logoName ? `/images/${logoName}.svg` : null;
+  };
+
+  const logoPath = getFutureLogo(future.id);
+
+  // Get industry background image path (only for sectorized versions)
+  const getIndustryBgImage = (futureId) => {
+    if (!futureId || !futureId.includes('-')) return null;
+    
+    const parts = futureId.split('-');
+    const suffix = parts[parts.length - 1];
+    
+    // industry suffix mapping
+    const industryMap = {
+      'cp': 'consumer-products',
+      'ip': 'industrial-products',
+      'og': 'oil-gas',
+      'd': 'defense',
+      'bcm': 'banking',  // banking-bg.jpg
+      'r': 'retail',
+      'ls': 'life-sciences'
+    };
+    
+    const industryName = industryMap[suffix];
+    return industryName ? `/images/industry/${industryName}-bg.jpg` : null;
+  };
+
+  const industryBgImagePath = getIndustryBgImage(future.id);
+
+  // Get video path
+  const getVideoPath = () => {
+    if (!futureType) return null;
+    return `/videos/${futureType}-video.mp4`;
+  };
+
+  // Handle video playback
+  const handleVideoPlay = () => {
+    setIsVideoPlaying(true);
+    setIsVideoLoading(true);
+  };
+
+  // When switching to playing state, trigger video.load()
+  useEffect(() => {
+    if (isVideoPlaying && videoRef.current) {
+      videoRef.current.load();
+    }
+  }, [isVideoPlaying]);
+
+  // Strategic Play Overlay fade-in effect
+  useEffect(() => {
+    if (selectedPlay) {
+      setIsPlayOverlayVisible(false);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsPlayOverlayVisible(true);
+        });
+      });
+    } else {
+      setIsPlayOverlayVisible(false);
+    }
+  }, [selectedPlay]);
+
+  // Video can play
+  const handleVideoCanPlay = () => {
+    setIsVideoLoading(false);
+    if (videoRef.current) {
+      videoRef.current.play().catch(err => {
+        console.error('Playback failed:', err);
+        setIsVideoLoading(false);
+      });
+    }
+  };
+
+  // Video load start
+  const handleVideoLoadStart = () => {
+    setIsVideoLoading(true);
+  };
+
+  // 视频加载错误处理
+  const handleVideoError = () => {
+    setIsVideoLoading(false);
+    console.error('Video failed to load');
+    // 可以显示错误提示，或回退到 thumbnail
+  };
+
+  // 淡入动画效果
+  useEffect(() => {
+    // 延迟一帧以确保初始状态被渲染
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsVisible(true);
+      });
+    });
+
+    // 延迟 1 秒后背景图层透明度变为 1
+    const timer = setTimeout(() => {
+      setBgOpacity(1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // 阻止背景页面滚动
   useEffect(() => {
@@ -97,11 +233,44 @@ export default function DetailView({ future, onClose }) {
 
   return (
     <>
-      {/* 背景遮罩（移除 backdrop-blur 以降低合成成本） */}
-      <div className="fixed inset-0 bg-black/95 z-[99]"></div>
+      {/* 背景遮罩 */}
+      <div 
+        className={`fixed inset-0 z-[99] transition-opacity duration-500 ease-out ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 1)'
+        }}
+      >
+        {/* 如果有关未来类型，显示背景图片 */}
+        {hasBackgroundImage && (
+          <>
+            <img 
+              src={`/images/${futureType}-bg.jpg`}
+              alt="Background" 
+              className="fixed inset-0 w-full h-full object-cover z-[99] transition-opacity duration-1000 ease-in-out"
+              style={{
+                pointerEvents: 'none',
+                opacity: bgOpacity
+              }}
+            />
+            {/* 深色遮罩以保持可读性 */}
+            <div 
+              className="absolute inset-0 bg-black/60 z-[99] transition-opacity duration-1000 ease-in-out"
+              style={{
+                opacity: bgOpacity
+              }}
+            ></div>
+          </>
+        )}
+      </div>
       
       {/* Modal 内容（添加 isolate 创建独立 stacking context） */}
-      <div className="fixed inset-0 text-white flex z-[100] isolate">
+      <div 
+        className={`fixed inset-0 text-white flex z-[100] isolate transition-opacity duration-500 ease-out ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
         {/* 左侧导航 */}
         <div className="fixed left-0 top-0 w-96 bg-transparent border-r border-white/10 z-[101] h-full overflow-hidden pointer-events-none">
         <div className="p-8 h-full flex flex-col pointer-events-auto">
@@ -121,7 +290,7 @@ export default function DetailView({ future, onClose }) {
           {/* 标题 */}
           <div className="mb-16">
             <h1 
-              className="text-5xl font-bold mb-4 leading-tight break-words"
+              className="text-5xl font-normal mb-4 leading-tight break-words"
               style={{
                 background: `linear-gradient(to right, #FFFFFF, ${future.color})`,
                 WebkitBackgroundClip: 'text',
@@ -183,7 +352,7 @@ export default function DetailView({ future, onClose }) {
           </nav>
 
           {/* 滚动提示 */}
-          <div className="text-center text-white/40 text-xs">
+          <div className="text-center text-white/40 text-[14px]">
             <div className="mb-2">Scroll down to explore</div>
             <svg className="w-3 h-3 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -201,11 +370,23 @@ export default function DetailView({ future, onClose }) {
           <div className="max-w-4xl mx-auto px-8 pt-16 pb-160 space-y-8">
             {/* About Section */}
             <section id="about" data-section>
-              <div className="bg-white/10 backdrop-blur-lg p-8 outline outline-1 outline-white/20">
-                <h2 className="text-3xl font-bold text-white mb-8 flex items-center gap-3">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
+              <div className="relative bg-white/5 backdrop-blur-lg p-8 outline outline-1 outline-white/20">
+                {/* 左上角装饰 */}
+                <div className="absolute left-0 top-0 w-4 h-1 bg-white/50"></div>
+                <div className="absolute left-0 top-0 w-1 h-4 bg-white/50"></div>
+                
+                {/* Future Logo - 在标题上方 */}
+                {logoPath && (
+                  <div className="mb-6">
+                    <img 
+                      src={logoPath} 
+                      alt="Future logo" 
+                      className="w-16 h-16 opacity-80"
+                    />
+                  </div>
+                )}
+                
+                <h2 className="text-3xl font-bold text-white mb-8">
                   {future.content.about.title || "About This Future"}
                 </h2>
                 
@@ -225,21 +406,60 @@ export default function DetailView({ future, onClose }) {
                   )}
                 </div>
                 
-                {/* 视频部分 - All-Industry 才显示（sectorized 不显示） */}
-                {!isSectorized && future.content.about.video && !future.content.about.hideVideo && (
-                  <div className="relative aspect-video bg-gray-900 rounded-xl overflow-hidden">
+                {/* Industry 背景图片 - 仅在 sectorized 版本显示 */}
+                {isSectorized && industryBgImagePath && (
+                  <div className="relative aspect-video bg-gray-900 overflow-hidden">
                     <img 
-                      src={future.content.about.video.thumbnail}
-                      alt="Video thumbnail"
+                      src={industryBgImagePath}
+                      alt="Industry background"
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                      <button className="w-24 h-24 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-colors">
-                        <svg className="w-10 h-10 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
-                        </svg>
-                      </button>
-                    </div>
+                  </div>
+                )}
+                
+                {/* 视频部分 - All-Industry 才显示（sectorized 不显示） */}
+                {!isSectorized && future.content.about.video && !future.content.about.hideVideo && (
+                  <div className="relative aspect-video bg-gray-900 overflow-hidden">
+                    {!isVideoPlaying ? (
+                      <>
+                        <img 
+                          src={futureType ? `/images/industry/${futureType}-thumbnail.jpg` : future.content.about.video.thumbnail}
+                          alt="Video thumbnail"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <button 
+                            onClick={handleVideoPlay}
+                            className="w-24 h-24 bg-white/5 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer"
+                          >
+                            <svg className="w-10 h-10 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                            </svg>
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {isVideoLoading && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
+                            <div className="text-center">
+                              <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+                              <p className="text-white text-sm">Loading video...</p>
+                            </div>
+                          </div>
+                        )}
+                        <video
+                          ref={videoRef}
+                          src={getVideoPath()}
+                          controls
+                          preload="none"
+                          className="w-full h-full object-cover"
+                          onLoadStart={handleVideoLoadStart}
+                          onCanPlay={handleVideoCanPlay}
+                          onError={handleVideoError}
+                        />
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -250,7 +470,10 @@ export default function DetailView({ future, onClose }) {
               <>
                 {future.content.valueChainImpacts && (
                   <section id="valueChainImpacts" data-section>
-                    <div className="bg-white/10 backdrop-blur-lg p-8 outline outline-1 outline-white/20">
+                    <div className="relative bg-white/5 backdrop-blur-lg p-8 outline outline-1 outline-white/20">
+                      {/* 左上角装饰 */}
+                      <div className="absolute left-0 top-0 w-4 h-1 bg-white/50 "></div>
+                      <div className="absolute left-0 top-0 w-1 h-4 bg-white/50 "></div>
                       <h2 className="text-3xl font-bold text-white mb-12">{future.content.valueChainImpacts.title}</h2>
                       <div className="space-y-6">
                         {future.content.valueChainImpacts.items.map((item, index) => (
@@ -271,20 +494,37 @@ export default function DetailView({ future, onClose }) {
 
                 {future.content.strategicResponse && (
                   <section id="strategicResponse" data-section>
-                    <div className="bg-white/10 backdrop-blur-lg p-8 outline outline-1 outline-white/20">
+                    <div className="relative bg-white/5 backdrop-blur-lg p-8 outline outline-1 outline-white/20">
+                      {/* 左上角装饰 */}
+                      <div className="absolute left-0 top-0 w-4 h-1 bg-white/50 "></div>
+                      <div className="absolute left-0 top-0 w-1 h-4 bg-white/50 "></div>
                       <h2 className="text-3xl font-bold text-white mb-6">{future.content.strategicResponse.title}</h2>
                       {future.content.strategicResponse.description && (
                         <p className="text-white/80 text-base leading-relaxed mb-8">{future.content.strategicResponse.description}</p>
                       )}
                       <div className="space-y-6">
-                        {future.content.strategicResponse.items.map((play, index) => (
-                          <div key={index} className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-10 h-10 bg-white/5 rounded-full flex items-center justify-center">
-                              <span className="text-white font-bold">{index + 1}</span>
+                        {future.content.strategicResponse.items.map((play, index) => {
+                          // 支持新的对象格式和旧的字符串格式
+                          const itemText = typeof play === 'string' ? play : play.text;
+                          const itemIcon = typeof play === 'object' && play.icon ? play.icon : null;
+                          
+                          return (
+                            <div key={index} className="flex items-center gap-6">
+                              <div className="flex-shrink-0 w-16 h-16 bg-white/5 rounded-full flex items-center justify-center">
+                                {itemIcon ? (
+                                  <img 
+                                    src={itemIcon} 
+                                    alt="" 
+                                    className="w-10 h-10"
+                                  />
+                                ) : (
+                                  <span className="text-white font-bold">{index + 1}</span>
+                                )}
+                              </div>
+                              <p className="text-white font-bold text-lg leading-relaxed pt-1">{itemText}</p>
                             </div>
-                            <p className="text-white/80 text-lg leading-relaxed pt-1">{play}</p>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   </section>
@@ -294,27 +534,19 @@ export default function DetailView({ future, onClose }) {
               <>
                 {future.content.forces && (
                   <section id="forces" data-section>
-                    <div className="bg-white/10 backdrop-blur-lg p-8 outline outline-1 outline-white/20">
+                    <div className="relative bg-white/5 backdrop-blur-lg p-8 outline outline-1 outline-white/20">
+                      {/* 左上角装饰 */}
+                      <div className="absolute left-0 top-0 w-4 h-1 bg-white/50 "></div>
+                      <div className="absolute left-0 top-0 w-1 h-4 bg-white/50 "></div>
                       <h2 className="text-3xl font-bold text-white mb-12">{future.content.forces.title}</h2>
                       <div className="space-y-6">
                         {future.content.forces.items.map((item, index) => (
-                          <div key={index} className="flex items-start gap-6">
+                          <div key={index} className="flex items-center gap-6">
                             <div className="flex-shrink-0 w-14 h-14 bg-white/5 rounded-lg flex items-center justify-center">
-                              <div className={`w-8 h-8 rounded ${item.trend === 'up' ? 'bg-green-500' : 'bg-red-500'}`} />
+                              <span className="text-white font-bold text-lg">{index + 1}</span>
                             </div>
                             <div className="flex-1">
-                              <p className="text-white text-lg mb-2">{item.title}</p>
-                              <div className="flex items-center gap-2">
-                                {item.trend === 'up' ? (
-                                  <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                                  </svg>
-                                ) : (
-                                  <svg className="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                  </svg>
-                                )}
-                              </div>
+                              <h3 className="text-white text-xl font-normal mb-2">{item.title}</h3>
                             </div>
                           </div>
                         ))}
@@ -325,17 +557,34 @@ export default function DetailView({ future, onClose }) {
 
                 {future.content.strategicPlays && (
                   <section id="strategicPlays" data-section>
-                    <div className="bg-white/10 backdrop-blur-lg p-8 outline outline-1 outline-white/20">
+                    <div className="relative bg-white/5 backdrop-blur-lg p-8 outline outline-1 outline-white/20">
+                      {/* 左上角装饰 */}
+                      <div className="absolute left-0 top-0 w-4 h-1 bg-white/50 "></div>
+                      <div className="absolute left-0 top-0 w-1 h-4 bg-white/50 "></div>
                       <h2 className="text-3xl font-bold text-white mb-12">{future.content.strategicPlays.title}</h2>
-                      <div className="space-y-6">
-                        {future.content.strategicPlays.items.map((play, index) => (
-                          <div key={index} className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-10 h-10 bg-white/5 rounded-full flex items-center justify-center">
-                              <span className="text-white font-bold">{index + 1}</span>
-                            </div>
-                            <p className="text-white/80 text-lg leading-relaxed pt-1">{play}</p>
-                          </div>
-                        ))}
+                      <div className="space-y-3">
+                        {future.content.strategicPlays.items.map((play, index) => {
+                          // 获取 play 内容
+                          const playContent = PLAY_CONTENT[play];
+                          const displayText = playContent ? playContent.title : play;
+                          
+                          return (
+                            <button
+                              key={index}
+                              onClick={() => playContent && setSelectedPlay(playContent)}
+                              className="w-full flex items-start gap-4 cursor-pointer border border-white/20 hover:border-white/40 transition-all duration-200 p-4"
+                              style={{
+                                backgroundColor: future.color,
+                              }}
+                              disabled={!playContent}
+                            >
+                              <div className="flex-shrink-0 w-10 h-10 bg-black rounded-full flex items-center justify-center">
+                                <span className="text-white font-bold">{index + 1}</span>
+                              </div>
+                              <p className="text-white text-lg font-bold leading-relaxed pt-1 text-left">{displayText}</p>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   </section>
@@ -346,6 +595,78 @@ export default function DetailView({ future, onClose }) {
         </div>
       </div>
       </div>
+
+      {/* Strategic Play Overlay */}
+      {selectedPlay && (
+        <>
+          {/* 背景遮罩 */}
+          <div 
+            className={`fixed inset-0 bg-black/80 z-[9998] transition-opacity duration-500 ease-out ${
+              isPlayOverlayVisible ? 'opacity-100' : 'opacity-0'
+            }`}
+            onClick={() => setSelectedPlay(null)}
+          ></div>
+          
+          {/* Overlay 内容 */}
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4 pointer-events-none">
+            <div className={`relative w-full max-w-4xl bg-black outline outline-1 outline-white/20 p-12 pointer-events-auto transition-opacity duration-500 ease-out ${
+              isPlayOverlayVisible ? 'opacity-100' : 'opacity-0'
+            }`}>
+              {/* 关闭按钮 */}
+              <button
+                onClick={() => setSelectedPlay(null)}
+                className="absolute top-4 right-4 w-12 h-12 flex items-center justify-center text-white hover:opacity-80 transition-opacity cursor-pointer"
+              >
+                <div className="w-12 h-12 border border-white flex items-center justify-center">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+              </button>
+
+              {/* 标题 */}
+              <h2 className="text-4xl font-bold text-white mb-8 pr-16">
+                {selectedPlay.title}
+              </h2>
+
+              {/* 描述 */}
+              <p className="text-xl text-white/80 mb-12 leading-relaxed">
+                {selectedPlay.desc}
+              </p>
+
+              {/* Bullets */}
+              {selectedPlay.bullets && selectedPlay.bullets.length > 0 && (
+                <div className="mb-12">
+                  <h3 className="text-2xl font-semibold text-white mb-6">Key Benefits</h3>
+                  <div className="space-y-4">
+                    {selectedPlay.bullets.map((bullet, index) => (
+                      <div key={index} className="flex items-start gap-4">
+                        <div className="flex-shrink-0 w-1 h-1 bg-white mt-3"></div>
+                        <p className="text-lg text-white/80 leading-relaxed">{bullet}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Recent */}
+              {selectedPlay.recent && selectedPlay.recent.length > 0 && (
+                <div className="border-t border-white/20 pt-8">
+                  <h3 className="text-2xl font-semibold text-white mb-6">Recent Examples</h3>
+                  <div className="space-y-4">
+                    {selectedPlay.recent.map((item, index) => (
+                      <div key={index} className="flex items-start gap-4">
+                        <div className="flex-shrink-0 w-1 h-1 bg-white/60 mt-3"></div>
+                        <p className="text-lg text-white/60 leading-relaxed italic">"{item}"</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

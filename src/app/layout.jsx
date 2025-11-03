@@ -6,9 +6,6 @@ import "./globals.css";
 import BackgroundLines from "../components/BackgroundLines";
 import Navigation from "../components/Navigation";
 import LayoutClient from "../components/LayoutClient";
-import Global3DCanvas, { ScrollSectionContext } from "../components/Global3DCanvas";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,25 +50,16 @@ const interstateBlackCondensed = localFont({
 export default function RootLayout({
   children,
 }) {
-  const [currentSection, setCurrentSection] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const pathname = usePathname();
-
   return (
     <html lang="en">
-      <ScrollSectionContext.Provider value={{ currentSection, setCurrentSection, modalOpen, setModalOpen }}>
-        <body
-          className={`${eyInterstate.variable} ${interstateBlackCondensed.variable} antialiased`}
-        >
-          <Navigation />
-          <BackgroundLines />
-          <LayoutClient />
-          {pathname?.startsWith('/futures') && (
-            <Global3DCanvas key="futures-canvas" currentSection={currentSection} />
-          )}
-          {children}
-        </body>
-      </ScrollSectionContext.Provider>
+      <body
+        className={`${eyInterstate.variable} ${interstateBlackCondensed.variable} antialiased`}
+      >
+        <Navigation />
+        <BackgroundLines />
+        <LayoutClient />
+        {children}
+      </body>
     </html>
   );
 }

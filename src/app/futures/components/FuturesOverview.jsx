@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import FutureSection from "./FutureSection";
 import NextChapterSection from "./NextChapterSection";
-import { useScrollSection } from "../../../components/Global3DCanvas";
+import { useScrollSection } from "./Futures3DCanvas";
 
 export default function FuturesOverview({ futures, onFutureClick }) {
   const [currentSection, setCurrentSection] = useState(0);
@@ -20,7 +20,7 @@ export default function FuturesOverview({ futures, onFutureClick }) {
     { type: "next-chapter", id: "next-chapter" }
   ];
 
-  // 滚动到下一个section的函数
+  // Helper to scroll to the next section
   const scrollToNextSection = (currentIndex) => {
     const nextIndex = currentIndex + 1;
     if (nextIndex < sections.length && sectionsRef.current[nextIndex]) {
@@ -28,7 +28,7 @@ export default function FuturesOverview({ futures, onFutureClick }) {
     }
   };
 
-  // 处理 URL hash 跳转
+  // Handle URL hash navigation
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
@@ -36,7 +36,7 @@ export default function FuturesOverview({ futures, onFutureClick }) {
         const targetIndex = sections.findIndex(s => s.id === hash);
         if (targetIndex !== -1 && sectionsRef.current[targetIndex]) {
           setTimeout(() => {
-            // 不使用 smooth，而是瞬间跳转
+            // Use instant jump instead of smooth behavior
             sectionsRef.current[targetIndex].scrollIntoView({ behavior: 'auto' });
             window.history.replaceState(null, '', '/futures');
           }, 100);
@@ -49,7 +49,7 @@ export default function FuturesOverview({ futures, onFutureClick }) {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // 监听滚动，更新当前 section
+  // Listen to scroll and update the current section
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + window.innerHeight / 2;
@@ -64,7 +64,7 @@ export default function FuturesOverview({ futures, onFutureClick }) {
           if (scrollPosition >= elementTop && scrollPosition < elementBottom) {
             setCurrentSection(index);
             if (setGlobalSection) {
-              // 如果是 next-chapter，传递 "nextChapter"
+              // If it is next-chapter, pass "nextChapter"
               if (section.type === "future") {
                 setGlobalSection(section.data.id);
               } else if (section.type === "next-chapter") {
@@ -91,7 +91,7 @@ export default function FuturesOverview({ futures, onFutureClick }) {
 
   return (
     <div className="relative">
-      {/* 主要内容 */}
+      {/* Main content */}
       <div className="relative z-10">
         {sections.map((section, index) => (
           <div 
@@ -114,7 +114,7 @@ export default function FuturesOverview({ futures, onFutureClick }) {
         ))}
       </div>
 
-      {/* 全局 Next 按钮 - 只在非最后一个section显示 */}
+      {/* Global Next button - only when not on the last section */}
       {currentSection < sections.length - 1 && (
         <button
           onClick={() => scrollToNextSection(currentSection)}
@@ -127,19 +127,19 @@ export default function FuturesOverview({ futures, onFutureClick }) {
                    active:border-white/80 
                    cursor-pointer"
         >
-          {/* Next 文本 */}
+          {/* Next label */}
           <div className="text-white text-[18px] font-semibold text-center tracking-none">
             Next
           </div>
 
-          {/* 向下箭头图标 */}
+          {/* Arrow icon */}
           <img
             src="/images/arrow-next.svg"
             alt="Next"
             className="w-8 h-8 mt-2 transition-transform duration-500 ease-out group-hover:translate-y-2"
           />
 
-          {/* 底部分隔线 */}
+          {/* Bottom separator */}
           <div className="absolute bottom-0 w-full h-[1px] group-hover:h-[4px] bg-white transition-all duration-500 ease-out" />
         </button>
       )}

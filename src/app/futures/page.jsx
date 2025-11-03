@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import FuturesOverview from "./components/FuturesOverview";
 import HeroSection from "./components/HeroSection";
 import DetailView from "./components/DetailView";
+import Futures3DCanvas, { ScrollSectionContext } from "./components/Futures3DCanvas";
+import VersionSelector from "./components/VersionSelector";
 // 导入所有 detailData
 import { detailData } from "./data/detailData.js";
-import { ScrollSectionContext } from "../../components/Global3DCanvas";
 
 // 从 detailData 生成版本数据
 const generateVersionData = (versionId, versionName, futureIds) => ({
@@ -60,17 +60,10 @@ const versionsData = {
 export default function FuturesPage() {
   const [selectedVersion, setSelectedVersion] = useState(null);
   const [selectedFuture, setSelectedFuture] = useState(null);
+  const [currentSection, setCurrentSection] = useState(null);
   const router = useRouter();
-  const { setCurrentSection } = useContext(ScrollSectionContext) || {};
 
   const currentVersion = selectedVersion ? versionsData[selectedVersion] : null;
-
-  // 进入 /futures 页面时重置 3D 相机到初始（hero）
-  useEffect(() => {
-    if (typeof setCurrentSection === 'function') {
-      setCurrentSection(null); // Global3DCanvas 会将 null 映射为 hero
-    }
-  }, []);
 
   // 检查 URL 参数和 hash
   useEffect(() => {
@@ -105,35 +98,54 @@ export default function FuturesPage() {
     setSelectedFuture(null);
   };
 
+  const handleChangeVersion = () => {
+    setSelectedVersion(null);
+  };
+
   // 如果还没有选择版本，显示选择界面
   if (!selectedVersion) {
     return (
-      <div className="relative min-h-screen bg-black text-white">
-        <div className="relative z-30">
-          <HeroSection onVersionSelect={handleVersionChange} />
+      <ScrollSectionContext.Provider value={{ currentSection: null, setCurrentSection }}>
+        <Futures3DCanvas currentSection={null} />
+        <div className="relative min-h-screen bg-black text-white">
+          <div className="relative z-30">
+            <HeroSection onVersionSelect={handleVersionChange} />
+          </div>
         </div>
-      </div>
+      </ScrollSectionContext.Provider>
     );
   }
 
   // 选择了版本后显示内容
-  return (
-    <div className="relative min-h-screen bg-black text-white">
-      {/* 主要内容区域 */}
-      <div className="relative z-30 pt-20">
-        <FuturesOverview 
-          futures={currentVersion.futures}
-          onFutureClick={handleFutureClick}
-        />
-      </div>
+  const isOnNextChapter = currentSection === 'nextChapter';
 
-      {/* DetailView Modal */}
-      {selectedFuture && (
-        <DetailView 
-          future={selectedFuture}
-          onClose={handleCloseDetailView}
+  return (
+      <ScrollSectionContext.Provider value={{ currentSection, setCurrentSection }}>
+        <Futures3DCanvas currentSection={currentSection || null} />
+      <div className="relative min-h-screen bg-black text-white">
+        {/* 版本选择器 - 固定在右上角，在 nextChapter 时淡出隐藏 */}
+        <VersionSelector 
+          versionName={currentVersion.name}
+          onChangeClick={handleChangeVersion}
+          isVisible={!isOnNextChapter}
         />
-      )}
-    </div>
+        
+        {/* 主要内容区域 */}
+        <div className="relative z-30 pt-20">
+          <FuturesOverview 
+            futures={currentVersion.futures}
+            onFutureClick={handleFutureClick}
+          />
+        </div>
+
+        {/* DetailView Modal */}
+        {selectedFuture && (
+          <DetailView 
+            future={selectedFuture}
+            onClose={handleCloseDetailView}
+          />
+        )}
+      </div>
+    </ScrollSectionContext.Provider>
   );
 }

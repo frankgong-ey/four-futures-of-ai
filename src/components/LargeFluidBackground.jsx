@@ -12,7 +12,7 @@ import fluidBackgroundFragmentShader from '../shaders/fluidBackground.frag.glsl'
 export default function LargeFluidBackground({ sectionState }) {
   const meshRef = useRef();
   const { camera } = useThree();
-  const color1Ref = useRef('#4762c4'); // 默认颜色
+  const color1Ref = useRef('#750D5D'); // 默认颜色改为 constraint 的紫色
   
   // Leva 调试面板 - 已禁用
   // const {
@@ -49,15 +49,15 @@ export default function LargeFluidBackground({ sectionState }) {
   useEffect(() => {
     // 定义每个 future section 对应的颜色
     const sectionColors = {
-      'hero': '#4762c4',        // 默认蓝色
+      'hero': '#750D5D',        // 默认使用 constraint 的紫色
       'constraint': '#750D5D',  // 紫色 - 对应 constraint 的颜色
       'growth': '#2BB856',       // 绿色 - 对应 growth 的颜色  
       'transform': '#198CE6',    // 蓝色 - 对应 transform 的颜色
       'collapse': '#FF4136',     // 红色 - 对应 collapse 的颜色
-      'nextChapter': '#bea852'   // 金色 - 对应 next chapter
+      'nextChapter': '#000000'   // 纯黑色 - 对应 next chapter
     };
     
-    const targetColor = sectionColors[sectionState] || '#4762c4';
+    const targetColor = sectionColors[sectionState] || '#750D5D';
     
     // 使用GSAP进行颜色过渡
     gsap.to(color1Ref, {

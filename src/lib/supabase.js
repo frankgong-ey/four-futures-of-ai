@@ -1,28 +1,7 @@
-// Supabase Client Configuration
-// TODO: Replace with your actual Supabase credentials
+import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = 'your-supabase-url';
-const SUPABASE_ANON_KEY = 'your-supabase-anon-key';
+const SUPABASE_URL = "https://rmgvfgjsqswwumheewho.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZ3ZmZ2pzcXN3d3VtaGVld2hvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2OTk2NzYsImV4cCI6MjA3MDI3NTY3Nn0.xm2Tn9fgBDvoM4zSuc4naQHBCoQaAxvRbUyht_LBLFs";
 
-// Uncomment when ready to use:
-// import { createClient } from '@supabase/supabase-js'
-// export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-// For now, export placeholder functions
-export const supabase = {
-  from: (table) => ({
-    select: () => ({
-      data: [],
-      error: null
-    }),
-    insert: async (data) => {
-      console.log('Mock insert:', table, data);
-      return { data, error: null };
-    },
-    update: async () => {
-      console.log('Mock update:', table);
-      return { data: null, error: null };
-    }
-  })
-};
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 

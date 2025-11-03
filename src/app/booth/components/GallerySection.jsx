@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 
-// Prompt卡片组件
+// Prompt card component
 function PromptCard({ text, isActive, progress }) {
   return (
     <div className={`relative w-[100%] p-[8px] bg-black/10 backdrop-blur-xl border border-white/40 will-change-[transform,opacity] transition-transform transition-opacity duration-500 ease-in-out ${
@@ -24,11 +24,11 @@ function PromptCard({ text, isActive, progress }) {
   );
 }
 
-// 主GallerySection组件
+// Main GallerySection component
 export default function GallerySection({ localScrollProgress = 0 }) {
   const sectionRef = useRef(null);
 
-  // 直接使用localScrollProgress驱动opacity变化：在90%-100%时淡出
+  // Use localScrollProgress to drive opacity, fade out from 90%-100%
   const opacity = localScrollProgress >= 0.9 ? 1 - (localScrollProgress - 0.9) / 0.1 : 1;
 
   useEffect(() => {
@@ -51,8 +51,8 @@ export default function GallerySection({ localScrollProgress = 0 }) {
 
   return (
     <div ref={sectionRef} className="relative w-screen h-screen bg-transparent z-20">
-        {/* HTML内容 */}
-                {/* 底部标题 - 绝对定位，距离屏幕下边缘120px */}
+        {/* HTML content */}
+                {/* Bottom title - absolute positioned, 120px from bottom */}
         <div className="absolute bottom-[120px] left-0 right-0 px-[16px] md:px-[64px] sm:px-[16px] z-50">
             <div className="grid grid-cols-12 gap-[24px]">
             <div className="col-span-4 col-start-1 text-left flex flex-col gap-[16px] items-start">
@@ -66,30 +66,30 @@ export default function GallerySection({ localScrollProgress = 0 }) {
             </div>
         </div>
       <div className="relative h-[400vh] flex justify-center items-start">
-        {/* 中间隔离带 */}
+        {/* Center column spacer */}
         <div className="w-60 h-screen flex flex-col justify-center items-center bg-black/0 sticky top-0">
-          {/* Prompt卡片轮播 */}
+          {/* Prompt card carousel */}
           <div className="relative w-full h-screen flex flex-col justify-center items-center space-y-8">
             {promptCards.map((text, index) => {
-              // 直接使用传入的 localScrollProgress（0-1 区间）
+              // Use provided localScrollProgress (0-1)
               const p = localScrollProgress;
 
-              // 定义每张卡片的高亮区间 [start, end)
+              // Define highlight range [start, end) for each card
               const ranges = [
-                [0.06, 0.22], // 第一张
-                [0.23, 0.39], // 第二张
-                [0.40, 0.55], // 第三张
-                [0.56, 0.72], // 第四张
-                [0.73, 0.88], // 第五张
+                [0.06, 0.22], // first
+                [0.23, 0.39], // second
+                [0.40, 0.55], // third
+                [0.56, 0.72], // fourth
+                [0.73, 0.88], // fifth
               ];
 
               const [start, end] = ranges[index] || [1, 1];
               const isActive = p >= start && p < end;
 
-              // 进度条：
+              // Progress bar logic:
               // p <= start  => 0
               // start < p < end => (p-start)/(end-start)
-              // p >= end => 1（保持满格，直到用户回滚到区间内或之前）
+              // p >= end => 1 (keep full until user scrolls back)
               let progress = 0;
               if (p <= start) {
                 progress = 0;

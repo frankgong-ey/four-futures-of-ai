@@ -7,54 +7,54 @@ import { SplitText } from "gsap/SplitText";
 import Link from "next/link";
 import TextReveal from "../../../components/TextReveal";
 
-// 注册插件
+// Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
-// ChartSection组件 - 100vh高度，包含图表和趋势线动画
-export default function VideoSection() {
-  // 内部创建 refs
+// VideoSection - 100vh height, contains reveal animations
+export default function VideoSection({ onPlayClick }) {
+  // Local refs
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
   
-  // 立即隐藏文字元素，防止闪现 - 使用useLayoutEffect确保在DOM渲染后立即执行
+  // Hide text immediately to avoid flash - useLayoutEffect ensures it runs right after mount
   useLayoutEffect(() => {
     if (!sectionRef.current) return;
     
-    // 立即隐藏所有文字元素
+    // Immediately hide all text elements
     const textElements = sectionRef.current.querySelectorAll('[data-text-reveal]');
     textElements.forEach((element) => {
       gsap.set(element, { autoAlpha: 0 });
     });
   }, []);
   
-  // VideoSection 动画初始化 - 使用ScrollTrigger控制TextReveal
+  // VideoSection animation init - control TextReveal via ScrollTrigger
   useEffect(() => {
     if (!sectionRef.current) return;
 
-    // 创建ScrollTrigger来控制TextReveal动画
+    // Create ScrollTrigger to control TextReveal animations
     const trigger = ScrollTrigger.create({
       trigger: sectionRef.current,
       start: "top 80%",
       onEnter: () => {
-        // 当section进入视口时，触发TextReveal动画
+        // When section enters viewport, trigger TextReveal animation
         const textElements = sectionRef.current.querySelectorAll('[data-text-reveal]');
         
         textElements.forEach((element, index) => {
-          // 使用SplitText分割文字
+          // Split text into lines
           const split = new SplitText(element, {
             type: "lines",
             linesClass: "reveal-line"
           });
 
-          // 为每一行创建遮罩效果
+          // Create mask for each line
           const masks = split.lines.map((line) => {
-            // 设置行元素的样式
+            // Style each line element
             Object.assign(line.style, {
               position: 'relative',
               overflow: 'hidden'
             });
             
-            // 创建遮罩容器
+            // Create mask container
             const maskContainer = document.createElement('div');
             Object.assign(maskContainer.style, {
               position: 'relative',
@@ -63,19 +63,19 @@ export default function VideoSection() {
               overflow: 'hidden'
             });
             
-            // 将文字内容移动到遮罩容器中
+            // Move original content into mask container
             const textContent = line.innerHTML;
             line.innerHTML = '';
             maskContainer.innerHTML = textContent;
             line.appendChild(maskContainer);
             
-            // 设置文字初始状态 - 从下方隐藏
+            // Initial state - hidden from bottom
             gsap.set(maskContainer, { y: "100%" });
             
             return maskContainer;
           });
 
-          // 创建动画时间线
+          // Create timeline
           const tl = gsap.timeline();
           
           // 为每个遮罩容器创建动画
@@ -146,9 +146,12 @@ export default function VideoSection() {
                 <div className="relative w-[320px] h-[200px] p-[24px] flex-col items-start justify-start bg-black/20 backdrop-blur-md outline outline-white/20 gap-[8px] will-change-transform transform-gpu">
                   <div className="font-light text-[24px] text-white">Watch Intro Video</div>
                   <div className="font-light text-[16px] text-white/60">01:23</div>
-                  <div className="absolute right-[24px] bottom-[24px] w-[64px] h-[64px] p-[16px] bg-white flex items-center justify-center cursor-pointer rounded-full hover:bg-white/90 transition-all duration-500">
-                      <img src="/images/play_dark.svg" className="w-full h-full object-cover"/>
-                  </div>
+                  <button 
+                    onClick={onPlayClick}
+                    className="absolute right-[24px] bottom-[24px] w-[64px] h-[64px] p-[16px] bg-white flex items-center justify-center cursor-pointer rounded-full hover:bg-white/90 transition-all duration-500"
+                  >
+                      <img src="/images/play_dark.svg" className="w-full h-full object-cover" alt="Play"/>
+                  </button>
                 </div>
                  <Link 
                    href="/futures"
