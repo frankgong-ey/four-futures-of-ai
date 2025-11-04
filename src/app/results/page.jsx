@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, Suspense } from "react";
 import dynamic from "next/dynamic";
 import ResultsSummarySection from "./ResultsSummarySection";
 import { useSearchParams } from "next/navigation";
@@ -30,7 +30,8 @@ function fetchVoteCounts(signal, pollId = null, showAll = false) {
   }).then((r) => r.json());
 }
 
-export default function ResultsPage() {
+// Component that uses useSearchParams - must be wrapped in Suspense
+function ResultsContent() {
   const searchParams = useSearchParams();
   const userVote = searchParams.get('future');
   const [counts, setCounts] = useState({ constraint: 0, growth: 0, transform: 0, collapse: 0 });
@@ -121,6 +122,19 @@ export default function ResultsPage() {
         />
       </div>
     </div>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function ResultsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading results...</div>
+      </div>
+    }>
+      <ResultsContent />
+    </Suspense>
   );
 }
 
