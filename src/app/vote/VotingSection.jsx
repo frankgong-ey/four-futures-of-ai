@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
+import { loadPollId } from "../../components/Settings";
 
 const futures = [
   {
@@ -91,17 +92,16 @@ export default function VotingSection() {
     }
   };
 
-  const handleSkip = () => {
-    handleSubmit();
+  const handleBack = () => {
+    setCurrentStep((s) => Math.max(1, s - 1));
   };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
     
     try {
-      // Use poll_id and choice according to the original schema
-      // choice should be the future title (e.g., "Constraint", "Growth", etc.)
-      const DEFAULT_POLL_ID = "test-2025-08-12";
+      // Load poll_id from localStorage (set via Settings)
+      const pollId = loadPollId();
       
       // Resolve selected future title
       const selectedFutureData = futures.find(f => f.id === selectedFuture);
@@ -113,7 +113,7 @@ export default function VotingSection() {
       
       // Insert poll_id, choice and industry
       const voteData = {
-        poll_id: DEFAULT_POLL_ID,
+        poll_id: pollId,
         choice: choice,
         industry: industry
       };
@@ -154,16 +154,22 @@ export default function VotingSection() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white relative">
+    <div className="min-h-screen bg-black text-white relative pt-[120px]">
+      {/* Background layer */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url(/images/hero_gradient_new.svg)', opacity: 0.5 }}
+      />
+
       {/* Quit Button */}
       <button
         onClick={handleQuit}
-        className="absolute top-[120px] left-8 text-white hover:opacity-80 transition-opacity z-10 cursor-pointer"
+        className="absolute left-16 h-10 px-4 bg-transparent border border-white rounded-none text-white hover:opacity-80 transition-opacity z-10 cursor-pointer"
       >
         Quit
       </button>
 
-      <div className="flex flex-col items-center justify-center min-h-screen px-6 py-20">
+      <div className="relative z-10 flex flex-col items-center justify-start px-6 ">
         {/* Progress Bar */}
         <div className="mb-8 flex gap-2">
           <div className={`h-1 w-16 transition-all duration-300 ${currentStep >= 1 ? 'bg-white' : 'bg-white/20'}`}></div>
@@ -294,11 +300,11 @@ export default function VotingSection() {
             {/* Action Buttons */}
             <div className="flex gap-4">
               <button
-                onClick={handleSkip}
+                onClick={handleBack}
                 disabled={isSubmitting}
-                className="px-12 py-4 text-base font-normal bg-white/5 outline outline-1 outline-white/20 text-white hover:bg-white/10 transition-all duration-300"
+                className="px-12 py-4 text-base font-normal bg-white/5 outline outline-1 outline-white/20 text-white hover:bg-white/10 transition-all duration-300 cursor-pointer"
               >
-                Skip
+                Back
               </button>
               <button
                 onClick={handleSubmit}

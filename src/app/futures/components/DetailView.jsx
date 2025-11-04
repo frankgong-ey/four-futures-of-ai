@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { PLAY_CONTENT } from "../data/strategicPlaysContent";
+import StrategicPlayIcons from "./StrategicPlayIcons";
 
 export default function DetailView({ future, onClose }) {
   const [activeSection, setActiveSection] = useState("about");
@@ -45,29 +46,16 @@ export default function DetailView({ future, onClose }) {
 
   const logoPath = getFutureLogo(future.id);
 
-  // Get industry background image path (only for sectorized versions)
-  const getIndustryBgImage = (futureId) => {
-    if (!futureId || !futureId.includes('-')) return null;
-    
-    const parts = futureId.split('-');
-    const suffix = parts[parts.length - 1];
-    
-    // industry suffix mapping
-    const industryMap = {
-      'cp': 'consumer-products',
-      'ip': 'industrial-products',
-      'og': 'oil-gas',
-      'd': 'defense',
-      'bcm': 'banking',  // banking-bg.jpg
-      'r': 'retail',
-      'ls': 'life-sciences'
-    };
-    
-    const industryName = industryMap[suffix];
-    return industryName ? `/images/industry/${industryName}-bg.jpg` : null;
+  // Get icon ID for strategic play
+  const getPlayIconId = (playKey) => {
+    if (!playKey) return null;
+    return `ico-${playKey}`;
   };
 
-  const industryBgImagePath = getIndustryBgImage(future.id);
+  // Story image from data (detailData.js): use if provided
+  const storyImageUrl = (future && future.content && future.content.about && future.content.about.storyImage)
+    ? future.content.about.storyImage
+    : null;
 
   // Get video path
   const getVideoPath = () => {
@@ -233,6 +221,9 @@ export default function DetailView({ future, onClose }) {
 
   return (
     <>
+      {/* SVG Sprite for Strategic Play Icons */}
+      <StrategicPlayIcons />
+
       {/* 背景遮罩 */}
       <div 
         className={`fixed inset-0 z-[99] transition-opacity duration-500 ease-out ${
@@ -407,10 +398,10 @@ export default function DetailView({ future, onClose }) {
                 </div>
                 
                 {/* Industry 背景图片 - 仅在 sectorized 版本显示 */}
-                {isSectorized && industryBgImagePath && (
+                {isSectorized && storyImageUrl && (
                   <div className="relative aspect-video bg-gray-900 overflow-hidden">
                     <img 
-                      src={industryBgImagePath}
+                      src={storyImageUrl}
                       alt="Industry background"
                       className="w-full h-full object-cover"
                     />
@@ -515,7 +506,7 @@ export default function DetailView({ future, onClose }) {
                                   <img 
                                     src={itemIcon} 
                                     alt="" 
-                                    className="w-10 h-10"
+                                    className="w-7 h-7"
                                   />
                                 ) : (
                                   <span className="text-white font-bold">{index + 1}</span>
@@ -572,14 +563,20 @@ export default function DetailView({ future, onClose }) {
                             <button
                               key={index}
                               onClick={() => playContent && setSelectedPlay(playContent)}
-                              className="w-full flex items-start gap-4 cursor-pointer border border-white/20 hover:border-white/40 transition-all duration-200 p-4"
+                              className="w-full flex items-center gap-4 cursor-pointer border border-white/20 hover:border-white/40 transition-all duration-200 p-4"
                               style={{
                                 backgroundColor: future.color,
                               }}
                               disabled={!playContent}
                             >
-                              <div className="flex-shrink-0 w-10 h-10 bg-black rounded-full flex items-center justify-center">
-                                <span className="text-white font-bold">{index + 1}</span>
+                              <div className="flex-shrink-0 w-14 h-14 bg-black rounded-full flex items-center justify-center">
+                                {getPlayIconId(play) ? (
+                                  <svg className="w-8 h-8 text-white" fill="currentColor">
+                                    <use href={`#${getPlayIconId(play)}`} />
+                                  </svg>
+                                ) : (
+                                  <span className="text-white font-bold text-lg">{index + 1}</span>
+                                )}
                               </div>
                               <p className="text-white text-lg font-bold leading-relaxed pt-1 text-left">{displayText}</p>
                             </button>

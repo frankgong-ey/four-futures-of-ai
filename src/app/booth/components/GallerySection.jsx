@@ -42,11 +42,11 @@ export default function GallerySection({ localScrollProgress = 0 }) {
   }, [opacity]);
 
   const promptCards = [
-    "Ethereal forest with glowing lights",
-    "Cyberpunk street scene at night",
-    "A serene mountain landscape",
-    "Abstract digital art with vibrant colors",
-    "A futuristic cityscape at sunset",
+    "Sophisticated man with glasses and salt-and-pepper beard in cozy indoor setting, studio light, Bokeh effect, shallow depth of field.",
+    "An art illustration abstract artistic portrait of a woman surrounded by swirling waves of colorful light. ",
+    "Abstract futuristic 3D explosion, geometric structures and shards bursting in midair, metallic and glass fragments floating.",
+    "A cinematic still frame of a narrow alley in a bustling Singapore food market. - warm golden and neon lights reflecting off wet pavement.",
+    "Perfume advertising video, the bottle is in the clouds.",
   ];
 
   return (
@@ -67,7 +67,7 @@ export default function GallerySection({ localScrollProgress = 0 }) {
         </div>
       <div className="relative h-[400vh] flex justify-center items-start">
         {/* Center column spacer */}
-        <div className="w-60 h-screen flex flex-col justify-center items-center bg-black/0 sticky top-0">
+        <div className="w-80 h-screen flex flex-col justify-center items-center bg-black/0 sticky top-0">
           {/* Prompt card carousel */}
           <div className="relative w-full h-screen flex flex-col justify-center items-center space-y-8">
             {promptCards.map((text, index) => {

@@ -1,16 +1,30 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import QuestionSummary from "./QuestionSummary";
 import useLiveCounts from "../../hooks/useLiveCounts";
+import { loadPollId, loadDashboardShowAll } from "../../components/Settings";
 
 // Disable SSR, render on client only (needs WebGL)
 const LiveVotesLinear = dynamic(() => import("./LiveVotesLinear"), { ssr: false });
 
 export default function ResultsPage() {
-  const counts = useLiveCounts({ pollMs: 5000 });
+  const [showAll, setShowAll] = useState(loadDashboardShowAll());
+  const pollId = showAll ? null : loadPollId();
+  const counts = useLiveCounts({ pollMs: 5000, pollId, showAll });
   const [soundEnabled, setSoundEnabled] = useState(false);
+
+  // Listen for dashboard show all setting changes
+  useEffect(() => {
+    const handleDashboardShowAllChange = () => {
+      setShowAll(loadDashboardShowAll());
+    };
+    window.addEventListener("dashboardShowAllChanged", handleDashboardShowAllChange);
+    return () => {
+      window.removeEventListener("dashboardShowAllChanged", handleDashboardShowAllChange);
+    };
+  }, []);
 
   return (
     <div className="bg-black relative min-h-screen">

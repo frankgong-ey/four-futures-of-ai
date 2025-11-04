@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 
 const futureNames = {
   constraint: "Constraint",
@@ -249,33 +250,136 @@ function DonutChart({ votes, totalParticipants, userVote }) {
   );
 }
 
-export default function ResultsSummarySection({ results }) {
-  if (!results) return null;
-  
-  const { totalParticipants, userVote, sinceDate, results: votes } = results;
-  
-  // 计算主要未来
-  const mainFuture = votes.reduce((max, current) => 
-    current.percentage > max.percentage ? current : max
-  );
+// Colors for categories (same as dashboard)
+const COLORS = {
+  constraint: "#C37EB3",
+  growth: "#2BB856",
+  transform: "#198CE6",
+  collapse: "#FF4136",
+};
 
-  // 生成 interpretation 文字
-  const getInterpretation = (percentage) => {
-    if (percentage < 10) {
-      return "a unique vision that stands out.";
-    } else if (percentage < 25) {
-      return "an emerging vision with growing resonance.";
-    } else if (percentage < 40) {
-      return "a well-supported perspective among participants.";
-    } else if (percentage < 50) {
-      return "a perspective shared by a thoughtful few.";
-    } else {
-      return "a shared vision embraced by the majority.";
-    }
+// Donut row that mirrors booth-dashboard/QuestionSummary layout
+function DonutRow({ category, count, total }) {
+  const radius = 35;
+  const circumference = 2 * Math.PI * radius;
+  const percentage = total > 0 ? (count / total) * 100 : 0;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  const iconMap = {
+    constraint: "/images/constraint-logo.svg",
+    growth: "/images/growth-logo.svg",
+    transform: "/images/transform-logo.svg",
+    collapse: "/images/collapse-logo.svg",
   };
 
-  // 获取用户投票的信息
+  const labelMap = {
+    constraint: "Constraint",
+    growth: "Growth",
+    transform: "Transform",
+    collapse: "Collapse",
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      {/* Donut (matches dashboard size/thickness) */}
+      <div className="relative flex-shrink-0">
+        <svg width="100" height="100" className="-rotate-90">
+          {/* Background circle */}
+          <circle cx="50" cy="50" r={radius} fill="none" stroke="white" strokeWidth="2.0" opacity="0.2" />
+          {/* Progress circle */}
+          <circle
+            cx="50"
+            cy="50"
+            r={radius}
+            fill="none"
+            stroke={COLORS[category]}
+            strokeWidth="2.0"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            className="transition-all duration-500 ease-out"
+          />
+        </svg>
+        {/* Center icon (no inner bg, same as dashboard) */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <img src={iconMap[category]} alt={labelMap[category]} className="w-10 h-10" />
+        </div>
+      </div>
+
+      {/* Text info (matches dashboard typography) */}
+      <div>
+        <div className="text-white mb-1 text-[16px]">{labelMap[category]}</div>
+        <div className="flex items-baseline gap-3">
+          <div className="text-white text-3xl font-bold">{Math.round(percentage)}%</div>
+          <div className="text-white text-[16px] opacity-70">{count.toLocaleString()}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Compact donut used inside statistic cards
+function CompactDonut({ id, color, percentage }) {
+  const size = 96;
+  const r = 40;
+  const cx = size / 2;
+  const cy = size / 2;
+  const circ = 2 * Math.PI * r;
+  const dash = Math.max(0, Math.min(100, percentage)) / 100 * circ;
+  const offset = circ - dash;
+  return (
+    <div className="relative" style={{ width: `${size}px`, height: `${size}px` }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="white" strokeOpacity={0.15} strokeWidth={6} />
+        <circle
+          cx={cx}
+          cy={cy}
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth={6}
+          strokeLinecap="round"
+          strokeDasharray={circ}
+          strokeDashoffset={offset}
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-[64px] h-[64px] rounded-full bg-black/70 border border-white/10 flex items-center justify-center">
+          <img src={`/images/${id}-logo.svg`} alt={id} className="w-8 h-8 opacity-90" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ id, label, color, percentage, count }) {
+  return (
+    <div className="flex items-center justify-between bg-white/10 p-6 border border-white/10">
+      <div className="flex items-center gap-6">
+        <CompactDonut id={id} color={color} percentage={percentage} />
+        <div>
+          <div className="text-white text-lg mb-1">{label}</div>
+          <div className="text-white text-6xl font-light leading-none">{percentage}%</div>
+        </div>
+      </div>
+      <div className="text-white text-2xl opacity-90 ml-6">
+        {count.toLocaleString()}
+      </div>
+    </div>
+  );
+}
+
+export default function ResultsSummarySection({ counts, totalParticipants = 0, userVote = null }) {
+  const votes = [
+    { id: 'constraint', percentage: totalParticipants > 0 ? Math.round((counts?.constraint || 0) / totalParticipants * 100) : 0, color: '#C37EB3' },
+    { id: 'growth', percentage: totalParticipants > 0 ? Math.round((counts?.growth || 0) / totalParticipants * 100) : 0, color: '#2BB856' },
+    { id: 'transform', percentage: totalParticipants > 0 ? Math.round((counts?.transform || 0) / totalParticipants * 100) : 0, color: '#198CE6' },
+    { id: 'collapse', percentage: totalParticipants > 0 ? Math.round((counts?.collapse || 0) / totalParticipants * 100) : 0, color: '#FF4136' },
+  ];
+
+  const mainFuture = votes.reduce((max, current) => current.percentage > max.percentage ? current : max);
   const userVoteResult = userVote ? votes.find(v => v.id === userVote) : null;
+  const matchingCount = userVoteResult ? Math.round((userVoteResult.percentage / 100) * totalParticipants) : 0;
 
   return (
     <>
@@ -289,99 +393,100 @@ export default function ResultsSummarySection({ results }) {
           }
         }
       `}</style>
-      <div className="min-h-screen px-6 py-20 pt-[160px]">
-        <div className="max-w-7xl mx-auto flex flex-col gap-16">
+      <div className="min-h-screen px-16 pt-[100px]">
+        <div className="flex flex-col gap-12">
         
-        {/* First Section: Title and Timestamp */}
-        <div className="flex justify-between items-start">
-          {/* Title */}
-          <div>
-            <h1 className="text-5xl md:text-[64px] font-bold text-white mb-4">
-              Here're our polling results
-            </h1>
+        {/* Two-column section */}
+        <div className="flex flex-col lg:flex-row gap-12 items-start">
+          {/* Left column: Title + line */}
+          <div className="relative flex-1 lg:order-1">
+            <div className="flex items-end gap-4">
+              <div>
+                <h1
+                  className="text-5xl md:text-[80px] tracking-[-0.05em] font-light leading-tight"
+                  style={{
+                    background: 'linear-gradient(to right, white, #FCF5B9)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  Thanks for voting.
+                </h1>
+              </div>
+              <div className="flex-1 mb-6 h-[1px] bg-white/20"></div>
+            </div>
           </div>
 
-          {/* Timestamp */}
-          <div className="text-right">
-            <p className="text-lg font-semibold text-white mb-2">All Time Results</p>
-            <p className="text-sm text-white/60">Since {sinceDate}</p>
+          {/* Right - Result Summary (English) */}
+          <div className="flex-1 max-w-[640px] space-y-8 lg:order-2">
+            <div className="space-y-4">
+              <h2 className="text-3xl font-normal text-white">
+                Result Summary
+              </h2>
+              <p className="text-xl text-white/80">
+                {userVoteResult && (
+                  <>
+                    Your choice is{' '}
+                    <span className="font-bold" style={{ color: userVoteResult.color }}>
+                      {futureNames[userVoteResult.id]}
+                    </span>
+                    .{' '}
+                  </>
+                )}
+                {userVoteResult && (
+                  <>
+                    {matchingCount.toLocaleString()} participants ({userVoteResult.percentage}%) chose the same.
+                  </>
+                )}
+                {' '}The most selected option is{' '}
+                <span className="font-bold text-white">
+                  {futureNames[mainFuture.id]}
+                </span>
+                .
+              </p>
+            </div>
+
+            {/* Big card containing Total Participants and four charts (dashboard style, 2 columns) */}
+            <div className="relative bg-white/10 outline outline-1 outline-white/20 p-6 md:p-6">
+              {/* top-left corner decorations */}
+              <div className="absolute left-0 top-0 w-4 h-1 bg-white/50"></div>
+              <div className="absolute left-0 top-0 w-1 h-4 bg-white/50"></div>
+              {/* Total Participants block */}
+              <div className="flex justify-between items-center mb-8">
+                <div className="text-white text-[24px]">Total Participants</div>
+                <div className="text-white text-[36px] font-normal leading-none">
+                  {totalParticipants.toLocaleString()}
+                </div>
+              </div>
+
+              {/* Four donut rows inside one card (2 columns) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-16">
+                <DonutRow category="constraint" count={counts?.constraint || 0} total={totalParticipants} />
+                <DonutRow category="growth" count={counts?.growth || 0} total={totalParticipants} />
+                <DonutRow category="transform" count={counts?.transform || 0} total={totalParticipants} />
+                <DonutRow category="collapse" count={counts?.collapse || 0} total={totalParticipants} />
+              </div>
+            </div>
+
+            {/* Next Chapter button */}
+            <Link 
+              href="/futures"
+              aria-disabled
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              tabIndex={-1}
+              className="group relative w-[320px] h-[120px] p-[24px] flex-col items-start justify-start bg-white cursor-default block pointer-events-none opacity-90"
+            >
+              <div className="font-light text-[16px] text-black/60">Next Chapter</div>
+              <div className="font-light text-[24px] text-black">Is Your Org Ready?</div>
+              <div className="absolute right-[24px] bottom-[24px] w-[64px] h-[64px] flex items-center justify-center">
+                <img src="/images/next_right.svg" className="w-full h-full object-cover transition-transform duration-300 group-hover:translate-x-1"/>
+              </div>
+            </Link>
           </div>
         </div>
-
-        {/* Second Section: Left (Results Interpretation) and Right (Donut Chart) */}
-        <div className="flex flex-col lg:flex-row gap-12 items-start">
-          
-          {/* Left Side - Results Interpretation */}
-          <div className="flex-1 space-y-8">
-            {/* Summary Text */}
-            <div className="space-y-6">
-              <h2 className="text-3xl font-bold text-white">
-                Summary
-              </h2>
-              
-              {/* First Paragraph */}
-              <p className="text-xl text-white/80">
-                The majority of participants are preparing for the <span style={{ color: mainFuture.color }} className="font-bold">{futureNames[mainFuture.id]}</span> future.
-              </p>
-              
-              {/* Second Paragraph */}
-              {userVoteResult ? (
-                <p className="text-lg text-white/80 leading-relaxed">
-                  You selected <span style={{ color: userVoteResult.color, fontWeight: 'bold' }}>
-                    {futureNames[userVoteResult.id].toUpperCase()}
-                  </span>, a perspective shared by{' '}
-                  <span style={{ color: userVoteResult.color, fontWeight: 'bold' }}>
-                    {userVoteResult.percentage}%
-                  </span> of all participants – {getInterpretation(userVoteResult.percentage)}
-                </p>
-              ) : (
-                <p className="text-lg text-white/80 leading-relaxed">
-                  {`${votes[0].percentage}% of participants are preparing for the ${futureNames[votes[0].id]} future, while ${votes[1].percentage}% expect the ${futureNames[votes[1].id]} scenario. The ${futureNames[votes[2].id]} future represents ${votes[2].percentage}% of votes, and ${futureNames[votes[3].id]} rounds out the responses at ${votes[3].percentage}%.`}
-                </p>
-              )}
-            </div>
-
-            {/* Four Result Tiles */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {votes.map((result) => (
-                <div
-                  key={result.id}
-                  className="bg-black p-6 border border-white/10"
-                >
-                  {/* Top colored line */}
-                  <div 
-                    className="h-1 mb-6 rounded"
-                    style={{ 
-                      background: `linear-gradient(to right, ${result.color} 0%, ${result.color}AA 100%)` 
-                    }}
-                  />
-                  
-                  {/* Icon and Label */}
-                  <div className="flex items-center gap-4 mb-4">
-                    {/* Icon placeholder - 50% white color block */}
-                    <div 
-                      className="w-8 h-8 bg-white/50 rounded"
-                      style={{ width: '24px', height: '24px' }}
-                    />
-                    <div className="text-lg font-semibold text-white">
-                      {futureNames[result.id]}
-                    </div>
-                  </div>
-                  
-                  {/* Percentage */}
-                  <div className="text-5xl font-bold text-white">
-                    {result.percentage}%
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-        {/* 右侧占位（已将 3D Canvas 移至 results/page.jsx 背景层） */}
-        <div className="relative flex-1 flex justify-center lg:justify-end" />
         </div>
       </div>
-    </div>
     </>
   );
 }

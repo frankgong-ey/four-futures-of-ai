@@ -11,6 +11,7 @@ export const detailData = {
           "Imagine AI freezes at today's level—fully scaled, widely used, but without breakthroughs in accuracy, reliability, training, or energy efficiency to realize the big promises of 2025.",
           `Aggressive regulation in North America and the EU is slowing AI development in western markets. "Grey market" AIs are emerging, and enterprise AI tools have only incremental impact. Employees are resistant, feeling burdened by mediocre tools. Companies are cautious with AI investments, leading to slower adoption, except in a few industries with notable AI impact.`
         ],
+        storyImage: "/images/industry/stories/constraint1.jpg",
         video: {
           thumbnail: "/images/video_thumbnail.jpg",
           duration: "2:45"
@@ -69,6 +70,7 @@ export const detailData = {
           "The barriers to entry into AI continue to come down. AI is everywhere, with largely positive impacts on business and society.",
           "Companies using AI have significantly improved efficiency, reducing costs while boosting revenue and innovation. Families rely on AI for tasks like vacation planning and daily scheduling. AI regulation is minimal and varies by region. In workplaces, human-AI partnerships enhance employee contributions and reduce burnout. Some organizations are testing 4-day workweeks, sharing AI benefits with employees. The demand for niche skills has decreased, intensifying the competition for talent."
         ],
+        storyImage: "/images/industry/stories/growth1.jpg",
         video: {
           thumbnail: "/images/video_thumbnail.jpg",
           duration: "3:12"
@@ -138,6 +140,7 @@ export const detailData = {
           "Progress in AI for the last 5 years has exceeded expectations in almost every dimension.",
           "Today, most companies use AI extensively to enhance efficiency and automate tasks, which employees generally welcome. Regulators have balanced safety and innovation effectively. This has led to increased productivity and growth, with AI-native firms outperforming traditional ones in the S&P 500. The most successful companies are those that have reinvented their business models, achieving unprecedented results."
         ],
+        storyImage: "/images/industry/stories/transform1.jpg",
         video: {
           thumbnail: "/images/video_thumbnail.jpg",
           duration: "0:00"
@@ -207,6 +210,7 @@ export const detailData = {
           "By 2030, the number of companies building AI has collapsed into a handful of mega-players.",
           "Over the past five years, the gap between \"AI winners\" and \"AI losers\" has widened. Prices for top-tier AI have skyrocketed, limiting access to a few \"VIP\" companies. The progress of AI has slowed due to major players and regulations affecting smaller builders. Companies without top-tier models must partner with market leaders, spend heavily, or face challenges. Public backlash has led to brand boycotts. New AI classes are emerging, but their value and control dynamics remain uncertain."
         ],
+        storyImage: "/images/industry/stories/collapse1.jpg",
         video: {
           thumbnail: "/images/video_thumbnail.jpg",
           duration: "0:00"
@@ -264,9 +268,10 @@ export const detailData = {
         title: "About This Future",
         subtitle: "Humanity: the once and future kings",
         description: [
-          "Artificial intelligence (AI) begets artificial value” is now a popular C-suite mantra as years of investment without return continue to dampen financial performance broadly across the markets. Valuations of AI-first companies continue to plummet as ambitious growth models are tempered by diminishing returns in AI performance and capital is withdrawn.",
+          `"Artificial intelligence (AI) begets artificial value" is now a popular C-suite mantra as years of investment without return continue to dampen financial performance broadly across the markets. Valuations of AI-first companies continue to plummet as ambitious growth models are tempered by diminishing returns in AI performance and capital is withdrawn.`,
           "While gains are still realized in specific silos, large-scale AI models peaked earlier than anticipated, and their increasing complexity now only drives additional unpredictability —with fact and opinion becoming increasingly blurred in their outputs. Growing distrust has led to fatigue, and consumers and companies still must rely on human intervention to facilitate real-world applicability. This sense of “dual work” has sidelined AI as a niche technology easily ignored vs. the game changer we were promised."
         ],
+        storyImage: "/images/industry/stories/constraint1.jpg",
         hideVideo: true
       },
       valueChainImpacts: {
@@ -319,7 +324,8 @@ export const detailData = {
         description: [
           "Personal AI agents are now as ubiquitous as the smartphones that preceded them. These digital reflections perceive our own wants and desires even better than our physical selves. You and your “digital twin” are now but one component in a vast interconnected hive of people, infrastructure and experiences.",
           "Consumption and daily decision-making are now passive human endeavors as your AI agent acts autonomously on your behalf in this new ecosystem, allowing you seamless navigation of your life both digitally and physically. Middlemen and waste vanish as collectivity is prioritized and our agents mutually influence the future of production on our behalf."
-        ]
+        ],
+        storyImage: "/images/industry/stories/growth1.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -342,9 +348,18 @@ export const detailData = {
         title: "Strategic Response",
         description: "In the AI growth scenario, organizations must pivot decisively toward both renovation and innovation strategies to capture market leadership. This dual approach is required to deliver immediate return on investment while simultaneously investing in breakthrough innovations that reshape markets:",
         items: [
-          "AI-native BUs",
-          "Challenger models",
-          "Enterprise transformation"
+          {
+            text: "AI-native BUs",
+            icon: "/images/industry/icons/cp-growth-abu.svg"
+          },
+          {
+            text: "Challenger models",
+            icon: "/images/industry/icons/cp-growth-cm.svg"
+          },
+          {
+            text: "Enterprise transformation",
+            icon: "/images/industry/icons/cp-growth-et.svg"
+          }
         ]
       }
     }
@@ -362,7 +377,8 @@ export const detailData = {
         description: [
           "AI has evolved from a technology product to a world-defining achievement similar to the internet and electricity before it. The productivity gains it has unleashed have redefined the modern human experience. Manufacturing is now completely robotic. Mobility is autonomous, as are supply chains. AI-powered assistants provide all basic services.",
           "Life is a passion project now that time is not a scarce resource. Some people double down and indulge in excessive consumption, some push the limits of human creativity and achievement, while others focus on community. Regardless, humans still seek meaning, but differentiation from what AI can provide is their primary objective as new traditions become the norm."
-        ]
+        ],
+        storyImage: "/images/industry/stories/transform1.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -385,9 +401,18 @@ export const detailData = {
         title: "Strategic Response",
         description: "Due to radical shifts in consumer behavior and market structure, protectionist and renovation strategies are extremely risky. A transformation scenario requires all market participants to take bold action and think strategically about the impact of AI on their sector:",
         items: [
-          "Ecosystem plays",
-          "Transactions",
-          "Business model innovation"
+          {
+            text: "Ecosystem plays",
+            icon: "/images/industry/icons/cp-transform-ep.svg"
+          },
+          {
+            text: "Transactions",
+            icon: "/images/industry/icons/cp-transform-t.svg"
+          },
+          {
+            text: "Business model innovation",
+            icon: "/images/industry/icons/cp-transform-bmi.svg"
+          }
         ]
       }
     }
@@ -405,7 +430,8 @@ export const detailData = {
         description: [
           "Just a few AI companies now dominate the global market, each controlling not just the flow of information but also the very concept of human agency. These gatekeepers dictate which products, services and information are seen, recommended or even compatible with their ecosystems, forcing brands to align with their ethical codes, data policies and monetization models or cease to exist.",
           "Consumer freedom narrows within AI-sanctioned boundaries, where success hinges less on innovation and more on appeasing algorithmic overlords. Marketing becomes a negotiation with AI values, and consumption is no longer driven by need or desire but by what the executives from each AI offering deem optimal, profitable or permissible."
-        ]
+        ],
+        storyImage: "/images/industry/stories/collapse1.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -428,9 +454,18 @@ export const detailData = {
         title: "Strategic Response",
         description: "In a collapse scenario, most companies invest in protectionist strategies, protecting intellectual property, consolidating to reduce competition and lobbying to slow down disruptions. On the other hand, the few market winners go all in on innovation and disruption, capturing market share with lean business models, forcing overreliance on their products and adopting proprietary AI to further differentiate:",
         items: [
-          "Deep partnerships",
-          "IP protection",
-          "Portfolio rationalization"
+          {
+            text: "Deep partnerships",
+            icon: "/images/industry/icons/cp-collapse-dp.svg"
+          },
+          {
+            text: "IP protection",
+            icon: "/images/industry/icons/cp-collapse-ip.svg"
+          },
+          {
+            text: "Portfolio rationalization",
+            icon: "/images/industry/icons/cp-collapse-pr.svg"
+          }
         ]
       }
     }
@@ -448,7 +483,8 @@ export const detailData = {
         description: [
           "AI in manufacturing falls short of expectations. Despite significant investments, its limitations in accuracy, reliability, and efficiency remain largely unchanged since 2025. Stricter regulatory frameworks in North America and the EU stifle innovation, creating a gap between AI hype and factory-floor reality. This leads to widespread skepticism among executives who witness numerous AI systems fail in real-world applications.",
           "Companies adopt AI slowly and selectively, focusing on modest efficiency gains rather than ambitious transformations. This cautious approach reflects a shift towards realistic expectations, prioritizing reliable solutions that address the complexities of industrial environments for sustainable growth through practical AI integration."
-        ]
+        ],
+        storyImage: "/images/industry/stories/constraint2.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -471,9 +507,18 @@ export const detailData = {
         title: "Strategic Response",
         description: "Navigate Regulatory and Technological Constraints by Fortifying Internal Foundations and Actively Influencing External Ecosystems",
         items: [
-          "Invest in Data Infrastructure",
-          "Partner for Skills Development",
-          "Advocated for Balanced Policies"
+          {
+            text: "Invest in Data Infrastructure",
+            icon: "/images/industry/icons/ip-constraint-di.svg"
+          },
+          {
+            text: "Partner for Skills Development",
+            icon: "/images/industry/icons/ip-constraint-sd.svg"
+          },
+          {
+            text: "Advocated for Balanced Policies",
+            icon: "/images/industry/icons/ip-constraint-bp.svg"
+          }
         ]
       }
     }
@@ -491,7 +536,8 @@ export const detailData = {
         description: [
           "AI-powered efficiency gains are driving a seismic shift in the Industrial Products sector. A new wave of smaller, agile manufacturers are challenging industry giants, empowered by accessible AI systems. These firms compete by being faster, more responsive, and highly specialized, outpacing larger players from product design to time-to-market.",
           "This shift redefines the business model. Success now lies in adaptability and intelligent automation rather than scale. AI levels the playing field, enabling niche players to deliver tailored solutions with speed and precision, fueling a more dynamic and decentralized industrial economy."
-        ]
+        ],
+        storyImage: "/images/industry/stories/growth1.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -514,9 +560,18 @@ export const detailData = {
         title: "Strategic Response",
         description: "Capitalize on AI-Driven Growth Opportunities Through Scaled Integration, Ethical Practices, and Enhanced Capability Building",
         items: [
-          "Scale Pilot Initiatives",
-          "Build AI Ethics & Talent Pipelines",
-          "Foster Ecosystem Partnerships"
+          {
+            text: "Scale Pilot Initiatives",
+            icon: "/images/industry/icons/ip-growth-spi.svg"
+          },
+          {
+            text: "Build AI Ethics & Talent Pipelines",
+            icon: "/images/industry/icons/ip-growth-aetp.svg"
+          },
+          {
+            text: "Foster Ecosystem Partnerships",
+            icon: "/images/industry/icons/ip-growth-ep.svg"
+          }
         ]
       }
     }
@@ -534,7 +589,8 @@ export const detailData = {
         description: [
           "Distributed intelligence, modular manufacturing networks, and seamless human-AI collaboration are now the baseline. AI governs the entire industrial value chain, from product design to procurement, from logistics to customer service. The system is fully integrated, adaptive, and self-optimizing, enabling real-time decision-making across global operations.",
           "Companies operate as fluid, AI-managed ecosystems where human roles shift toward oversight, creativity, and ethical governance. Competitive advantage lies in how well firms can design and evolve these AI-powered networks to deliver hyper-efficient, resilient, and customer-centric outcomes."
-        ]
+        ],
+        storyImage: "/images/industry/stories/transform2.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -561,9 +617,18 @@ export const detailData = {
         title: "Strategic Response",
         description: "Lead the AI Transformation by Pioneering Frontier Innovations and Ensuring Adaptive Organizational Preparedness",
         items: [
-          "Pioneer Frontier AI",
-          "Address Workforce Evolution",
-          "Build Adaptive Governance"
+          {
+            text: "Pioneer Frontier AI",
+            icon: "/images/industry/icons/ip-transform-pfa.svg"
+          },
+          {
+            text: "Address Workforce Evolution",
+            icon: "/images/industry/icons/ip-transform-awe.svg"
+          },
+          {
+            text: "Build Adaptive Governance",
+            icon: "/images/industry/icons/ip-transform-bag.svg"
+          }
         ]
       }
     }
@@ -581,7 +646,8 @@ export const detailData = {
         description: [
           "AI creates a ruthless oligopoly in industrial manufacturing. A few mega-corporations control most of the high-value production through proprietary AI systems that operate with devastating efficiency advantages. Their factories produce faster, cheaper, and with fewer defects than any competitor can match, creating an insurmountable technological moat.",
           "Market dynamics shift from open competition to closed ecosystems, where access to advanced AI infrastructure becomes the primary barrier to entry. Innovation slows, supply chains grow more fragile, and economic power centralizes around a handful of AI-driven giants. The result is a brittle industrial landscape optimized for efficiency, but vulnerable to disruption and resistant to change."
-        ]
+        ],
+        storyImage: "/images/industry/stories/collapse2.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -604,9 +670,18 @@ export const detailData = {
         title: "Strategic Response",
         description: "Mitigate Risks of Industry Collapse Through Strategic Diversification, Antitrust Advocacy, and Building Resilient Frameworks",
         items: [
-          "Diversify Tech Stacks",
-          "Advocate Anti-Trust",
-          "Strengthen Resilience"
+          {
+            text: "Diversify Tech Stacks",
+            icon: "/images/industry/icons/ip-collapse-dts.svg"
+          },
+          {
+            text: "Advocate Anti-Trust",
+            icon: "/images/industry/icons/ip-collapse-aat.svg"
+          },
+          {
+            text: "Strengthen Resilience",
+            icon: "/images/industry/icons/ip-collapse-sr.svg"
+          }
         ]
       }
     }
@@ -624,7 +699,8 @@ export const detailData = {
         description: [
           "A wave of high-profile AI failures in oil and gas sparks global backlash and region-specific regulations focused on reliability, human oversight, and risk mitigation. Companies respond with cautious AI strategies, prioritizing governance, transparency, and trust. Innovation slows, with firms favoring smaller open-source LLMs despite cybersecurity concerns—though their popularity declines as regulations tighten.",
           "Fragmented global rules complicate development, allowing only a few certified LLM providers to thrive. Investment shifts to low-risk AI applications like inspections, while broader operational use lags. Trust and safety take precedence, slowing AI adoption. In high-stakes sectors like oil and gas, missteps lead to halted projects or financial loss, reinforcing a restrained approach to AI integration."
-        ]
+        ],
+        storyImage: "/images/industry/stories/constraint3.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -651,10 +727,22 @@ export const detailData = {
         title: "Strategic Response",
         description: "In response to potential impacts from widespread distrust, companies should consider:",
         items: [
-          "Ensure transparent, ethical AI governance",
-          "Partner with trusted AI adopters",
-          "Explore adjacent AI innovations",
-          "Apply AI to proven back-office tasks"
+          {
+            text: "Ensure transparent, ethical AI governance",
+            icon: "/images/industry/icons/og-constraint-eteag.svg"
+          },
+          {
+            text: "Partner with trusted AI adopters",
+            icon: "/images/industry/icons/og-constraint-pwtaa.svg"
+          },
+          {
+            text: "Explore adjacent AI innovations",
+            icon: "/images/industry/icons/og-constraint-eaai.svg"
+          },
+          {
+            text: "Apply AI to proven back-office tasks",
+            icon: "/images/industry/icons/og-constraint-aapbt.svg"
+          }
         ]
       }
     }
@@ -672,7 +760,8 @@ export const detailData = {
         description: [
           "Data is no longer a byproduct—it’s a core asset fueling AI-powered transformation in oil and gas. Every asset, from reservoirs to trading desks, is mirrored by a digital twin, fed by real-time data. These ecosystems enable AI agents to allocate capital, optimize operations, and simulate scenarios—shrinking planning cycles and enabling faster, risk-adjusted decisions.",
           "Unified data platforms break silos across exploration, production, and trading—driving predictive maintenance, autonomous procurement, and real-time optimization. Standardized systems let AI scale best practices globally, lifting performance and ensuring safety and compliance. The result: a closed-loop system where every molecule, dollar, and decision is optimized—powered by data. The winners treat data as infrastructure—investing in governance, integration, and continuous learning to unlock compounding returns. They move faster, with fewer people, lower risk, and better capital outcomes."
-        ]
+        ],
+        storyImage: "/images/industry/stories/growth2.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -699,10 +788,22 @@ export const detailData = {
         title: "Strategic Response",
         description: "To drive sustainable growth, organizations must adopt a multifaceted approach that includes developments such as:",
         items: [
-          "Scale proven use cases for value",
-          "Target differentiators to guide investment",
-          "Use digital twins and global hubs",
-          "Upskill teams for AI collaboration"
+          {
+            text: "Scale proven use cases for value",
+            icon: "/images/industry/icons/og-growth-spucv.svg"
+          },
+          {
+            text: "Target differentiators to guide investment",
+            icon: "/images/industry/icons/og-growth-tdgi.svg"
+          },
+          {
+            text: "Use digital twins and global hubs",
+            icon: "/images/industry/icons/og-growth-udtgh.svg"
+          },
+          {
+            text: "Upskill teams for AI collaboration",
+            icon: "/images/industry/icons/og-growth-utac.svg"
+          }
         ]
       }
     }
@@ -720,7 +821,8 @@ export const detailData = {
         description: [
           "Leading energy companies have evolved into fully AI-integrated enterprises. Advanced AI systems now coordinate both field operations and corporate functions—managing everything from drilling and maintenance to finance, procurement, and compliance.",
           "Autonomous field operations are standard, with robotic systems handling inspections and repairs in remote environments. In parallel, AI manages enterprise workflows like reporting, forecasting, and regulatory submissions. Secure, standardized data interfaces protect IP while enabling seamless collaboration across partners and regulators. Companies now license their AI infrastructure to adjacent sectors, while human teams focus on strategy, ethics, and stakeholder engagement."
-        ]
+        ],
+        storyImage: "/images/industry/stories/transform3.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -747,10 +849,22 @@ export const detailData = {
         title: "Strategic Response",
         description: "To thrive in a transformed energy landscape, organizations must embrace initiatives such as:",
         items: [
-          "Invest to build AI-first operations",
-          "Recruit for strategy, ethics, engagement",
-          "Adopt AI agents to reshape work",
-          "Monetize AI assets and IP"
+          {
+            text: "Invest to build AI-first operations",
+            icon: "/images/industry/icons/og-transform-ibao.svg"
+          },
+          {
+            text: "Recruit for strategy, ethics, engagement",
+            icon: "/images/industry/icons/og-transform-rsee.svg"
+          },
+          {
+            text: "Adopt AI agents to reshape work",
+            icon: "/images/industry/icons/og-transform-aaarw.svg"
+          },
+          {
+            text: "Monetize AI assets and IP",
+            icon: "/images/industry/icons/og-transform-maai.svg"
+          }
         ]
       }
     }
@@ -768,7 +882,8 @@ export const detailData = {
         description: [
           "In early 2030, a catastrophic methane leak erupts from a deepwater rig, undetected for 72 hours due to failure in a monopolistic autonomous AI safety system. Opaque, unauditable models replaced human oversight in safety-critical operations while mid-tier operators lacked access to critical patches behind closed ecosystems.",
           "The disaster triggers a global reckoning: regulators lacked visibility, and firms realize accountability was outsourced. With AI monopolized and agentic systems ungoverned, trust collapses—autonomous AI stalls and human-in-the-loop solutions rise. Resilience now demands diversified governance, transparent architectures, and rebuilding internal capability."
-        ]
+        ],
+        storyImage: "/images/industry/stories/collapse3.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -795,10 +910,22 @@ export const detailData = {
         title: "Strategic Response",
         description: "In response to monopolistic actions, organizations must adopt a comprehensive strategy that includes:",
         items: [
-          "Adopt open, explainable AI with oversight",
-          "Build internal AI oversight center (COE)",
-          "Diversify partners to reduce dependency",
-          "Invest in future value pools strategically"
+          {
+            text: "Adopt open, explainable AI with oversight",
+            icon: "/images/industry/icons/og-collapse-aoeao.svg"
+          },
+          {
+            text: "Build internal AI oversight center (COE)",
+            icon: "/images/industry/icons/og-collapse-biaoc.svg"
+          },
+          {
+            text: "Diversify partners to reduce dependency",
+            icon: "/images/industry/icons/og-collapse-dprd.svg"
+          },
+          {
+            text: "Invest in future value pools strategically",
+            icon: "/images/industry/icons/og-collapse-ifvps.svg"
+          }
         ]
       }
     }
@@ -816,7 +943,8 @@ export const detailData = {
         description: [
           "High-profile AI failures in critical sectors trigger global concern, leading to tighter regulations. The defense industry adopts a cautious, risk-averse stance, prioritizing trust, human oversight, and operational assurance. Stricter laws and rising cybersecurity threats push organizations away from open-source LLMs and unvetted providers, consolidating around trusted, sovereign AI partners. Focus shifts to low-risk applications like logistics, intelligence processing, and cyber defense, with frontline autonomous systems facing intense scrutiny and slower deployment.",
           "Defense AI development adheres and is constrained by strict assurance, ethics, and security standards, aligned with allies’ principles and the Defense AI Strategy. Investments prioritize resilient, decision-support systems over autonomous lethality, reflecting a commitment to public trust and mission integrity in a complex threat landscape."
-        ]
+        ],
+        storyImage: "/images/industry/stories/constraint4.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -839,10 +967,22 @@ export const detailData = {
         title: "Strategic Response",
         description: "In response to potential impacts from widespread distrust, Defense should consider:",
         items: [
-          "Invest in proven AI firms actively exploring adjacent markets",
-          "Develop AI skills in Government/MoD to enhance trust",
-          "Focus on use cases in more proven back-office areas (finance, HR, logistics, etc)",
-          "Promote AI transparency through cross-government engagement"
+          {
+            text: "Invest in proven AI firms actively exploring adjacent markets",
+            icon: "/images/industry/icons/de-constraint-ipaf.svg"
+          },
+          {
+            text: "Develop AI skills in Government/MoD to enhance trust",
+            icon: "/images/industry/icons/de-constraint-dag.svg"
+          },
+          {
+            text: "Focus on use cases in more proven back-office areas (finance, HR, logistics, etc)",
+            icon: "/images/industry/icons/de-constraint-fucm.svg"
+          },
+          {
+            text: "Promote AI transparency through cross-government engagement",
+            icon: "/images/industry/icons/de-constraint-pat.svg"
+          }
         ]
       }
     }
@@ -860,7 +1000,8 @@ export const detailData = {
         description: [
           "AI is transforming military operations and defense capability development. Agile defense tech firms and dual-use innovators are challenging traditional players with faster, mission-focused solutions. Using modular AI systems and rapid prototyping, these companies outpace legacy suppliers in everything from sensors to decision-support tools. Success now depends on adaptability, speed, and intelligent automation—not just scale. AI is leveling the field, enabling niche firms to deliver tailored, deployable solutions that boost operational advantage.",
           "On the battlefield, this means better decision-making, more precise targeting, and adaptive mission planning. AI-enabled platforms support dynamic tasking, autonomous ISR, and real-time threat analysis, giving commanders greater flexibility at the tactical edge. Together, these advances are creating a more decentralized, resilient defense environment, aligned with the goal of fielding a tech-enabled force that can outpace evolving threats across all domains."
-        ]
+        ],
+        storyImage: "/images/industry/stories/growth3.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -883,10 +1024,22 @@ export const detailData = {
         title: "Strategic Response",
         description: "To drive sustainable growth, Defense must adopt a multifaceted approach that includes developments such as:",
         items: [
-          "Build AI ethics and talent pipelines for future readiness",
-          "Partner with AI leaders to boost defense and speed delivery",
-          "Expand successful use cases to highlight advantages",
-          "Drive adoption across the military commands and into industry"
+          {
+            text: "Build AI ethics and talent pipelines for future readiness",
+            icon: "/images/industry/icons/de-growth-baet.svg"
+          },
+          {
+            text: "Partner with AI leaders to boost defense and speed delivery",
+            icon: "/images/industry/icons/de-growth-palb.svg"
+          },
+          {
+            text: "Expand successful use cases to highlight advantages",
+            icon: "/images/industry/icons/de-growth-esch.svg"
+          },
+          {
+            text: "Drive adoption across the military commands and into industry",
+            icon: "/images/industry/icons/de-growth-daamci.svg"
+          }
         ]
       }
     }
@@ -904,7 +1057,8 @@ export const detailData = {
         description: [
           "Leading defense organizations are evolving into fully AI-integrated enterprises, where advanced AI systems coordinate both operational missions and enterprise-level functions. From force readiness and logistics to procurement, intelligence, and compliance, AI is becoming embedded across the full defense lifecycle, complementing and, where appropriate, replacing human effort.",
           "Autonomous systems are now standard in operational theater—performing tasks in high-risk or remote environments—while AI streamlines enterprise workflows via secure, federated data frameworks across forces, allies, and industry partners. Confidence builds and AI-powered autonomous weapon systems emerge on the battlefield."
-        ]
+        ],
+        storyImage: "/images/industry/stories/transform4.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -927,9 +1081,18 @@ export const detailData = {
         title: "Strategic Response",
         description: "In response to potential impacts from widespread distrust, Defence should consider:",
         items: [
-          "Reshape Defense’s allies-aligned AI strategy for dominance",
-          "Prioritize investments to transition into an AI-first operating model",
-          "Use AI agents to reshape work and foster an AI-first culture"
+          {
+            text: "Reshape Defense's allies-aligned AI strategy for dominance",
+            icon: "/images/industry/icons/de-transform-rdaas.svg"
+          },
+          {
+            text: "Prioritize investments to transition into an AI-first operating model",
+            icon: "/images/industry/icons/de-transform-pitaom.svg"
+          },
+          {
+            text: "Use AI agents to reshape work and foster an AI-first culture",
+            icon: "/images/industry/icons/de-transform-uarwfa.svg"
+          }
         ]
       }
     }
@@ -947,7 +1110,8 @@ export const detailData = {
         description: [
           "By 2030, the arms race shifts to AI dominance. Nations rush to build closed-source AI, but only a few achieve breakthroughs via massive compute and exclusive materials. With defense reliant on algorithmic decision-making, most countries fall behind, while leaders field systems that anticipate and counter threats before they emerge.",
           "AI providers gain unprecedented influence; private capital funds agendas through deep partnerships. Smaller nations become testing grounds as brain drain creates technological dead zones. International law struggles with autonomous decisions, shifting sovereignty and alliances from military might to algorithmic strength."
-        ]
+        ],
+        storyImage: "/images/industry/stories/collapse4.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -970,10 +1134,22 @@ export const detailData = {
         title: "Strategic Response",
         description: "In response to monopolistic actions, the industry needs to protect against a single or few winners capturing global market share:",
         items: [
-          "Boost national resilience without AI",
-          "Identify and fund AI rivals to reduce vendor dependence",
-          "Build AI oversight, laws, and skills for safer use",
-          "Protect IP and consolidate to safeguard prosperity"
+          {
+            text: "Boost national resilience without AI",
+            icon: "/images/industry/icons/de-collapse-bnrwa.svg"
+          },
+          {
+            text: "Identify and fund AI rivals to reduce vendor dependence",
+            icon: "/images/industry/icons/de-collapse-ifarrvd.svg"
+          },
+          {
+            text: "Build AI oversight, laws, and skills for safer use",
+            icon: "/images/industry/icons/de-collapse-baolss.svg"
+          },
+          {
+            text: "Protect IP and consolidate to safeguard prosperity",
+            icon: "/images/industry/icons/de-collapse-picsp.svg"
+          }
         ]
       }
     }
@@ -991,7 +1167,8 @@ export const detailData = {
         description: [
           "AI in capital markets plateaus at today’s capability—embedded across trading, risk, research, and operations, but without leaps needed for fully autonomous execution. Quant teams get incremental lifts; signals improve at the margins while humans steer orders, limits, and exceptions.",
           "Stricter regulation slows adoption. Firms consolidate around certified providers; experimental models face stricter risk reviews. Benefits cluster in surveillance and regulatory reporting—steady, compliance‑led gains rather than breakthroughs."
-        ]
+        ],
+        storyImage: "/images/industry/stories/constraint4.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -1007,11 +1184,26 @@ export const detailData = {
         title: "Strategic Response",
         description: "To respond to plateaued AI and tighter oversight, firms should:",
         items: [
-          "Stand up/refresh AI COE with guardrails; upskill at scale",
-          "Industrialize model governance",
-          "Mutualize regulatory cost via reporting/surveillance utilities",
-          "Re‑platform data quality & controls; bias testing as standard",
-          "Prioritize low‑latency ops automation"
+          {
+            text: "Stand up/refresh AI COE with guardrails; upskill at scale",
+            icon: "/images/industry/icons/bcm-constraint-srac.svg"
+          },
+          {
+            text: "Industrialize model governance",
+            icon: "/images/industry/icons/bcm-constraint-img.svg"
+          },
+          {
+            text: "Mutualize regulatory cost via reporting/surveillance utilities",
+            icon: "/images/industry/icons/bcm-constraint-mrcrsu.svg"
+          },
+          {
+            text: "Re‑platform data quality & controls; bias testing as standard",
+            icon: "/images/industry/icons/bcm-constraint-rdqc.svg"
+          },
+          {
+            text: "Prioritize low‑latency ops automation",
+            icon: "/images/industry/icons/bcm-constraint-srac.svg"
+          }
         ]
       }
     }
@@ -1038,17 +1230,33 @@ export const detailData = {
           { title: "Credit manufacturing", description: "Event‑driven pricing; dynamic covenants; real‑time collateral health." },
           { title: "Markets & execution", description: "Dealer/client agents negotiate spreads and size; liquidity discovery improves beyond top‑of‑book." },
           { title: "Post‑trade", description: "Near‑zero‑touch confirmations/allocations; exception volumes fall sharply." }
-        ]
+        ],
+        storyImage: "/images/industry/stories/growth1.jpg"
       },
       strategicResponse: {
         title: "Strategic Response",
         description: "Scale AI while hardening controls and compliance:",
         items: [
-          "Launch AI‑native business units",
-          "Transform ledgers/limits/exposure engines to real‑time",
-          "Incubate challenger models to pre‑empt fintechs",
-          "Productize agent‑safe onboarding/pricing/reporting APIs",
-          "Stand up cross‑border compliance orchestration"
+          {
+            text: "Launch AI‑native business units",
+            icon: "/images/industry/icons/bcm-growth-labu.svg"
+          },
+          {
+            text: "Transform ledgers/limits/exposure engines to real‑time",
+            icon: "/images/industry/icons/bcm-growth-tler.svg"
+          },
+          {
+            text: "Incubate challenger models to pre‑empt fintechs",
+            icon: "/images/industry/icons/bcm-growth-icmpf.svg"
+          },
+          {
+            text: "Productize agent‑safe onboarding/pricing/reporting APIs",
+            icon: "/images/industry/icons/bcm-growth-pao.svg"
+          },
+          {
+            text: "Stand up cross‑border compliance orchestration",
+            icon: "/images/industry/icons/bcm-growth-labu.svg"
+          }
         ]
       }
     }
@@ -1066,7 +1274,8 @@ export const detailData = {
         description: [
           "Agentic systems connect research, signals, execution, risk, and post‑trade in one self‑optimizing flow. Orders route, hedge, and reconcile automatically within firm‑defined limits; models recalibrate to live conditions in milliseconds.",
           "Human teams set risk appetite, strategy, and controls, stepping in for exceptions and new opportunities. Edge accrues to institutions that architect secure agent control planes for speed, precision, and capital efficiency across global markets."
-        ]
+        ],
+        storyImage: "/images/industry/stories/transform4.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -1082,11 +1291,26 @@ export const detailData = {
         title: "Strategic Response",
         description: "Build for autonomous markets with control and resilience:",
         items: [
-          "Build a secure agent control plane",
-          "Innovate business models",
-          "Ecosystem & transactions: acquire specialty data/compute",
-          "Migrate identity, payments, custody to quantum‑safe",
-          "Institutionalize predictive regulation interfaces"
+          {
+            text: "Build a secure agent control plane",
+            icon: "/images/industry/icons/bcm-transform-bsacp.svg"
+          },
+          {
+            text: "Innovate business models",
+            icon: "/images/industry/icons/bcm-transform-ibm.svg"
+          },
+          {
+            text: "Ecosystem & transactions: acquire specialty data/compute",
+            icon: "/images/industry/icons/bcm-transform-etasd.svg"
+          },
+          {
+            text: "Migrate identity, payments, custody to quantum‑safe",
+            icon: "/images/industry/icons/bcm-transform-mipcqsa.svg"
+          },
+          {
+            text: "Institutionalize predictive regulation interfaces",
+            icon: "/images/industry/icons/bcm-transform-bsacp.svg"
+          }
         ]
       }
     }
@@ -1104,7 +1328,8 @@ export const detailData = {
         description: [
           "By 2030, advantage comes from privileged access to closed AI, powerful compute, and premium data. Gatekeeping platforms sit between exchanges, brokers, and clearing. VIP firms trade faster, price risk better, and win order priority; others rent slower tools or resell services.",
           "Platforms set the pace via exclusive deals and standard templates. Share skews to the largest players; capital‑constrained firms struggle to access premium AI. Price discovery moves inside walled gardens."
-        ]
+        ],
+        storyImage: "/images/industry/stories/collapse2.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -1120,11 +1345,22 @@ export const detailData = {
         title: "Strategic Response",
         description: "Compete in platform‑dominated markets via resilience and bargaining power:",
         items: [
-          "Lock deep partnerships with 1–2 gatekeepers; negotiate data rights/latency tiers",
-          "Double down on IP protection and portfolio rationalization",
-          "Engineer second‑source portability",
-          "Form co‑op consortia to mutualize compute/data and bargain collectively",
-          "Create client lock‑ins via service quality independent of platform"
+          {
+            text: "Lock deep partnerships with 1–2 gatekeepers; negotiate data rights/latency tiers",
+            icon: "/images/industry/icons/bcm-collapse-ldp.svg"
+          },
+          {
+            text: "Double down on IP protection and portfolio rationalization",
+            icon: "/images/industry/icons/bcm-collapse-ddipp.svg"
+          },
+          {
+            text: "Engineer second‑source portability",
+            icon: "/images/industry/icons/bcm-collapse-essp.svg"
+          },
+          {
+            text: "Form co‑op consortia to mutualize compute/data and bargain collectively",
+            icon: "/images/industry/icons/bcm-collapse-fccm.svg"
+          }
         ]
       }
     }
@@ -1142,7 +1378,8 @@ export const detailData = {
         description: [
           "After a brief summer, AI in retail enters winter. Major cyber breaches erode consumer trust. Regulation becomes a quagmire, split between advocates and adversaries. Intrusive state controls leave little room to maneuver in all but a handful of markets. Retailers retreat from frontline applications like personalization, curation and data-led experiences, shifting toward defensive backline uses. Automation boosts margins in warehousing, procurement, logistics and inventory, but gains are offset by rising cybersecurity and compliance costs.",
           "As AI returns diminish, capital shifts and retailers refocus on reskilling talent. Store associates become trusted advisers, upselling and cross-selling. Localized customer-facing AI delivers growth in pockets without scale. Retailers cede autonomy to markets and regions, supported by centralized AI-led cores that enable complex local store and channel strategies."
-        ]
+        ],
+        storyImage: "/images/industry/stories/constraint1.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -1185,7 +1422,8 @@ export const detailData = {
         description: [
           "AI becomes deeply embedded in retail operations and customer lives. Regulatory approval of unified, interoperable systems accelerates enterprise efficiency and integrates AI into daily routines. Household decisions are delegated to AI agents; physical spaces shift to community and experience; digital operations prioritize rapid algorithmic fulfillment.",
           "Automation shrinks workforces; underemployment rises, prompting shorter workweek and UBI trials. Consumption shifts from ownership to experiences and services as free time increases and AI delegation grows."
-        ]
+        ],
+        storyImage: "/images/industry/stories/growth1.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -1228,7 +1466,8 @@ export const detailData = {
         description: [
           "Mass adoption of AI tools transforms retail. Retailers go beyond selling products to create and share value across open‑source AI ecosystems. Agents define demand; superfluid enterprises meet it with minimal human input. Small tech teams run ops; strategy, creativity, and premium service are human‑led with AI augmentation.",
           "Retailers lease logistics, payments, and digital platforms to peer‑to‑peer ecosystems, lowering barriers to new markets and enabling distributed entrepreneurship. Retail thrives as part of vast human networks enabled by AI."
-        ]
+        ],
+        storyImage: "/images/industry/stories/transform4.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",
@@ -1271,7 +1510,8 @@ export const detailData = {
         description: [
           "Trillion‑dollar platform investments restrict AI access to deep‑pocketed players. Smaller firms are absorbed; in‑house AI declines. Large retailers partner with platforms for volume and fulfillment at low margins, trading autonomy and data control for efficiency; mid‑sized players fail or are acquired; smaller retailers lean into human authenticity.",
           "Rising unemployment fuels gig work; luxury persists via elite wealth. A niche retail subsector wins on human connection, service, and creativity amid agentic overload."
-        ]
+        ],
+        storyImage: "/images/industry/stories/collapse2.jpg"
       },
       valueChainImpacts: {
         title: "Value Chain Impacts",

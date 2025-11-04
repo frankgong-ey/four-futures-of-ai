@@ -12,6 +12,7 @@ export default function LayoutClient() {
   const isDetailPage = pathname?.startsWith('/futures/') && pathname !== '/futures';
   const isDashboardPage = pathname?.startsWith('/booth-dashboard');
   const isVotePage = pathname === '/vote';
+  const isResultsPage = pathname === '/results';
 
   // Do not render any global components on DetailView pages
   if (isDetailPage) {
@@ -25,6 +26,11 @@ export default function LayoutClient() {
 
   // Do not render any global components on vote page
   if (isVotePage) {
+    return null;
+  }
+
+  // Do not render any global components on results page
+  if (isResultsPage) {
     return null;
   }
 

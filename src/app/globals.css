@@ -83,3 +83,22 @@ h1, h2, h3, h4, h5, h6 {
 .detail-scroll::-webkit-scrollbar-track {
   background: transparent; /* 隐藏轨道 */
 }
+
+/* Settings 专用滚动条样式：暗色拇指，隐藏轨道 */
+.custom-scrollbar {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent; /* Firefox: thumb + track */
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px; /* Chrome/Safari/Edge */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* 隐藏轨道 */
+}

@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { loadVersionSettings } from "../../../components/Settings";
 
 // Version options
-const versions = [
+const allVersions = [
   {
     id: "all-industries",
     name: "All Industries",
@@ -59,6 +60,32 @@ export default function HeroSection({ onVersionSelect }) {
   const [selectedVersion, setSelectedVersion] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const [bgLoaded, setBgLoaded] = useState(false);
+  const [versions, setVersions] = useState(allVersions);
+
+  // Load enabled versions from localStorage
+  useEffect(() => {
+    const loadVersions = () => {
+      const enabledSettings = loadVersionSettings();
+      const filteredVersions = allVersions.filter(
+        (version) => enabledSettings[version.id] === true
+      );
+      setVersions(filteredVersions);
+    };
+
+    // Load on mount
+    loadVersions();
+
+    // Listen for settings changes
+    const handleSettingsChange = () => {
+      loadVersions();
+    };
+
+    window.addEventListener("versionSettingsChanged", handleSettingsChange);
+
+    return () => {
+      window.removeEventListener("versionSettingsChanged", handleSettingsChange);
+    };
+  }, []);
 
   // Trigger fade-in on mount
   useEffect(() => {
@@ -111,17 +138,20 @@ export default function HeroSection({ onVersionSelect }) {
           <div className="tetx-[24px] font-bold text-white mb-4">I would like to explore for:</div>
           
           <div className="p-0">
-            {/* All Industries option - full width row */}
-            <button
-              onClick={() => handleVersionClick("all-industries")}
-              className="w-full h-[120px] p-6 mb-4 border border-white/10 bg-white/10 backdrop-blur-[16px] hover:border-white/50 hover:bg-white/20 transition-all duration-300 cursor-pointer"
-            >
-              <div className="text-white text-[18px] font-medium">All Industries</div>
-            </button>
+            {/* All Industries option - full width row (only if enabled) */}
+            {versions[0]?.id === "all-industries" && (
+              <button
+                onClick={() => handleVersionClick("all-industries")}
+                className="w-full h-[120px] p-6 mb-4 border border-white/10 bg-white/10 backdrop-blur-[16px] hover:border-white/50 hover:bg-white/20 transition-all duration-300 cursor-pointer"
+              >
+                <div className="text-white text-[18px] font-medium">All Industries</div>
+              </button>
+            )}
 
             {/* Industry-specific options - 3x3 grid */}
-            <div className="grid grid-cols-3 border border-white/10 bg-white/10 backdrop-blur-[16px] overflow-hidden">
-              {versions.slice(1, 10).map((version, index) => (
+            {versions.filter(v => v.id !== "all-industries").length > 0 && (
+              <div className="grid grid-cols-3 border border-white/10 bg-white/10 backdrop-blur-[16px] overflow-hidden">
+                {versions.filter(v => v.id !== "all-industries").map((version, index) => (
                 <button
                   key={version.id}
                   onClick={() => handleVersionClick(version.id)}
@@ -151,8 +181,9 @@ export default function HeroSection({ onVersionSelect }) {
                     </div>
                   </div>
                 </button>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
