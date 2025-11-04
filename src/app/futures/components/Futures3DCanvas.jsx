@@ -839,6 +839,7 @@ export default function Futures3DCanvas({ currentSection }) {
     <div className="fixed inset-0 pointer-events-none z-20">
       <Canvas 
         camera={{ position: [0, 0, 3], fov: 75 }}
+        dpr={[1, 1]}
         gl={{ 
           alpha: true,
           antialias: true,
