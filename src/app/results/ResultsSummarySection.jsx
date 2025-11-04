@@ -370,16 +370,29 @@ function StatCard({ id, label, color, percentage, count }) {
 }
 
 export default function ResultsSummarySection({ counts, totalParticipants = 0, userVote = null }) {
+  // 计算百分比时使用和图表相同的计算方式：先计算精确值，显示时再四舍五入
+  const calculatePercentage = (count) => {
+    if (totalParticipants === 0) return 0;
+    return Math.round((count / totalParticipants) * 100);
+  };
+
   const votes = [
-    { id: 'constraint', percentage: totalParticipants > 0 ? Math.round((counts?.constraint || 0) / totalParticipants * 100) : 0, color: '#C37EB3' },
-    { id: 'growth', percentage: totalParticipants > 0 ? Math.round((counts?.growth || 0) / totalParticipants * 100) : 0, color: '#2BB856' },
-    { id: 'transform', percentage: totalParticipants > 0 ? Math.round((counts?.transform || 0) / totalParticipants * 100) : 0, color: '#198CE6' },
-    { id: 'collapse', percentage: totalParticipants > 0 ? Math.round((counts?.collapse || 0) / totalParticipants * 100) : 0, color: '#FF4136' },
+    { id: 'constraint', count: counts?.constraint || 0, percentage: calculatePercentage(counts?.constraint || 0), color: '#C37EB3' },
+    { id: 'growth', count: counts?.growth || 0, percentage: calculatePercentage(counts?.growth || 0), color: '#2BB856' },
+    { id: 'transform', count: counts?.transform || 0, percentage: calculatePercentage(counts?.transform || 0), color: '#198CE6' },
+    { id: 'collapse', count: counts?.collapse || 0, percentage: calculatePercentage(counts?.collapse || 0), color: '#FF4136' },
   ];
 
   const mainFuture = votes.reduce((max, current) => current.percentage > max.percentage ? current : max);
-  const userVoteResult = userVote ? votes.find(v => v.id === userVote) : null;
-  const matchingCount = userVoteResult ? Math.round((userVoteResult.percentage / 100) * totalParticipants) : 0;
+  // 确保 userVote 转换为小写以匹配 counts 的键
+  const userVoteKey = userVote ? (userVote.toLowerCase()) : null;
+  const userVoteResult = userVoteKey ? votes.find(v => v.id === userVoteKey) : null;
+  // 直接从 counts 获取，与图表中的 DonutRow 使用完全相同的表达式
+  // 图表: <DonutRow category="transform" count={counts?.transform || 0} ... />
+  // 文本: 使用 counts?.[userVoteKey] || 0，确保完全一致
+  const matchingCount = userVoteKey ? (counts?.[userVoteKey] || 0) : 0;
+  // 使用与 DonutRow 完全相同的百分比计算方式: Math.round((count / total) * 100)
+  const matchingPercentage = matchingCount > 0 && totalParticipants > 0 ? Math.round((matchingCount / totalParticipants) * 100) : 0;
 
   return (
     <>
@@ -436,7 +449,7 @@ export default function ResultsSummarySection({ counts, totalParticipants = 0, u
                 )}
                 {userVoteResult && (
                   <>
-                    {matchingCount.toLocaleString()} participants ({userVoteResult.percentage}%) chose the same.
+                    {matchingCount.toLocaleString()} participants ({matchingPercentage}%) chose the same.
                   </>
                 )}
                 {' '}The most selected option is{' '}
