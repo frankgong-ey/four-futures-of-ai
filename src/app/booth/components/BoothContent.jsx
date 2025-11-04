@@ -199,7 +199,7 @@ export default function BoothContent() {
 
       {/* 全局Canvas - 所有section共用 */}
       <Canvas 
-        dpr={[1, 1.5]} 
+        dpr={[1, 1]} 
         gl={{ 
           antialias: false,
           alpha: true,

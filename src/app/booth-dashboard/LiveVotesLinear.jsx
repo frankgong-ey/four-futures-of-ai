@@ -510,7 +510,7 @@ function Globe({ counts, soundEnabled }) {
 export default function LiveVotesGlobe({ counts, soundEnabled }) {
   return (
     <div className="fixed inset-0 z-20 pointer-events-none" style={{ width: "100vw", height: "100vh" }}>
-      <Canvas camera={{ position: [0, 0, 5], fov: 60 }} style={{ pointerEvents: 'auto' }}>
+      <Canvas camera={{ position: [0, 0, 5], fov: 60 }} dpr={[1, 1]} style={{ pointerEvents: 'auto' }}>
         <Globe counts={counts} soundEnabled={soundEnabled} />
       </Canvas>
 

@@ -495,7 +495,7 @@ export default function LiveVotesGlobe({ counts: countsOverride, userVote }) {
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none" style={{ width: "100vw", height: "100vh" }}>
-      <Canvas camera={{ position: [1.3, 0, 8], fov: 60 }}>
+      <Canvas camera={{ position: [1.3, 0, 8], fov: 60 }} dpr={[1, 1]}>
         <CameraRig />
         <Globe counts={counts} userVote={userVote} />
       </Canvas>
