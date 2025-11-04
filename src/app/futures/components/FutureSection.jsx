@@ -3,80 +3,87 @@
 import React from "react";
 
 export default function FutureSection({ future, sectionNumber, onExploreClick }) {
+  // Extract base type from future.id and map it to the logo file
+  const getFutureLogo = (futureId) => {
+    if (!futureId) return null;
+
+    // Extract base type (e.g., from "constraint-cp" to "constraint")
+    const parts = futureId.split('-');
+    const baseType = parts[0]; // constraint, growth, transform, collapse
+
+    // Map to the logo file
+    const logoMap = {
+      'constraint': 'constraint-logo',
+      'growth': 'growth-logo',
+      'transform': 'transform-logo',
+      'collapse': 'collapse-logo'
+    };
+
+    const logoName = logoMap[baseType];
+    return logoName ? `/images/${logoName}.svg` : null;
+  };
+
+  const logoPath = getFutureLogo(future.id);
+
   return (
-    <div className="max-w-7xl mx-auto px-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        {/* 左侧内容 */}
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <div className="text-sm text-white/60 font-medium">
+    <div className="pl-16">
+      {/* Wrap all elements in a container with blurred background */}
+      <div 
+        className="space-y-8 px-8 pt-8 pb-0 w-full md:w-[800px]"
+        style={{
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(0, 0, 0, 0.1)',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
+        }}
+      >
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="text-[64px] text-white/20 font-bold">
               {String(sectionNumber).padStart(2, '0')}
             </div>
-            <h2 
-              className="text-5xl md:text-7xl font-bold leading-tight"
-              style={{ color: future.color }}
-            >
-              {future.title}
-            </h2>
-            <p className="text-xl text-white/80 leading-relaxed">
-              {future.description}
-            </p>
+            {logoPath && (
+              <img 
+                src={logoPath} 
+                alt="Future logo" 
+                className="w-16 h-16 opacity-80"
+              />
+            )}
           </div>
-
-          <button
-            onClick={onExploreClick}
-            className="group inline-flex items-center space-x-3 px-8 py-4 bg-white/10 backdrop-blur-md rounded-lg border border-white/20 hover:bg-white/20 transition-all duration-300"
-          >
-            <span className="text-lg font-medium">Explore this future</span>
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </div>
-          </button>
-        </div>
-
-        {/* 右侧装饰 */}
-        <div className="relative">
-          <div 
-            className="w-full h-96 rounded-2xl opacity-20"
+          <h2 
+            className="text-5xl md:text-[96px] font-light leading-tight"
             style={{ 
-              background: `linear-gradient(135deg, ${future.color}20, ${future.color}40)`,
-              backdropFilter: 'blur(20px)'
+              background: `linear-gradient(to right, #FFFFFF, ${future.color})`,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              letterSpacing: '-0.05em' // tighter letter spacing
             }}
           >
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div 
-                className="w-32 h-32 rounded-full opacity-30"
-                style={{ backgroundColor: future.color }}
-              />
-            </div>
-          </div>
-          
-          {/* 装饰性线条 */}
-          <div className="absolute inset-0">
-            <svg className="w-full h-full" viewBox="0 0 400 400">
-              <defs>
-                <linearGradient id={`gradient-${future.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor={future.color} stopOpacity="0.3" />
-                  <stop offset="100%" stopColor={future.color} stopOpacity="0.1" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M50,200 Q200,50 350,200 T50,350"
-                stroke={`url(#gradient-${future.id})`}
-                strokeWidth="2"
-                fill="none"
-                className="animate-pulse"
-              />
-            </svg>
+            {future.title}
+          </h2>
+          <div className="text-xl text-white/80 leading-relaxed space-y-4">
+            {Array.isArray(future.description) ? (
+              future.description.map((para, idx) => (
+                <p key={idx}>{para}</p>
+              ))
+            ) : (
+              <p>{future.description}</p>
+            )}
           </div>
         </div>
+
+        <button
+          onClick={onExploreClick}
+          className="group inline-flex items-center space-x-3 px-8 py-8 bg-white/90 border border-white/20 hover:bg-white/100 transition-all duration-300 cursor-pointer"
+        >
+          <span className="text-lg font-medium text-[#131313]">Explore this future</span>
+          <div className="flex items-center space-x-2">
+            <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="#131313" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </div>
+        </button>
       </div>
     </div>
   );

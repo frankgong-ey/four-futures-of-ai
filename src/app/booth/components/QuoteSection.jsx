@@ -3,21 +3,21 @@
 import React, { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 
-// QuoteSection组件 - 100vh高度，包含Quotes动画
+// QuoteSection - 100vh height, includes quotes animation
 export default function QuoteSection() {
-  // 内部创建 refs
+  // Local refs
   const sectionRef = useRef(null);
   const quotesRef = useRef(null);
   const titleRef = useRef(null);
 
-  // 合并：外层淡入淡出 + 标题淡入（ScrollTrigger 驱动）
+  // Combine: outer fade + title fade (driven by ScrollTrigger)
   useEffect(() => {
     if (!sectionRef.current) return;
 
-    // 外层初始状态
+    // Initial state for container
     gsap.set(sectionRef.current, { opacity: 0 });
 
-    // 外层淡入淡出
+    // Container fade in/out
     const sectionTween = gsap.to(sectionRef.current, {
       opacity: 1,
       duration: 1.5,
@@ -30,7 +30,7 @@ export default function QuoteSection() {
       }
     });
 
-    // 标题淡入
+    // Title fade in
     let titleTween;
     if (quotesRef.current && titleRef.current) {
       gsap.set(titleRef.current, { opacity: 0 });
@@ -57,7 +57,7 @@ export default function QuoteSection() {
       ref={sectionRef}
       className="relative w-full h-screen bg-transparent"
     >
-      {/* 中央标题（从 Quotes 移到这里） */}
+      {/* Center title (moved out from Quotes) */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center z-10">
         <h2 ref={titleRef} className="text-4xl md:text-[80px] sm:text-3xl leading-none text-white">
           No one truly knows what the future of AI holds.
@@ -71,24 +71,24 @@ export default function QuoteSection() {
   );
 }
 
-// Quotes组件 - 100vh高度，绿色背景
+// Quotes component - 100vh, green background
 function Quotes({ quotesRef }) {
   const animationRef = useRef(null);
 
   useEffect(() => {
-    // 创建循环动画
+    // Create animation cycle
     const createAnimationCycle = () => {
       const tl = gsap.timeline();
       
-      // 调试信息
+      // Debug selectors
       const rightElements = animationRef.current.querySelectorAll(".cross-right");
       const leftElements = animationRef.current.querySelectorAll(".cross-left");
       const downElements = animationRef.current.querySelectorAll(".cross-down");
       const upElements = animationRef.current.querySelectorAll(".cross-up");
       
-      // 阶段1: 十字星出现
+      // Phase 1: Cross stars appear
       if (rightElements.length > 0) {
-        // 先设置初始状态
+        // Set initial state first
         gsap.set([rightElements, leftElements, downElements, upElements], {
           opacity: 0,
           strokeDashoffset: 12
@@ -102,7 +102,7 @@ function Quotes({ quotesRef }) {
         });
       }
 
-      // 阶段2: Quote cards 扩展
+      // Phase 2: Expand quote cards
       tl.to(animationRef.current.querySelectorAll(".quote-card-container"), {
         opacity: 1,
         width: "360px",
@@ -121,7 +121,7 @@ function Quotes({ quotesRef }) {
       return tl;
     };
 
-    // 初始隐藏所有元素
+    // Initially hide all elements
     if (animationRef.current) {
       gsap.set(animationRef.current.querySelectorAll(".cross-right, .cross-left, .cross-down, .cross-up"), {
         opacity: 0,
@@ -134,7 +134,7 @@ function Quotes({ quotesRef }) {
       });
     }
 
-    // 使用 ScrollTrigger 触发主动画
+    // Use ScrollTrigger to start main animation
     let tl;
     if (quotesRef.current) {
       tl = gsap.timeline({
@@ -146,7 +146,7 @@ function Quotes({ quotesRef }) {
       });
 
       const built = createAnimationCycle();
-      // 将已构建的序列添加到有 ScrollTrigger 的时间线
+      // Add built sequence onto the ScrollTrigger timeline
       tl.add(built);
     }
 
@@ -155,7 +155,7 @@ function Quotes({ quotesRef }) {
     };
   }, []);
 
-  // Quote cards 数据
+  // Quote cards data
   const quoteCards = [
     {
       id: 1,

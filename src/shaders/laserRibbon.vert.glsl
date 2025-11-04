@@ -11,7 +11,7 @@ varying vec3 vWorldPosition;
 void main() {
   vHalfCoord = halfCoord;
   vU = uCoord;
-  // 计算世界坐标
+  // Calculate world position
   vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
   // ensure ribbon faces the camera with slight forward offset
   vec3 pos = position;

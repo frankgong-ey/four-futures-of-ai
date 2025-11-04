@@ -1,10 +1,11 @@
+"use client";
+
 import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import BackgroundLines from "../components/BackgroundLines";
 import Navigation from "../components/Navigation";
 import LayoutClient from "../components/LayoutClient";
-import Global3DCanvas from "../components/Global3DCanvas";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,11 +47,6 @@ const interstateBlackCondensed = localFont({
   display: "swap",
 });
 
-export const metadata = {
-  title: "Four Futures of AI",
-  description: "An immersive exhibit exploring possible futures of AI.",
-};
-
 export default function RootLayout({
   children,
 }) {
@@ -62,7 +58,6 @@ export default function RootLayout({
         <Navigation />
         <BackgroundLines />
         <LayoutClient />
-        <Global3DCanvas />
         {children}
       </body>
     </html>

@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from 'next/navigation';
+import Settings from "./Settings";
 
 // 计时器组件
 function CountdownTimer() {
@@ -102,7 +104,8 @@ function CountdownTimer() {
 const MENU_ITEMS = [
   { id: '01', title: 'The Introduction', href: '/booth' },
   { id: '02', title: 'The Four Futures of AI', href: '/futures' },
-  { id: '03', title: 'Is Your Org Ready?', href: '#' },
+  { id: '03', title: 'Vote', href: '/vote' },
+  { id: '04', title: 'Is Your Org Ready?', href: '#' },
 ];
 
 // 菜单按钮组件
@@ -139,7 +142,7 @@ function MenuButton({ isOpen, onClick }) {
 }
 
 // 导航菜单组件
-function NavigationMenu({ isOpen, onClose }) {
+function NavigationMenu({ isOpen, onClose, onSettingsClick }) {
   return (
     <>
       {/* 遮罩层 */}
@@ -157,41 +160,120 @@ function NavigationMenu({ isOpen, onClose }) {
         }`}
         style={{ zIndex: 105 }}
       >
-        <div className="flex flex-col justify-center h-full px-12">
-          {MENU_ITEMS.map((item, index) => (
+        <div className="flex flex-col h-full px-12 py-12">
+          {/* Menu items container */}
+          <div className="flex-1 flex flex-col justify-center">
+            {MENU_ITEMS.map((item, index) => (
+              <Link
+                key={item.id}
+                href={item.href}
+                className="group py-6 border-b border-white/10 last:border-b-0 transition-all duration-300 hover:pl-4"
+                onClick={onClose}
+              >
+                <div className="flex items-baseline gap-4">
+                  {/* Index */}
+                  <span className="text-white/40 text-lg font-bold transition-colors duration-300 group-hover:text-white/60">
+                    {item.id}
+                  </span>
+                  {/* Title */}
+                  <span className="text-white text-xl font-normal transition-all duration-300 group-hover:text-white/90">
+                    {item.title}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+          
+          {/* Bottom section - Dashboard and Settings */}
+          <div className="flex flex-col border-t border-white/10">
+            {/* Dashboard button */}
             <Link
-              key={item.id}
-              href={item.href}
-              className="group py-6 border-b border-white/10 last:border-b-0 transition-all duration-300 hover:pl-4"
+              href="/booth-dashboard"
+              className="group py-6 transition-all duration-300 hover:pl-4 cursor-pointer"
               onClick={onClose}
             >
-              <div className="flex items-baseline gap-4">
-                {/* 序号 */}
-                <span className="text-white/40 text-lg font-bold transition-colors duration-300 group-hover:text-white/60">
-                  {item.id}
-                </span>
-                {/* 标题 */}
+              <div className="flex items-center gap-4">
+                {/* Dashboard icon placeholder */}
+                <div className="w-6 h-6 flex items-center justify-center">
+                  <svg
+                    className="w-6 h-6 text-white/40 group-hover:text-white/60 transition-colors duration-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                    />
+                  </svg>
+                </div>
+                {/* Title */}
                 <span className="text-white text-xl font-normal transition-all duration-300 group-hover:text-white/90">
-                  {item.title}
+                  Dashboard
                 </span>
               </div>
             </Link>
-          ))}
+            
+            {/* Settings button */}
+            <button
+              onClick={() => {
+                onClose();
+                onSettingsClick();
+              }}
+              className="group py-6 border-t border-white/10 transition-all duration-300 hover:pl-4 cursor-pointer"
+            >
+              <div className="flex items-center gap-4">
+                {/* Settings icon */}
+                <svg
+                  className="w-6 h-6 text-white/40 group-hover:text-white/60 transition-colors duration-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                {/* Title */}
+                <span className="text-white text-xl font-normal transition-all duration-300 group-hover:text-white/90">
+                  Settings
+                </span>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
     </>
   );
 }
 
-// 主导航组件
+// Main navigation component
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const pathname = usePathname();
+  
+  // Hide navigation on DetailView pages
+  const isDetailPage = pathname?.startsWith('/futures/') && pathname !== '/futures';
 
   return (
     <>
-      {/* 导航栏 - Logo 和计时器 */}
+      {/* Top bar - Logo and timer */}
       <nav 
-        className="fixed left-0 h-16 flex items-center pl-[64px] justify-between bg-transparent"
+        className={`fixed left-0 h-16 flex items-center pl-[64px] justify-between bg-transparent transition-opacity duration-300 ${
+          isDetailPage ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
         style={{ height: '64px', marginTop: '16px', zIndex: 99, right: '160px' }}
       >
         {/* Logo */}
@@ -199,28 +281,37 @@ export default function Navigation() {
           <Image
             src="/images/nav_logo.svg"
             alt="Four Futures of AI Logo"
-            width={120}
+            width={64}
             height={64}
             className="h-16"
           />
         </div>
 
-        {/* 右侧内容 - 计时器 */}
+        {/* Right content - timer */}
         <div className="flex items-center gap-8">
           <CountdownTimer />
         </div>
       </nav>
 
-      {/* 菜单按钮 - 独立层级 */}
+      {/* Menu button - separate layer */}
       <div 
-        className="fixed right-16 flex items-center"
+        className={`fixed right-16 flex items-center transition-opacity duration-300 ${
+          isDetailPage ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
         style={{ top: '16px', height: '64px', zIndex: 150 }}
       >
         <MenuButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen(!isMenuOpen)} />
       </div>
 
-      {/* 导航菜单 */}
-      <NavigationMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      {/* Navigation menu */}
+      <NavigationMenu 
+        isOpen={isMenuOpen} 
+        onClose={() => setIsMenuOpen(false)}
+        onSettingsClick={() => setIsSettingsOpen(true)}
+      />
+
+      {/* Settings overlay */}
+      <Settings isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </>
   );
 }

@@ -1054,16 +1054,109 @@ const ImageCard = React.memo(function ImageCard({ imagePath, position, opacity =
   );
 });
 
-// Gallery 3D 组件 - 展示图片
+// 3D视频卡片组件 - 使用自定义shader
+const VideoCard = React.memo(function VideoCard({ videoPath, position, opacity = 1.0 }) {
+  const meshRef = useRef();
+  const videoRef = useRef();
+  const textureRef = useRef();
+  const materialRef = useRef();
+  
+  // 创建视频元素和纹理
+  useEffect(() => {
+    const video = document.createElement('video');
+    video.src = videoPath;
+    video.crossOrigin = 'anonymous';
+    video.loop = true;
+    video.muted = true;
+    video.playsInline = true;
+    
+    const handleLoadedData = () => {
+      video.play().catch(() => {
+        // 忽略自动播放错误
+      });
+    };
+    
+    video.addEventListener('loadeddata', handleLoadedData);
+    
+    videoRef.current = video;
+    
+    const texture = new THREE.VideoTexture(video);
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    textureRef.current = texture;
+    
+    // 创建材质
+    const material = new THREE.ShaderMaterial({
+      vertexShader: imageCardVertexShader,
+      fragmentShader: imageCardFragmentShader,
+      uniforms: {
+        uTexture: { value: texture },
+        uOpacity: { value: opacity },
+        uWorldPosition: { value: position },
+        uTime: { value: 0.0 },
+        uResolution: { value: 24.0 }
+      },
+      transparent: true
+    });
+    
+    materialRef.current = material;
+    
+    return () => {
+      video.removeEventListener('loadeddata', handleLoadedData);
+      video.pause();
+      texture.dispose();
+      material.dispose();
+    };
+  }, [videoPath]);
+  
+  // 更新uniforms
+  useFrame((state, delta) => {
+    if (meshRef.current && materialRef.current && textureRef.current) {
+      // 更新视频纹理
+      if (videoRef.current && videoRef.current.readyState >= 2) {
+        textureRef.current.needsUpdate = true;
+      }
+      
+      // 更新世界位置uniform
+      materialRef.current.uniforms.uWorldPosition.value = position;
+      
+      // 更新透明度uniform
+      materialRef.current.uniforms.uOpacity.value = opacity;
+      
+      // 更新时间uniform
+      materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
+    }
+  });
+
+  if (!materialRef.current) return null;
+
+  return (
+    <mesh ref={meshRef} position={position} rotation={[0, 0, 0]}>
+      <planeGeometry args={[4, 2.6]} />
+      <primitive object={materialRef.current} />
+    </mesh>
+  );
+});
+
+// Gallery 3D 组件 - 展示图片和视频
 const Gallery3D = React.memo(function Gallery3D({ scrollProgress }) {
   
-  // 缓存图片位置计算
-  const imagePositions = useMemo(() => [
-    { x: -25, y: -10, z: 0 }, // gallery_1.png
-    { x: -20, y: -10, z: 0 }, // gallery_2.png
-    { x: -15, y: -10, z: 0 },  // gallery_3.png (中心)
-    { x: -10, y: -10, z: 0 },  // gallery_4.png
-    { x: -5, y: -10, z: 0 },  // gallery_5.png
+  // 缓存媒体位置计算
+  const mediaPositions = useMemo(() => [
+    { x: -25, y: -10, z: 0 }, // business.jpg
+    { x: -20, y: -10, z: 0 }, // commercial.jpg
+    { x: -15, y: -10, z: 0 }, // scenery.jpg
+    { x: -10, y: -10, z: 0 }, // abstract.jpg
+    { x: -5, y: -10, z: 0 },  // commerial.mp4
+  ], []);
+
+  // 媒体文件路径数组（顺序已颠倒：第一个是视频，后面是倒序的图片）
+  const mediaPaths = useMemo(() => [
+    '/videos/commerial.mp4',    // 第一个（视频）
+    '/images/scenery.jpg',     // 第二个（原来第四个）
+    '/images/abstract.jpg',      // 第三个（原来第三个）
+    '/images/commercial.jpg',   // 第四个（原来第二个）
+    '/images/business.jpg',     // 第五个（原来第一个）
   ], []);
 
   // 根据滚动进度计算整体偏移
@@ -1086,24 +1179,36 @@ const Gallery3D = React.memo(function Gallery3D({ scrollProgress }) {
 
   return (
     <>
-      {/* 3D图片卡片 */}
-      {useMemo(() => imagePositions.map((pos, index) => {
-        const imagePath = `/images/gallery_${index + 1}.png`;
+      {/* 3D媒体卡片 */}
+      {useMemo(() => mediaPositions.map((pos, index) => {
+        const mediaPath = mediaPaths[index];
+        const isVideo = index === 0; // 第一个（索引0）是视频
         const adjustedPosition = [
           pos.x + baseOffset,
           pos.y,
           pos.z
         ];
         
-        return (
-          <ImageCard
-            key={index}
-            imagePath={imagePath}
-            position={adjustedPosition}
-            opacity={fadeOpacity}
-          />
-        );
-      }), [imagePositions, baseOffset, fadeOpacity])}
+        if (isVideo) {
+          return (
+            <VideoCard
+              key={index}
+              videoPath={mediaPath}
+              position={adjustedPosition}
+              opacity={fadeOpacity}
+            />
+          );
+        } else {
+          return (
+            <ImageCard
+              key={index}
+              imagePath={mediaPath}
+              position={adjustedPosition}
+              opacity={fadeOpacity}
+            />
+          );
+        }
+      }), [mediaPositions, mediaPaths, baseOffset, fadeOpacity])}
     </>
   );
 });

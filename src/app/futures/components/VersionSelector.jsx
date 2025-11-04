@@ -1,51 +1,32 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 
-export default function VersionSelector({ versions, selectedVersion, onVersionChange }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const selectedVersionData = versions[selectedVersion];
-
+export default function VersionSelector({ versionName, onChangeClick, isVisible = true }) {
   return (
-    <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-4 py-2 border border-white/20 rounded-lg hover:bg-white/5 transition-colors"
-      >
-        <span className="text-white">{selectedVersionData.name}</span>
-        <svg 
-          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
+    <div 
+      className={`fixed top-24 left-16 z-50 w-[340px] transition-opacity duration-500 ease-in-out ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+    >
+      {/* 第一行：The Four Futures of AI for */}
+      <div className="text-white/60 text-sm">
+        The Four Futures of AI for
+      </div>
+      
+      {/* 第二行：版本名称和Change按钮，下面有白线 */}
+      <div className="flex items-baseline justify-between gap-2 mt-1 relative">
+        <span className="text-white text-xl font-medium">
+          {versionName}
+        </span>
+        <button
+          onClick={onChangeClick}
+          className="text-white/60 text-sm hover:text-white transition-colors cursor-pointer ml-auto"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-64 bg-black/90 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-50">
-          <div className="p-2">
-            {Object.values(versions).map((version) => (
-              <button
-                key={version.id}
-                onClick={() => {
-                  onVersionChange(version.id);
-                  setIsOpen(false);
-                }}
-                className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
-                  selectedVersion === version.id 
-                    ? 'bg-white/10 text-white' 
-                    : 'text-white/70 hover:bg-white/5 hover:text-white'
-                }`}
-              >
-                {version.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+          Change
+        </button>
+        {/* 白线 - 在第二行下方 */}
+        <div className="absolute bottom-[-4px] left-0 right-0 h-[1px] bg-white" />
+      </div>
     </div>
   );
 }
+

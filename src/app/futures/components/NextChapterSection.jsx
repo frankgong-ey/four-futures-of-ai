@@ -1,50 +1,111 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function NextChapterSection() {
+  const router = useRouter();
+
+  const handleGoToVote = () => {
+    router.push('/vote');
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-6 text-center">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <h2 className="text-4xl md:text-6xl font-bold mb-8">
-          Ready to dive deeper?
-        </h2>
-        
-        <p className="text-xl md:text-2xl text-white/70 mb-12 leading-relaxed">
-          Explore detailed insights, strategic implications, and actionable recommendations for each future scenario
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
-          <div className="p-6 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
-              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
+    <div className="relative px-16 min-h-screen pt-[120px] pb-16">
+      {/* Background gradient image - full width, absolute position, bottom aligned */}
+      <div 
+        className="absolute bottom-0 left-0 right-0 w-full h-full"
+        style={{
+          backgroundImage: 'url(/images/hero_gradient_new.svg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center bottom',
+          backgroundRepeat: 'no-repeat',
+          pointerEvents: 'none',
+          zIndex: 0
+        }}
+      />
+      
+      {/* Content wrapper with z-index */}
+      <div className="relative z-10 grid grid-cols-12 gap-[24px]">
+        {/* Left side - Title and Icons */}
+        <div className="col-span-4 col-start-1 flex gap-4">
+          <div className="space-y-6">
+            {/* Four Icons */}
+            <div className="flex gap-4">
+              <div className="w-16 h-16 relative">
+                <Image src="/images/constraint-logo.svg" alt="Constraint" fill className="object-contain" />
+              </div>
+              <div className="w-16 h-16 relative">
+                <Image src="/images/growth-logo.svg" alt="Growth" fill className="object-contain" />
+              </div>
+              <div className="w-16 h-16 relative">
+                <Image src="/images/transform-logo.svg" alt="Transform" fill className="object-contain" />
+              </div>
+              <div className="w-16 h-16 relative">
+                <Image src="/images/collapse-logo.svg" alt="Collapse" fill className="object-contain" />
+              </div>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Strategic Analysis</h3>
-            <p className="text-sm text-white/60">Deep dive into business implications and strategic opportunities</p>
-          </div>
 
-          <div className="p-6 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
-            <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
-              <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+            {/* Main Title */}
+            <div>
+              <h1 className="text-5xl md:text-[96px] font-light bg-gradient-to-r from-white to-[#FCF5B9] bg-clip-text text-transparent leading-none tracking-[-0.05em]">
+                Step Into the Futures of AI
+              </h1>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Action Plans</h3>
-            <p className="text-sm text-white/60">Practical steps to prepare for each future scenario</p>
           </div>
         </div>
+        {/* Right side - Two Cards */}
+        <div className="col-span-4 col-start-8 flex flex-col gap-8">
+          {/* Card 1: Test your AI readiness */}
+          <div className="relative bg-white/10 backdrop-blur-md border-[1px] border-[#FFE600] px-8 pt-8">
+            {/* Recommended Badge */}
+            <div className="absolute top-1 right-1 text-[#FFE600] text-[14px] font-bold px-3 py-1">
+              Recommended
+            </div>
+            
+            <div className="space-y-8 pt-4">
+              <h2 className="text-3xl font-light text-white">Test your AI readiness</h2>
+              <p className="text-white text-base leading-relaxed">
+                Are you strategically preparing for the AI future you believe in? Take a 10-question quiz to see how your current strategic plays align with your preferred AI future – then proceed to vote.
+              </p>
+              <button 
+                className="w-full bg-[#FFE600] text-[18px] text-black font-normal py-6 px-6 hover:bg-[#FFD700] transition-colors cursor-pointer"
+              >
+                Start quiz
+              </button>
+            </div>
+          </div>
 
-        <div className="pt-8">
-          <button className="group inline-flex items-center space-x-3 px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300">
-            <span className="text-lg font-medium">Continue Exploring</span>
-            <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
+          {/* Card 2: Vote for your envisioned AI future */}
+          <div className="relative bg-white/10 backdrop-blur-md border-[1px] border-white/10 px-8 pt-8">
+            <div className="space-y-8">
+              <h2 className="text-3xl font-light text-white">Vote for your envisioned AI future</h2>
+              <p className="text-white text-base leading-relaxed">
+                Cast your vote for the AI trajectory you believe in and view the collective results from all participants.
+              </p>
+              <button 
+                onClick={handleGoToVote}
+                className="w-full bg-white text-[18px] text-black font-normal py-6 px-6 hover:bg-white/90 transition-colors cursor-pointer"
+              >
+                Vote now
+              </button>
+            </div>
+          </div>
+
+          <button 
+            onClick={handleGoToVote}
+            className="w-full bg-white/5 backdrop-blur-md border-[1px] border-white/10 text-white/60 font-normal py-6 px-6 hover:bg-white/20 transition-colors cursor-pointer"
+          >
+            Skip to next chapter
           </button>
+
         </div>
+
       </div>
+
+
+
     </div>
   );
 }

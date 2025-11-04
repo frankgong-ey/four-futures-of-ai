@@ -8,9 +8,38 @@ import { BOOTH_SECTION_POSITIONS } from '../app/booth/config/sections';
 export default function LayoutClient() {
   const pathname = usePathname();
   const isBoothPage = pathname === '/booth';
+  const isFuturesPage = pathname?.startsWith('/futures');
+  const isDetailPage = pathname?.startsWith('/futures/') && pathname !== '/futures';
+  const isDashboardPage = pathname?.startsWith('/booth-dashboard');
+  const isVotePage = pathname === '/vote';
+  const isResultsPage = pathname === '/results';
 
-  // 只在 booth 页面显示组件
+  // Do not render any global components on DetailView pages
+  if (isDetailPage) {
+    return null;
+  }
+
+  // Do not render any global components on dashboard pages
+  if (isDashboardPage) {
+    return null;
+  }
+
+  // Do not render any global components on vote page
+  if (isVotePage) {
+    return null;
+  }
+
+  // Do not render any global components on results page
+  if (isResultsPage) {
+    return null;
+  }
+
+  // Only render these components on the booth page
   if (!isBoothPage) {
+    // On futures pages, only show ScrollProgress and hide NextButton
+    if (isFuturesPage) {
+      return <ScrollProgress />;
+    }
     return <NextButton />;
   }
 

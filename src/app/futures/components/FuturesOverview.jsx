@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
-import HeroSection from "./HeroSection";
+import React, { useState, useEffect, useRef } from "react";
 import FutureSection from "./FutureSection";
 import NextChapterSection from "./NextChapterSection";
+import { useScrollSection } from "./Futures3DCanvas";
 
 export default function FuturesOverview({ futures, onFutureClick }) {
   const [currentSection, setCurrentSection] = useState(0);
+  const sectionsRef = useRef([]);
+  const { setCurrentSection: setGlobalSection } = useScrollSection();
 
   const sections = [
-    { type: "hero", id: "hero" },
     ...futures.map((future, index) => ({ 
       type: "future", 
       id: future.id, 
@@ -19,20 +20,86 @@ export default function FuturesOverview({ futures, onFutureClick }) {
     { type: "next-chapter", id: "next-chapter" }
   ];
 
+  // Helper to scroll to the next section
+  const scrollToNextSection = (currentIndex) => {
+    const nextIndex = currentIndex + 1;
+    if (nextIndex < sections.length && sectionsRef.current[nextIndex]) {
+      sectionsRef.current[nextIndex].scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Handle URL hash navigation
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) {
+        const targetIndex = sections.findIndex(s => s.id === hash);
+        if (targetIndex !== -1 && sectionsRef.current[targetIndex]) {
+          setTimeout(() => {
+            // Use instant jump instead of smooth behavior
+            sectionsRef.current[targetIndex].scrollIntoView({ behavior: 'auto' });
+            window.history.replaceState(null, '', '/futures');
+          }, 100);
+        }
+      }
+    };
+
+    handleHashChange();
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // Listen to scroll and update the current section
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + window.innerHeight / 2;
+      
+      sections.forEach((section, index) => {
+        const element = sectionsRef.current[index];
+        if (element) {
+          const { top, bottom } = element.getBoundingClientRect();
+          const elementTop = top + window.scrollY;
+          const elementBottom = bottom + window.scrollY;
+          
+          if (scrollPosition >= elementTop && scrollPosition < elementBottom) {
+            setCurrentSection(index);
+            if (setGlobalSection) {
+              // If it is next-chapter, pass "nextChapter"
+              if (section.type === "future") {
+                setGlobalSection(section.data.id);
+              } else if (section.type === "next-chapter") {
+                setGlobalSection("nextChapter");
+              } else {
+                setGlobalSection(null);
+              }
+            }
+          }
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    // 初始状态：根据当前滚动位置设置
+    const initScrollPosition = window.scrollY + window.innerHeight / 2;
+    handleScroll(); // 初始调用
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [sections, setGlobalSection]);
+
   return (
     <div className="relative">
-      {/* 背景装饰 */}
-      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/20 via-pink-900/20 to-blue-900/20">
-        <div className="absolute inset-0 bg-[url('/images/hero_gradient.svg')] bg-cover bg-center opacity-30"></div>
-      </div>
-
-      {/* 主要内容 */}
+      {/* Main content */}
       <div className="relative z-10">
         {sections.map((section, index) => (
-          <div key={section.id} className="min-h-screen flex items-center justify-center">
-            {section.type === "hero" && (
-              <HeroSection />
-            )}
+          <div 
+            key={section.id} 
+            ref={(el) => (sectionsRef.current[index] = el)}
+            data-futures-section
+            className="min-h-screen flex items-center justify-start"
+          >
             {section.type === "future" && (
               <FutureSection 
                 future={section.data}
@@ -47,40 +114,35 @@ export default function FuturesOverview({ futures, onFutureClick }) {
         ))}
       </div>
 
-      {/* 右侧导航 */}
-      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-20">
-        <div className="flex flex-col space-y-2">
-          {sections.map((section, index) => (
-            <button
-              key={section.id}
-              onClick={() => {
-                const element = document.getElementById(`section-${index}`);
-                element?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className={`w-3 h-3 rounded-full transition-all ${
-                currentSection === index 
-                  ? 'bg-white scale-125' 
-                  : 'bg-white/30 hover:bg-white/50'
-              }`}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* 底部导航 */}
-      <div className="fixed bottom-6 right-6 z-20">
-        <div className="flex items-center space-x-4">
-          <button className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-lg hover:bg-white/20 transition-colors">
-            <span className="text-sm">Next</span>
-            <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-          </button>
-          <div className="text-sm text-white/60">
-            {String(currentSection + 1).padStart(2, '0')}
+      {/* Global Next button - only when not on the last section */}
+      {currentSection < sections.length - 1 && (
+        <button
+          onClick={() => scrollToNextSection(currentSection)}
+          className="group fixed right-16 bottom-6 w-[80px] h-[160px] 
+                   border border-white/20 bg-transparent 
+                   flex flex-col items-center justify-between 
+                   py-6 px-[16px] z-[1000] 
+                   transition-all duration-500 ease-out
+                   hover:border-white/50 
+                   active:border-white/80 
+                   cursor-pointer"
+        >
+          {/* Next label */}
+          <div className="text-white text-[18px] font-semibold text-center tracking-none">
+            Next
           </div>
-        </div>
-      </div>
+
+          {/* Arrow icon */}
+          <img
+            src="/images/arrow-next.svg"
+            alt="Next"
+            className="w-8 h-8 mt-2 transition-transform duration-500 ease-out group-hover:translate-y-2"
+          />
+
+          {/* Bottom separator */}
+          <div className="absolute bottom-0 w-full h-[1px] group-hover:h-[4px] bg-white transition-all duration-500 ease-out" />
+        </button>
+      )}
     </div>
   );
 }

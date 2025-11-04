@@ -33,7 +33,7 @@ export default function NextButton({ sections = DEFAULT_SECTION_POSITIONS }) {
         }
       }
       
-      console.log('NextButton: scrollY:', scrollY, 'vh:', viewportHeight, 'scrollVh:', scrollVh.toFixed(2), 'section:', sections[foundIndex].name, 'index:', foundIndex);
+      
       setCurrentSectionIndex(foundIndex);
     };
 
