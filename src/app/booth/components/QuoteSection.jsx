@@ -59,7 +59,7 @@ export default function QuoteSection() {
     >
       {/* Center title (moved out from Quotes) */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center z-10">
-        <h2 ref={titleRef} className="text-4xl md:text-[80px] sm:text-3xl leading-none text-white">
+        <h2 ref={titleRef} className="text-4xl md:text-[80px] sm:text-3xl leading-none text-white tracking-[-0.05em]">
           No one truly knows what the future of AI holds.
         </h2>
       </div>

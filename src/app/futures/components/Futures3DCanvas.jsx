@@ -351,7 +351,7 @@ function OrbitRing({ ringIndex, position, rotation, radius = 2 }) {
 
   return (
     <mesh position={position} rotation={rotation}>
-      <torusGeometry args={[radius, 0.01, 4, 100]} />
+      <torusGeometry args={[radius, 0.01, 4, 70]} />
       <shaderMaterial
         attach="material"
         uniforms={uniforms}
@@ -374,7 +374,7 @@ function pseudoRandom(n) {
 
 function TransformScene({ position }) {
   const containerRef = useRef();
-  const ringsCount = 30; // 20个轨道环
+  const ringsCount = 25; // 减少环数量以提升性能
   
   useFrame((state, delta) => {
     if (containerRef.current) {
@@ -457,7 +457,7 @@ function GrowthScene({ position }) {
   const containerRef = useRef();
   
   // 固定参数值（从 Leva 调试后确定）
-  const tubesCount = 50;
+  const tubesCount = 40; // 减少管子数量以提升性能
   const rotationSpeed = 0.03;
   const rotationX = -0.4;
   const rotationY = 0;
@@ -467,8 +467,8 @@ function GrowthScene({ position }) {
   const heightBase = 4.2;
   const heightRange = 2.8;
   const tubeRadius = 0.01;
-  const tubularSegments = 100;
-  const radialSegments = 8;
+  const tubularSegments = 70; // 减少segments以提升性能
+  const radialSegments = 6; // 减少radial segments以提升性能
   
   useFrame((state, delta) => {
     if (containerRef.current) {
@@ -563,8 +563,8 @@ function ConstraintScene({ position }) {
   const rotationY = 0.18;
   const rotationZ = -0.2;
   const tubeRadius = 0.02;
-  const tubularSegments = 100;
-  const radialSegments = 8;
+  const tubularSegments = 70; // 减少segments以提升性能
+  const radialSegments = 6; // 减少radial segments以提升性能
   const curvePoints = 50;
 
   // 生成互相环绕的管子
@@ -662,9 +662,9 @@ function CollapseTube({ tubeIndex, angle }) {
     <mesh>
       <tubeGeometry args={[
         curve,
-        100, // tubularSegments
+        70, // tubularSegments - 减少segments以提升性能
         0.01, // radius
-        8, // radialSegments
+        6, // radialSegments - 减少radial segments以提升性能
         false
       ]} />
       <shaderMaterial
@@ -842,7 +842,7 @@ export default function Futures3DCanvas({ currentSection }) {
         dpr={[1, 1]}
         gl={{ 
           alpha: true,
-          antialias: true,
+          antialias: false,
           stencil: false,
           depth: true,
           premultipliedAlpha: false,

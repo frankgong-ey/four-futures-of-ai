@@ -13,6 +13,7 @@ export default function LargeFluidBackground({ sectionState }) {
   const meshRef = useRef();
   const { camera } = useThree();
   const color1Ref = useRef('#750D5D'); // 默认颜色改为 constraint 的紫色
+  const shaderMaterialRef = useRef();
   
   // Leva 调试面板 - 已禁用
   // const {
@@ -45,7 +46,35 @@ export default function LargeFluidBackground({ sectionState }) {
   const opacity = 0.8;
   const distance = 25;
 
-  // 根据sectionState动态改变color1
+  // 创建shader材质
+  const shaderMaterial = useMemo(() => {
+    const material = new THREE.ShaderMaterial({
+      vertexShader: fluidBackgroundVertexShader,
+      fragmentShader: fluidBackgroundFragmentShader,
+      uniforms: {
+        uTime: { value: 0 }, // 设为0，使背景静态
+        uColor1: { value: new THREE.Color(color1Ref.current) },
+        uColor2: { value: new THREE.Color(color2) },
+        uColor3: { value: new THREE.Color(color3) },
+        uColor4: { value: new THREE.Color(color4) },
+        uSpeed: { value: speed },
+        uNoiseScale: { value: noiseScale },
+        uIntensity: { value: intensity },
+        uOpacity: { value: opacity }
+      },
+      transparent: true,
+      side: THREE.DoubleSide
+    });
+    shaderMaterialRef.current = material;
+    return material;
+  }, [color2, color3, color4, speed, noiseScale, intensity, opacity]);
+
+  // 创建几何体 - 超大平面确保覆盖全屏
+  const geometry = useMemo(() => {
+    return new THREE.PlaneGeometry(100, 100, 32, 32);
+  }, []);
+
+  // 根据sectionState动态改变color1（保留颜色变化逻辑）
   useEffect(() => {
     // 定义每个 future section 对应的颜色
     const sectionColors = {
@@ -59,59 +88,21 @@ export default function LargeFluidBackground({ sectionState }) {
     
     const targetColor = sectionColors[sectionState] || '#750D5D';
     
-    // 使用GSAP进行颜色过渡
+    // 使用GSAP进行颜色过渡，并直接更新uniform
     gsap.to(color1Ref, {
       current: targetColor,
       duration: 1.5,
       ease: "power2.inOut",
       onUpdate: () => {
-        // 颜色更新会在useFrame中处理
+        // 直接更新uniform颜色
+        if (shaderMaterialRef.current && shaderMaterialRef.current.uniforms) {
+          shaderMaterialRef.current.uniforms.uColor1.value.set(color1Ref.current);
+        }
       }
     });
   }, [sectionState]);
 
-  // 创建shader材质
-  const shaderMaterial = useMemo(() => {
-    return new THREE.ShaderMaterial({
-      vertexShader: fluidBackgroundVertexShader,
-      fragmentShader: fluidBackgroundFragmentShader,
-      uniforms: {
-        uTime: { value: 0 },
-        uColor1: { value: new THREE.Color(color1Ref.current) },
-        uColor2: { value: new THREE.Color(color2) },
-        uColor3: { value: new THREE.Color(color3) },
-        uColor4: { value: new THREE.Color(color4) },
-        uSpeed: { value: speed },
-        uNoiseScale: { value: noiseScale },
-        uIntensity: { value: intensity },
-        uOpacity: { value: opacity }
-      },
-      transparent: true,
-      side: THREE.DoubleSide
-    });
-  }, [color2, color3, color4, speed, noiseScale, intensity, opacity]);
-
-  // 创建几何体 - 超大平面确保覆盖全屏
-  const geometry = useMemo(() => {
-    return new THREE.PlaneGeometry(100, 100, 32, 32);
-  }, []);
-
-  // 更新材质uniforms
-  useFrame((state) => {
-    if (shaderMaterial.uniforms) {
-      shaderMaterial.uniforms.uTime.value = state.clock.getElapsedTime();
-      shaderMaterial.uniforms.uColor1.value.set(color1Ref.current);
-      shaderMaterial.uniforms.uColor2.value.set(color2);
-      shaderMaterial.uniforms.uColor3.value.set(color3);
-      shaderMaterial.uniforms.uColor4.value.set(color4);
-      shaderMaterial.uniforms.uSpeed.value = speed;
-      shaderMaterial.uniforms.uNoiseScale.value = noiseScale;
-      shaderMaterial.uniforms.uIntensity.value = intensity;
-      shaderMaterial.uniforms.uOpacity.value = opacity;
-    }
-  });
-
-  // 让背景始终面向摄像机
+  // 让背景始终面向摄像机（保留位置更新）
   useFrame(() => {
     if (meshRef.current) {
       // 获取摄像机的世界位置
