@@ -266,13 +266,16 @@ export default function Navigation() {
   
   // Hide navigation on DetailView pages
   const isDetailPage = pathname?.startsWith('/futures/') && pathname !== '/futures';
+  // Hide navigation on vb page
+  const isVBTestPage = pathname?.startsWith('/vb');
+  const shouldHideNavigation = isDetailPage || isVBTestPage;
 
   return (
     <>
       {/* Top bar - Logo and timer */}
       <nav 
         className={`fixed left-0 h-16 flex items-center pl-[64px] justify-between bg-transparent transition-opacity duration-300 ${
-          isDetailPage ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          shouldHideNavigation ? 'opacity-0 pointer-events-none' : 'opacity-100'
         }`}
         style={{ height: '64px', marginTop: '16px', zIndex: 99, right: '160px' }}
       >
@@ -296,7 +299,7 @@ export default function Navigation() {
       {/* Menu button - separate layer */}
       <div 
         className={`fixed right-16 flex items-center transition-opacity duration-300 ${
-          isDetailPage ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          shouldHideNavigation ? 'opacity-0 pointer-events-none' : 'opacity-100'
         }`}
         style={{ top: '16px', height: '64px', zIndex: 150 }}
       >
