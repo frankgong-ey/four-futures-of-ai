@@ -13,6 +13,8 @@ export default function LayoutClient() {
   const isDashboardPage = pathname?.startsWith('/booth-dashboard');
   const isVotePage = pathname === '/vote';
   const isResultsPage = pathname === '/results';
+  const isValueBlueprintPage = pathname === '/value-blueprint';
+  const isVBTestPage = pathname === '/vb';
 
   // Do not render any global components on DetailView pages
   if (isDetailPage) {
@@ -31,6 +33,16 @@ export default function LayoutClient() {
 
   // Do not render any global components on results page
   if (isResultsPage) {
+    return null;
+  }
+
+  // Do not render any global components on value-blueprint page
+  if (isValueBlueprintPage) {
+    return null;
+  }
+
+  // Do not render any global components on vb page
+  if (isVBTestPage) {
     return null;
   }
 

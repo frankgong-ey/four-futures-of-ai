@@ -1,12 +1,22 @@
 "use client";
 
 import React from 'react';
+import { usePathname } from 'next/navigation';
 
 /**
  * 背景竖线组件
  * 在所有页面section中显示，包含6条均匀分布的竖线
+ * 在 /vb 页面不显示
  */
 export default function BackgroundLines() {
+  const pathname = usePathname();
+  const isVBTestPage = pathname === '/vb';
+
+  // 在 vb 页面不显示背景线
+  if (isVBTestPage) {
+    return null;
+  }
+
   return (
     <div 
       className="fixed inset-0 pointer-events-none"

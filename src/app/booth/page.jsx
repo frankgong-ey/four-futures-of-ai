@@ -123,7 +123,7 @@ function VideoModal({ onClose }) {
             </div>
           </button>
 
-          {/* 视频容器 */}
+          {/* video container */}
           <div className="relative aspect-video bg-gray-900 overflow-hidden">
             {isVideoLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
@@ -151,7 +151,7 @@ function VideoModal({ onClose }) {
 }
 
 export default function BoothPage() {
-  // Loading状态管理
+  // Loading state management
   const [isLoading, setIsLoading] = useState(true);
   // 视频播放 Modal 状态
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
