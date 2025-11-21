@@ -268,7 +268,9 @@ export default function Navigation() {
   const isDetailPage = pathname?.startsWith('/futures/') && pathname !== '/futures';
   // Hide navigation on vb page
   const isVBTestPage = pathname?.startsWith('/vb');
-  const shouldHideNavigation = isDetailPage || isVBTestPage;
+  // Hide navigation on home page
+  const isHomePage = pathname === '/';
+  const shouldHideNavigation = isDetailPage || isVBTestPage || isHomePage;
 
   return (
     <>

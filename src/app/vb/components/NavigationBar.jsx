@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 
 // 定义所有滚动位置
 const SCROLL_POSITIONS = [
@@ -9,6 +9,8 @@ const SCROLL_POSITIONS = [
   { type: 'section', id: 3, name: 'Section 3' },
   { type: 'section', id: 4, name: 'Section 4' },
   { type: 'section5-vh', vh: 1, name: 'Section 5 (1vh)' },
+  { type: 'section5-vh', vh: 211, name: 'Section 5 (211vh)' },
+  { type: 'section5-vh', vh: 399, name: 'Section 5 (399vh)' },
   { type: 'section5-vh', vh: 600, name: 'Section 5 (600vh) - Layer 0' },
   { type: 'section5-vh', vh: 700, name: 'Section 5 (700vh) - Layer 1' },
   { type: 'section5-vh', vh: 800, name: 'Section 5 (800vh) - Layer 2' },
@@ -18,10 +20,27 @@ const SCROLL_POSITIONS = [
   { type: 'section5-vh', vh: 1200, name: 'Section 5 (1200vh) - Layer 6' },
   { type: 'section', id: 6, name: 'Section 6' },
   { type: 'section', id: 7, name: 'Section 7' },
-  { type: 'section8-vh', vh: 1, name: 'Section 8 (1vh)' },
   { type: 'section8-vh', vh: 101, name: 'Section 8 (101vh)' },
   { type: 'section', id: 9, name: 'Section 9' },
 ];
+
+// 定义 Chapter 映射
+const CHAPTERS = [
+  { name: 'Home', startIndex: 0, endIndex: 0 }, // Section 1
+  { name: 'Background', startIndex: 1, endIndex: 3 }, // Section 2, 3, 4
+  { name: 'Agentic Enterprise', startIndex: 4, endIndex: 4 }, // Section 5 1vh
+  { name: 'Value Blueprints', startIndex: 5, endIndex: 13 }, // Section 5 211vh 及之后所有 section5 节点
+  { name: 'Methodology', startIndex: 14, endIndex: 14 }, // Section 6
+  { name: 'Success Stories', startIndex: 15, endIndex: 16 }, // Section 7, 8
+  { name: 'Diagnostic Approach', startIndex: 17, endIndex: 17 }, // Section 9
+];
+
+// 根据 position index 获取对应的 chapter
+const getChapterByPositionIndex = (positionIndex) => {
+  return CHAPTERS.find(chapter => 
+    positionIndex >= chapter.startIndex && positionIndex <= chapter.endIndex
+  ) || CHAPTERS[0];
+};
 
 // 定义每个位置的滚动持续时间（毫秒）
 const SCROLL_DURATIONS = [
@@ -29,17 +48,18 @@ const SCROLL_DURATIONS = [
   500, // Section 2 -> 3
   500, // Section 3 -> 4
   500, // Section 4 -> Section 5 vh=1
-  2000, // Section 5 vh=1 -> vh=600
-  2000, // Section 5 vh=600 -> vh=700
-  2000, // Section 5 vh=700 -> vh=800
-  2000, // Section 5 vh=800 -> vh=900
-  2000, // Section 5 vh=900 -> vh=1000
-  2000, // Section 5 vh=1000 -> vh=1100
-  2000, // Section 5 vh=1100 -> vh=1200
+  2000, // Section 5 vh=1 -> vh=211
+  2000, // Section 5 vh=211 -> vh=399
+  1000, // Section 5 vh=399 -> vh=600
+  1000, // Section 5 vh=600 -> vh=700
+  1000, // Section 5 vh=700 -> vh=800
+  1000, // Section 5 vh=800 -> vh=900
+  1000, // Section 5 vh=900 -> vh=1000
+  1000, // Section 5 vh=1000 -> vh=1100
+  1000, // Section 5 vh=1100 -> vh=1200
   500, // Section 5 vh=1200 -> Section 6
   500, // Section 6 -> Section 7
-  500, // Section 7 -> Section 8 vh=1
-  2000, // Section 8 vh=1 -> vh=101
+  2000, // Section 7 -> Section 8 vh=101
   500, // Section 8 vh=101 -> Section 9
 ];
 
@@ -83,18 +103,43 @@ export default function NavigationBar({
     setShowMenu(!showMenu);
   };
 
-  const handleMenuSelect = (index) => {
+  const handleMenuSelect = (chapterIndex) => {
     if (isScrolling) return;
     setShowMenu(false);
-    onNavigate(index);
+    // 跳转到该 chapter 的第一个位置
+    const chapter = CHAPTERS[chapterIndex];
+    onNavigate(chapter.startIndex);
   };
 
   const currentPosition = SCROLL_POSITIONS[currentPositionIndex] || SCROLL_POSITIONS[0];
+  
+  // 使用 useMemo 优化 chapter 查找
+  const currentChapter = useMemo(() => {
+    return getChapterByPositionIndex(currentPositionIndex);
+  }, [currentPositionIndex]);
+  
+  // 使用 useMemo 优化 chapter 索引查找
+  const currentChapterIndex = useMemo(() => {
+    return CHAPTERS.findIndex(ch => ch.name === currentChapter.name);
+  }, [currentChapter.name]);
+  
+  // 使用 useMemo 优化进度计算
+  // 如果 chapter 有多个位置，第一个位置也应该显示进度（不是0%）
+  // 例如：3个位置 -> 第一次33%，第二次66%，第三次100%
+  //      2个位置 -> 第一次50%，第二次100%
+  const currentChapterProgress = useMemo(() => {
+    if (currentPositionIndex < currentChapter.startIndex) return 0;
+    if (currentPositionIndex > currentChapter.endIndex) return 1;
+    const totalPositions = currentChapter.endIndex - currentChapter.startIndex + 1;
+    const currentPositionInChapter = currentPositionIndex - currentChapter.startIndex + 1;
+    return currentPositionInChapter / totalPositions;
+  }, [currentPositionIndex, currentChapter.startIndex, currentChapter.endIndex]);
 
   return (
     <>
       {/* 导航栏 - 固定在左下角，移动端隐藏 */}
       <div 
+        data-navigation-bar
         className="hidden md:flex fixed bottom-0 left-0 z-[1000] items-center"
         style={{
           fontFamily: 'var(--font-eyinterstate)',
@@ -180,12 +225,28 @@ export default function NavigationBar({
                 </svg>
                 
                 {/* 章节编号和名称 */}
-                <span className="text-gray-400 text-sm">
-                  {String(currentPositionIndex + 1).padStart(2, '0')}
-                </span>
-                <span className="text-white text-sm">
-                  {currentPosition.name}
-                </span>
+                <div className="flex-1 flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-400 text-sm">
+                      {String(currentChapterIndex + 1).padStart(2, '0')}
+                    </span>
+                    <span className="text-white text-sm">
+                      {currentChapter.name}
+                    </span>
+                  </div>
+                  {/* 进度条 */}
+                  <div 
+                    className="w-full bg-gray-700/50 rounded-full overflow-hidden"
+                    style={{ height: '1px', minHeight: '1px' }}
+                  >
+                    <div 
+                      className="h-full bg-white transition-all duration-300"
+                      style={{ 
+                        width: `${currentChapterProgress * 100}%`,
+                      }}
+                    />
+                  </div>
+                </div>
               </button>
 
               {/* 章节菜单 */}
@@ -194,26 +255,29 @@ export default function NavigationBar({
                   className="absolute bottom-full left-0 mb-1 bg-black/80 backdrop-blur-md border border-gray-400/30 max-h-[400px] overflow-y-auto"
                   style={{ minWidth: '250px' }}
                 >
-                  {SCROLL_POSITIONS.map((position, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleMenuSelect(index)}
-                      className={`w-full px-4 py-2 text-left hover:bg-gray-800 transition-colors ${
-                        index === currentPositionIndex 
-                          ? 'bg-gray-800 text-white' 
-                          : 'text-gray-300'
-                      }`}
-                      style={{
-                        fontFamily: 'var(--font-eyinterstate)',
-                        fontSize: '14px',
-                      }}
-                    >
-                      <span className="text-gray-400 mr-2">
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
-                      {position.name}
-                    </button>
-                  ))}
+                  {CHAPTERS.map((chapter, chapterIndex) => {
+                    const isCurrentChapter = currentPositionIndex >= chapter.startIndex && currentPositionIndex <= chapter.endIndex;
+                    return (
+                      <button
+                        key={chapterIndex}
+                        onClick={() => handleMenuSelect(chapterIndex)}
+                        className={`w-full px-4 py-2 text-left hover:bg-gray-800 transition-colors cursor-pointer ${
+                          isCurrentChapter
+                            ? 'bg-gray-800 text-white' 
+                            : 'text-gray-300'
+                        }`}
+                        style={{
+                          fontFamily: 'var(--font-eyinterstate)',
+                          fontSize: '14px',
+                        }}
+                      >
+                        <span className="text-gray-400 mr-2">
+                          {String(chapterIndex + 1).padStart(2, '0')}
+                        </span>
+                        {chapter.name}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>

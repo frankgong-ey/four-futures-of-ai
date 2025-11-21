@@ -59,20 +59,24 @@ export default function Section7({ onRiskAssessmentClick }) {
             
             {/* 卡片列表 */}
             {[
-              { title: "EY's Risk Assessment", onClick: onRiskAssessmentClick },
+              { title: "EY's Risk Assessment" },
               { title: "Fossil's Watch Design" },
               { title: "Life Sciences Global Conglomerate Order-to-Cash" },
             ].map((item, index) => (
               <div
                 key={index}
-                onClick={item.onClick}
-                className="bg-gray-200 border border-white px-4 md:px-6 py-4 md:py-6 flex items-center justify-between cursor-pointer hover:bg-gray-300 transition-colors"
+                className="bg-gray-200 border border-white px-4 md:px-6 py-4 md:py-6"
                 style={{ fontFamily: 'var(--font-eyinterstate)' }}
               >
-                <div className="text-sm sm:text-base md:text-[18px] font-normal flex-1 text-black">
-                  {item.title}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-sm sm:text-base md:text-[18px] font-normal flex-1 text-black">
+                    {item.title}
+                  </div>
+                  <div className="text-black text-xl sm:text-2xl md:text-[32px] ml-2 md:ml-4 flex-shrink-0">›</div>
                 </div>
-                <div className="text-black text-xl sm:text-2xl md:text-[32px] ml-2 md:ml-4 flex-shrink-0">›</div>
+                <div className="text-xs sm:text-sm text-gray-500 italic">
+                  Work in progress
+                </div>
               </div>
             ))}
           </div>

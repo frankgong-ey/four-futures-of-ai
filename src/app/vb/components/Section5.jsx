@@ -4,6 +4,18 @@ import React, { useState, useEffect } from "react";
 import { LabelProvider, Mesh2DLabel } from "./Mesh2DLabels";
 import { LABEL_DATA } from "./MeshLabels";
 
+// 每个 layer 的渐变颜色（从白色到指定颜色）
+// 移到组件外部，避免每次渲染时重新创建
+const layerGradientColors = [
+  '#EAD726', // layer1: 黄色
+  '#E87729', // layer2
+  '#EB5242', // layer3
+  '#AE5A9C', // layer4
+  '#428ADE', // layer5
+  '#5BABA8', // layer6
+  '#8BDBDC', // layer7
+];
+
 export default function Section5({ scrollProgress, mounted, layerInfo, scrollSectionRef, activeSection }) {
   
   const currentVh = scrollProgress * 1300;
@@ -27,8 +39,8 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
   // 新第二阶段（200-300vh）：显示"The Value Blueprint"，300vh时隐藏
   const showInitialText = currentVh >= 200 && currentVh < 300;
   
-  // 调整showSevenLayersText的显示范围，改为300-400vh显示
-  const showSevenLayersText = currentVh >= 300 && currentVh < 400;
+  // 调整showSevenLayersText的显示范围，改为350-500vh显示
+  const showSevenLayersText = currentVh >= 350 && currentVh < 500;
   const showLayerDetails = currentVh >= 600; // 600vh开始进入逐层查看阶段
   // 每100vh切换一层：600vh=layer0, 700vh=layer1, 800vh=layer2, ...
   const currentLayerIndex = showLayerDetails ? Math.min(6, Math.floor((currentVh - 600) / 100)) : -1;
@@ -80,7 +92,7 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
             <h1 
               className="text-[36px] md:text-[64px] font-normal mb-6 tracking-[-0.05em] leading-none"
               style={{ 
-                background: 'linear-gradient(to right, white, #EAD726)',
+                backgroundImage: 'linear-gradient(to right, white, #EAD726)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -114,7 +126,7 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
             <h1 
               className="text-[36px] md:text-[64px] font-normal mb-6 tracking-[-0.05em] leading-none"
               style={{ 
-                background: 'linear-gradient(to right, white, #EAD726)',
+                backgroundImage: 'linear-gradient(to right, white, #EAD726)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -146,7 +158,7 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
             <h2 
               className="text-[36px] md:text-[64px] font-normal mb-6 tracking-[-0.05em] leading-none"
               style={{ 
-                background: 'linear-gradient(to right, white, #EAD726)',
+                backgroundImage: 'linear-gradient(to right, white, #EAD726)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -189,7 +201,7 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
             <h3 
               className="text-[36px] md:text-[64px] font-normal mb-6 tracking-[-0.05em] leading-none"
               style={{ 
-                background: 'linear-gradient(to right, white, #EAD726)',
+                backgroundImage: `linear-gradient(to right, white, ${layerGradientColors[currentLayerIndex]})`,
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -241,8 +253,8 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
         </LabelProvider>
       )}
       
-      {/* 调试信息 - 只在Section5激活时显示 */}
-      {mounted && (
+      {/* 调试信息 - 只在Section5激活时显示 - 暂时隐藏 */}
+      {false && mounted && (
         <div 
           className="fixed bottom-4 right-4 pointer-events-none"
           style={{

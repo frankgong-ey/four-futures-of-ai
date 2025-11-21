@@ -1,6 +1,6 @@
  "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Section1 from "./components/Section1";
@@ -25,6 +25,8 @@ const SCROLL_POSITIONS = [
   { type: 'section', id: 3 },
   { type: 'section', id: 4 },
   { type: 'section5-vh', vh: 1 },
+  { type: 'section5-vh', vh: 211 },
+  { type: 'section5-vh', vh: 399 },
   { type: 'section5-vh', vh: 600 },
   { type: 'section5-vh', vh: 700 },
   { type: 'section5-vh', vh: 800 },
@@ -34,7 +36,6 @@ const SCROLL_POSITIONS = [
   { type: 'section5-vh', vh: 1200 },
   { type: 'section', id: 6 },
   { type: 'section', id: 7 },
-  { type: 'section8-vh', vh: 1 },
   { type: 'section8-vh', vh: 101 },
   { type: 'section', id: 8 },
 ];
@@ -45,17 +46,18 @@ const SCROLL_DURATIONS = [
   500, // Section 2 -> 3
   500, // Section 3 -> 4
   500, // Section 4 -> Section 5 vh=1
-  2000, // Section 5 vh=1 -> vh=600
-  2000, // Section 5 vh=600 -> vh=700
-  2000, // Section 5 vh=700 -> vh=800
-  2000, // Section 5 vh=800 -> vh=900
-  2000, // Section 5 vh=900 -> vh=1000
-  2000, // Section 5 vh=1000 -> vh=1100
-  2000, // Section 5 vh=1100 -> vh=1200
+  2000, // Section 5 vh=1 -> vh=211
+  2000, // Section 5 vh=211 -> vh=399
+  1000, // Section 5 vh=399 -> vh=600
+  1000, // Section 5 vh=600 -> vh=700
+  1000, // Section 5 vh=700 -> vh=800
+  1000, // Section 5 vh=800 -> vh=900
+  1000, // Section 5 vh=900 -> vh=1000
+  1000, // Section 5 vh=1000 -> vh=1100
+  1000, // Section 5 vh=1100 -> vh=1200
   500, // Section 5 vh=1200 -> Section 6
   500, // Section 6 -> Section 7
-  500, // Section 7 -> Section 8 vh=1
-  2000, // Section 8 vh=1 -> vh=101
+  2000, // Section 7 -> Section 8 vh=101
   500, // Section 8 vh=101 -> Section 9
 ];
 
@@ -175,10 +177,25 @@ export default function VBTestPage() {
             targetY = ref.current.offsetTop;
           }
         } else if (position.type === 'section5-vh') {
+          // 使用和calculateScrollTarget相同的计算逻辑
+          // 注意：对于layers展示阶段（600vh+），实际滚动位置可能是+2vh，但检测时应该基于原始vh
           if (scrollSectionRef.current) {
-            const section5Top = scrollSectionRef.current.offsetTop;
-            const vhInPixels = (position.vh / 100) * viewportHeight;
-            targetY = section5Top + vhInPixels;
+            const trigger = ScrollTrigger.getById('section5-trigger');
+            if (trigger) {
+              const startScrollY = trigger.start;
+              const endScrollY = trigger.end;
+              const section5Height = 1300 * viewportHeight / 100;
+              const scrollRange = section5Height - viewportHeight;
+              const targetProgress = position.vh / 1300;
+              targetY = startScrollY + targetProgress * scrollRange;
+            } else {
+              // Fallback: 如果trigger还没创建
+              const section5Top = scrollSectionRef.current.offsetTop;
+              const section5Height = 1300 * viewportHeight / 100;
+              const scrollRange = section5Height - viewportHeight;
+              const targetProgress = position.vh / 1300;
+              targetY = section5Top + targetProgress * scrollRange;
+            }
           }
         } else if (position.type === 'section8-vh') {
           if (scrollSectionRef8.current) {
@@ -188,7 +205,13 @@ export default function VBTestPage() {
           }
         }
 
-        const distance = Math.abs(scrollY - targetY);
+        // 对于layers展示阶段（600vh+），允许±2vh的容差，因为滚动目标位置会+2vh
+        let distance = Math.abs(scrollY - targetY);
+        if (position.type === 'section5-vh' && position.vh >= 600) {
+          // 检查是否在±2vh范围内（对应实际滚动位置+2vh的情况）
+          const vh2Offset = (2 / 100) * viewportHeight;
+          distance = Math.min(distance, Math.abs(scrollY - (targetY + vh2Offset)));
+        }
         if (distance < closestDistance) {
           closestDistance = distance;
           closestIndex = index;
@@ -222,8 +245,8 @@ export default function VBTestPage() {
     };
   }, [mounted, isScrolling]);
 
-  // 计算滚动目标位置
-  const calculateScrollTarget = (positionIndex) => {
+  // 计算滚动目标位置 - 使用 useCallback 优化，避免每次渲染时重新创建
+  const calculateScrollTarget = useCallback((positionIndex) => {
     const position = SCROLL_POSITIONS[positionIndex];
     if (!position) return null;
 
@@ -247,13 +270,43 @@ export default function VBTestPage() {
       }
     } else if (position.type === 'section5-vh') {
       // Section5的特定vh位置
+      // ScrollTrigger: start="top top", end="bottom bottom"
+      // progress = (scrollY - startScrollY) / (endScrollY - startScrollY)
+      // 要使得progress = vh / 1300，需要正确计算start和end位置
+      // 对于layers展示阶段（600vh+），滚动目标位置要+2vh
       if (scrollSectionRef.current) {
-        const section5Top = scrollSectionRef.current.offsetTop;
-        const vhInPixels = (position.vh / 100) * window.innerHeight;
-        return {
-          element: scrollSectionRef.current,
-          offset: section5Top + vhInPixels,
-        };
+        const trigger = ScrollTrigger.getById('section5-trigger');
+        // 如果是layers展示阶段（600vh及以上），滚动目标+2vh
+        const targetVh = position.vh >= 600 ? position.vh + 2 : position.vh;
+        
+        if (trigger) {
+          // 使用ScrollTrigger的实际start和end位置
+          const startScrollY = trigger.start;
+          const endScrollY = trigger.end;
+          const section5Height = 1300 * window.innerHeight / 100;
+          const viewportHeight = window.innerHeight;
+          const scrollRange = section5Height - viewportHeight;
+          const targetProgress = targetVh / 1300;
+          const targetScrollY = startScrollY + targetProgress * scrollRange;
+          
+          return {
+            element: scrollSectionRef.current,
+            offset: targetScrollY,
+          };
+        } else {
+          // 如果trigger还没创建，使用简单计算
+          const section5Top = scrollSectionRef.current.offsetTop;
+          const section5Height = 1300 * window.innerHeight / 100;
+          const viewportHeight = window.innerHeight;
+          const scrollRange = section5Height - viewportHeight;
+          const targetProgress = targetVh / 1300;
+          const targetScrollY = section5Top + targetProgress * scrollRange;
+          
+          return {
+            element: scrollSectionRef.current,
+            offset: targetScrollY,
+          };
+        }
       }
     } else if (position.type === 'section8-vh') {
       // Section8的特定vh位置
@@ -267,7 +320,7 @@ export default function VBTestPage() {
       }
     }
     return null;
-  };
+  }, [scrollSectionRef, scrollSectionRef8, section1Ref, section2Ref, section3Ref, section4Ref, section6Ref, section7Ref, section8Ref]);
 
   // 导航到指定位置
   const handleNavigate = (targetIndex) => {
@@ -324,6 +377,8 @@ export default function VBTestPage() {
         // 恢复页面滚动
         document.body.style.overflow = '';
         setIsScrolling(false);
+        // 强制更新当前位置索引，确保导航栏显示正确
+        setCurrentPositionIndex(targetIndex);
       }
     };
 
@@ -336,6 +391,7 @@ export default function VBTestPage() {
     
     // Section5的ScrollTrigger
     const trigger = ScrollTrigger.create({
+      id: 'section5-trigger',
       trigger: scrollSectionRef.current,
       start: "top top",
       end: "bottom bottom",

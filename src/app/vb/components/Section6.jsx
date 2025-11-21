@@ -1,4 +1,34 @@
+"use client";
+
+import React, { useState } from "react";
+import ImageModal from "./ImageModal";
+
 export default function Section6() {
+  const [modalImages, setModalImages] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = (images) => {
+    setModalImages(images);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setModalImages(null);
+  };
+
+  // Step 1 的图片
+  const step1Images = [
+    { src: '/images/value-blueprints/vcm.png', description: 'Value Chain Mapping' },
+    { src: '/images/value-blueprints/rrf.png', description: 'Reimagine Readiness Framework' },
+  ];
+
+  // Step 2 的图片
+  const step2Images = [
+    { src: '/images/value-blueprints/ce.png', description: 'Contact Engineering' },
+    { src: '/images/value-blueprints/aet.png', description: 'Agentic Enterprise Tech Stack' },
+  ];
+
   return (
     <section
       className="relative w-full text-white py-12 md:py-16 lg:py-24"
@@ -23,44 +53,56 @@ export default function Section6() {
         {/* 上半部分：4列步骤说明 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 border-t border-white/20 pt-8 md:pt-12 mb-12 md:mb-16">
           <div className="pr-0 md:pr-8">
-            <h3 className="text-[20px] sm:text-[24px] md:text-[28px] font-semibold mb-3">Value-led Transformation</h3>
-            <p className="text-sm md:text-sm text-gray-300 leading-relaxed">
-              Focus on where value can be unlocked and gained throughout the design and
-              prioritization of the future state.
-            </p>
+            <h3 className="text-[20px] sm:text-[24px] md:text-[28px] font-semibold mb-3">EY Custom Value Blueprint Methodology</h3>
           </div>
 
           <div className="border-l-0 md:border-l border-white/20 pl-0 md:pl-8 border-t md:border-t-0 pt-6 md:pt-0">
             <p className="text-sm text-gray-400 mb-2">Step 1</p>
-            <h3 className="text-base md:text-lg font-semibold mb-3">Context and Ambition</h3>
-            <p className="text-sm text-gray-300 leading-relaxed">
-              Understand where the business is most ready to adopt agentic powered ways of
-              operating for the future.
+            <h3 className="text-base md:text-lg font-semibold mb-3">Identify Process & Readiness</h3>
+            <p className="text-sm text-gray-300 leading-relaxed mb-3">
+              Identify value pools in the organization and select process well-suited for disruption.
             </p>
+            <button
+              onClick={() => handleOpenModal(step1Images)}
+              className="px-4 py-2 text-sm text-white border border-white/50 hover:bg-white/20 hover:border-white/70 transition-all cursor-pointer"
+              style={{
+                fontFamily: 'var(--font-eyinterstate)',
+                borderRadius: 0,
+                backgroundColor: 'transparent',
+              }}
+            >
+              View Examples
+            </button>
           </div>
 
           <div className="border-l-0 md:border-l border-white/20 pl-0 md:pl-8 border-t md:border-t-0 pt-6 md:pt-0 lg:border-t-0 lg:pt-0">
             <p className="text-sm text-gray-400 mb-2">Step 2</p>
             <h3 className="text-base md:text-lg font-semibold mb-3">
-              Future State Process
-              <br />
-              reimagined
+              Reimagine Process with Trust & Scalability
             </h3>
-            <p className="text-sm text-gray-300 leading-relaxed">
-              Reimagine how we think about structuring work to accomplish business outcomes.
+            <p className="text-sm text-gray-300 leading-relaxed mb-3">
+              Build a new socio-technical model with redesigned roles, embedded trust and scalable and modular infrastructure.
             </p>
+            <button
+              onClick={() => handleOpenModal(step2Images)}
+              className="px-4 py-2 text-sm text-white border border-white/50 hover:bg-white/20 hover:border-white/70 transition-all cursor-pointer"
+              style={{
+                fontFamily: 'var(--font-eyinterstate)',
+                borderRadius: 0,
+                backgroundColor: 'transparent',
+              }}
+            >
+              View Examples
+            </button>
           </div>
 
           <div className="border-l-0 md:border-l border-white/20 pl-0 md:pl-8 border-t md:border-t-0 pt-6 md:pt-0 lg:border-t-0 lg:pt-0">
             <p className="text-sm text-gray-400 mb-2">Step 3</p>
             <h3 className="text-base md:text-lg font-semibold mb-3">
-              Future State Architecture
-              <br />
-              and Roadmap
+              Unlock New Value Creation
             </h3>
             <p className="text-sm text-gray-300 leading-relaxed">
-              Position people, data and technology to enable and thrive working with new agentic
-              capability.
+              Redeploy human capacity toward innovation and strategy and value creation.
             </p>
           </div>
         </div>
@@ -140,6 +182,13 @@ export default function Section6() {
           />
         </div>
       </div>
+
+      {/* Image Modal */}
+      <ImageModal
+        images={modalImages}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </section>
   );
 }
