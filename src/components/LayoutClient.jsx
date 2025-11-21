@@ -15,6 +15,12 @@ export default function LayoutClient() {
   const isResultsPage = pathname === '/results';
   const isValueBlueprintPage = pathname === '/value-blueprint';
   const isVBTestPage = pathname === '/vb';
+  const isHomePage = pathname === '/';
+
+  // Do not render any global components on home page
+  if (isHomePage) {
+    return null;
+  }
 
   // Do not render any global components on DetailView pages
   if (isDetailPage) {

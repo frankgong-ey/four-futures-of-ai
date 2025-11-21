@@ -1,12 +1,17 @@
 export default function Home() {
-  console.log('ROOT PAGE RENDERED');
   return (
-    <main className="min-h-screen w-screen grid place-content-center bg-black text-white p-8">
-      <div className="max-w-[960px] text-center">
-        <h1 className="text-4xl md:text-6xl font-light mb-6">Four Futures of AI</h1>
-        <p className="opacity-80 mb-8">An immersive, scroll-driven exhibit built with WebGL.</p>
-        <a className="underline opacity-90 hover:opacity-100" href="/home">Enter Chapter I →</a>
-      </div>
+    <main className="min-h-screen w-screen grid place-content-center bg-black text-white">
+      <a 
+        href="/vb"
+        className="px-12 py-6 text-2xl md:text-4xl font-normal border border-white/50 hover:bg-white/10 hover:border-white/70 transition-all cursor-pointer"
+        style={{
+          fontFamily: 'var(--font-eyinterstate)',
+          borderRadius: 0,
+          backgroundColor: 'transparent',
+        }}
+      >
+        Explore Value Blueprints
+      </a>
     </main>
   );
 }
