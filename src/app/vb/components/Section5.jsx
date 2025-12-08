@@ -16,6 +16,17 @@ const layerGradientColors = [
   '#8BDBDC', // layer7
 ];
 
+// 每个 layer 的 badge 文本
+const layerBadgeTexts = [
+  'Reliable Data', // layer1
+  'Tech Stack', // layer2
+  'Enterprise Knowledge', // layer3
+  'Responsible AI, Security', // layer4
+  'Streamlined, AI-First', // layer5
+  'Human/AI Collaboration', // layer6
+  'Customer Experience', // layer7
+];
+
 export default function Section5({ scrollProgress, mounted, layerInfo, scrollSectionRef, activeSection }) {
   
   const currentVh = scrollProgress * 1300;
@@ -67,79 +78,164 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
         <div
           style={{
             position: 'absolute',
-            top: '120px',
+            top: 0,
             left: 0,
             right: 0,
             height: '100vh',
             display: 'flex',
-            alignItems: showAgenticEnterprise ? 'flex-start' : 'center', // The Agentic Enterprise 靠上，其他垂直居中
-            justifyContent: 'flex-start',
+            alignItems: 'center', // 垂直居中
+            justifyContent: 'flex-start', // 水平左对齐
             paddingLeft: '5%',
-            paddingTop: showAgenticEnterprise ? '5%' : 0, // The Agentic Enterprise 有顶部 padding
             pointerEvents: 'none', // 确保不阻挡Canvas的交互
           }}
         >
         {/* 新第一阶段：The Agentic Enterprise */}
         {showAgenticEnterprise && (
           <div 
-            className="px-8"
+            className="px-8 w-full max-w-[480px]"
             style={{
               opacity: 1,
               textAlign: 'left',
-              maxWidth: '600px',
             }}
           >
-            <h1 
-              className="text-[36px] md:text-[64px] font-normal mb-6 tracking-[-0.05em] leading-none"
-              style={{ 
-                backgroundImage: 'linear-gradient(to right, white, #EAD726)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                fontFamily: 'var(--font-eyinterstate)' 
-              }}
-            >
-              The Agentic Enterprise
-            </h1>
+            {/* Title Module - 与 Section3 一致 */}
+            <div className="flex justify-start mb-8">
+              <div className="flex items-stretch">
+                {/* 垂直渐变边框 */}
+                <div
+                  className="w-[3px]"
+                  style={{
+                    background: 'linear-gradient(to bottom, #FFDD0B, #FF789B, #34F8FD)',
+                  }}
+                />
+                {/* 文案容器 */}
+                <div className="pl-6">
+                  <p className="text-[28px] md:text-[48px] font-normal tracking-[-0.05em] leading-none text-[#FFE601] mb-4">
+                    The Vision
+                  </p>
+                  <h2 className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-white">
+                    The Agentic Enterprise
+                  </h2>
+                </div>
+              </div>
+            </div>
+
+            {/* 描述文本框 */}
             <p 
-              className="text-[16px] md:text-[20px]"
+              className="text-[16px] md:text-[20px] mb-8"
               style={{ color: '#ffffff', fontFamily: 'var(--font-eyinterstate)' }}
             >
-              Design the next generation of business models that foresee customer needs and unlock new products, services, and customer journeys.
+              Built-in AI provides the building blocks of scalable AI value.
             </p>
+
+            {/* 5个卡片列表 */}
+            <div className="flex flex-col gap-2">
+              {/* 卡片 1 */}
+              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-none p-3 flex items-center gap-6">
+                <img
+                  src="/images/value-blueprints/bullet-plus.svg"
+                  alt="Bullet"
+                  className="w-7 h-7 flex-shrink-0"
+                />
+                <p className="text-[18px] font-bold leading-relaxed text-white">
+                  Interoperable toolsets
+                </p>
+              </div>
+
+              {/* 卡片 2 */}
+              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-none p-3 flex items-center gap-6">
+                <img
+                  src="/images/value-blueprints/bullet-plus.svg"
+                  alt="Bullet"
+                  className="w-7 h-7 flex-shrink-0"
+                />
+                <p className="text-[18px] font-bold leading-relaxed text-white">
+                  Compliance as code
+                </p>
+              </div>
+
+              {/* 卡片 3 */}
+              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-none p-3 flex items-center gap-6">
+                <img
+                  src="/images/value-blueprints/bullet-plus.svg"
+                  alt="Bullet"
+                  className="w-7 h-7 flex-shrink-0"
+                />
+                <p className="text-[18px] font-bold leading-relaxed text-white">
+                  Transparent hybrid workforce
+                </p>
+              </div>
+
+              {/* 卡片 4 */}
+              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-none p-3 flex items-center gap-6">
+                <img
+                  src="/images/value-blueprints/bullet-plus.svg"
+                  alt="Bullet"
+                  className="w-7 h-7 flex-shrink-0"
+                />
+                <p className="text-[18px] font-bold leading-relaxed text-white">
+                  Goal-oriented execution
+                </p>
+              </div>
+
+              {/* 卡片 5 */}
+              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-none p-3 flex items-center gap-6">
+                <img
+                  src="/images/value-blueprints/bullet-plus.svg"
+                  alt="Bullet"
+                  className="w-7 h-7 flex-shrink-0"
+                />
+                <p className="text-[18px] font-bold leading-relaxed text-white">
+                  Work advances itself; humans focus on judgment and innovation.
+                </p>
+              </div>
+            </div>
           </div>
         )}
         
         {/* 新第二阶段：The Value Blueprint */}
         {showInitialText && (
           <div 
-            className="px-8"
+            className="px-8 w-full max-w-[480px]"
             style={{
               // 200vh时立刻显示，到750vh保持显示，750-800vh淡出
               opacity: currentVh < 750 
                 ? 1 
                 : Math.max(0, 1 - ((currentVh - 750) / 50)),
               textAlign: 'left',
-              maxWidth: '600px',
             }}
           >
-            <h1 
-              className="text-[36px] md:text-[64px] font-normal mb-6 tracking-[-0.05em] leading-none"
-              style={{ 
-                backgroundImage: 'linear-gradient(to right, white, #EAD726)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                fontFamily: 'var(--font-eyinterstate)' 
-              }}
-            >
-              The Value Blueprint
-            </h1>
+            {/* Title Module - 与第一阶段一致 */}
+            <div className="flex justify-start mb-8">
+              <div className="flex items-stretch">
+                {/* 垂直渐变边框 */}
+                <div
+                  className="w-[3px]"
+                  style={{
+                    background: 'linear-gradient(to bottom, #FFDD0B, #FF789B, #34F8FD)',
+                  }}
+                />
+                {/* 文案容器 */}
+                <div className="pl-6">
+                  <p className="text-[28px] md:text-[48px] font-normal tracking-[-0.05em] leading-none text-[#FFE601] mb-4">
+                    The Solution
+                  </p>
+                    <h2 
+                      className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-white"
+                      style={{ textShadow: '0 0 24px rgba(0, 0, 0, 0.8)' }}
+                    >
+                      EY.ai Value Blueprints
+                    </h2>
+                </div>
+              </div>
+            </div>
+
+            {/* 描述文本框 */}
             <p 
               className="text-[16px] md:text-[20px]"
               style={{ color: '#ffffff', fontFamily: 'var(--font-eyinterstate)' }}
             >
-              EY's Value Blueprint is a strategic roadmap to help organization transform into an agentic enterprise.
+              EY's layered AI methodology and library of ready-made Value Blueprints guide transformation into an agentic enterprise – blueprint by blueprint.
             </p>
           </div>
         )}
@@ -147,31 +243,41 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
         {/* Seven interconnected layers 文字 */}
         {showSevenLayersText && (
           <div 
-            className="px-8"
+            className="px-8 w-full max-w-[480px]"
             style={{
               // 300-400vh时立刻显示
               opacity: 1,
               textAlign: 'left',
-              maxWidth: '640px',
             }}
           >
-            <h2 
-              className="text-[36px] md:text-[64px] font-normal mb-6 tracking-[-0.05em] leading-none"
-              style={{ 
-                backgroundImage: 'linear-gradient(to right, white, #EAD726)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                fontFamily: 'var(--font-eyinterstate)' 
-              }}
-            >
-              Seven interconnected layers
-            </h2>
+            {/* Title Module - 与前面阶段一致 */}
+            <div className="flex justify-start mb-8">
+              <div className="flex items-stretch">
+                {/* 垂直渐变边框 */}
+                <div
+                  className="w-[3px]"
+                  style={{
+                    background: 'linear-gradient(to bottom, #FFDD0B, #FF789B, #34F8FD)',
+                  }}
+                />
+                {/* 文案容器 */}
+                <div className="pl-6">
+                  <p className="text-[28px] md:text-[48px] font-normal tracking-[-0.05em] leading-none text-[#FFE601] mb-4">
+                    The Solution
+                  </p>
+                  <h2 className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-white">
+                    Seven interconnected layers
+                  </h2>
+                </div>
+              </div>
+            </div>
+
+            {/* 描述文本框 */}
             <p 
-              className="text-[16px] md:text-xl tracking-[-0.05em]"
+              className="text-[16px] md:text-[20px]"
               style={{ color: '#ffffff', fontFamily: 'var(--font-eyinterstate)' }}
             >
-              Seven interconnected layers come together to move you from being AI-enabled to AI-native by creating a cohesive approach to AI success.
+              7 interconnected execution layers drive a cohesive, scalable approach.
             </p>
           </div>
         )}
@@ -186,9 +292,9 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
               maxWidth: '640px',
             }}
           >
-            {/* 大序号 - 20%透明度 */}
+            {/* 大序号 */}
             <div 
-              className="text-9xl md:text-[200px] font-light mb-4 tracking-[-0.05em]"
+              className="text-[80px] font-bold mb-4 tracking-[-0.05em]"
               style={{ 
                 color: '#ffffff', 
                 fontFamily: 'var(--font-eyinterstate)',
@@ -199,17 +305,25 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
               {String(currentLayerIndex + 1).padStart(2, '0')}
             </div>
             <h3 
-              className="text-[36px] md:text-[64px] font-normal mb-6 tracking-[-0.05em] leading-none"
+              className="text-[36px] md:text-[64px] font-bold mb-6 tracking-[-0.05em] leading-none"
               style={{ 
-                backgroundImage: `linear-gradient(to right, white, ${layerGradientColors[currentLayerIndex]})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                color: layerGradientColors[currentLayerIndex],
                 fontFamily: 'var(--font-eyinterstate)' 
               }}
             >
               {layerInfo[currentLayerIndex].title}
             </h3>
+            {/* Badge - 白色文字，无边框，无 padding */}
+            <div 
+              className="inline-flex items-center justify-start mb-6"
+            >
+              <span 
+                className="text-white text-[16px] md:text-[20px] font-bold"
+                style={{ fontFamily: 'var(--font-eyinterstate)' }}
+              >
+                {layerBadgeTexts[currentLayerIndex]}
+              </span>
+            </div>
             <p 
               className="text-[16px] md:text-[20px]"
               style={{ color: '#ffffff', fontFamily: 'var(--font-eyinterstate)' }}
@@ -253,19 +367,27 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
         </LabelProvider>
       )}
       
-      {/* 调试信息 - 只在Section5激活时显示 - 暂时隐藏 */}
-      {false && mounted && (
+      {/* 调试信息 - 右下角显示 */}
+      {mounted && (
         <div 
           className="fixed bottom-4 right-4 pointer-events-none"
           style={{
             fontFamily: 'monospace',
-            fontSize: '8px',
+            fontSize: '10px',
             color: '#ffffff',
-            opacity: 0.4,
+            opacity: 0.6,
             zIndex: 101,
+            lineHeight: '1.2',
+            display: 'none', // 暂时隐藏 debug 信息
           }}
         >
-          Section5 Progress: {(scrollProgress * 100).toFixed(2)}% | VH: {(scrollProgress * 1300).toFixed(2)} | Current Layer: {currentLayerIndex >= 0 ? `Layer ${currentLayerIndex + 1}` : 'N/A'}
+          <div>Progress: {(scrollProgress * 100).toFixed(2)}%</div>
+          <div>VH: {(scrollProgress * 1300).toFixed(2)}</div>
+          <div>Layer: {currentLayerIndex >= 0 ? `${currentLayerIndex + 1}` : 'N/A'}</div>
+          <div>Show Agentic: {showAgenticEnterprise ? 'Y' : 'N'}</div>
+          <div>Show Initial: {showInitialText ? 'Y' : 'N'}</div>
+          <div>Show Seven: {showSevenLayersText ? 'Y' : 'N'}</div>
+          <div>Show Details: {showLayerDetails ? 'Y' : 'N'}</div>
         </div>
       )}
     </section>

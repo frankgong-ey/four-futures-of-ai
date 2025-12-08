@@ -1,76 +1,176 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 
-export default function Section8({ scrollSectionRef }) {
+export default function Section8() {
+  const router = useRouter();
+  
+  const successStories = [
+    {
+      id: "life-sciences",
+      client: "Life Sciences Client",
+      title: "Quote-to-Cash",
+      description: "Unified 100+ ERPs with an agentic orchestration layer and reimagined process outcomes, delivering $100M+ annual cost savings and enabling new experiences.",
+      backgroundImage: "/images/value-blueprints/ss-tf-hero.png",
+    },
+    {
+      id: "retail",
+      client: "Retail Client",
+      title: "Design-to-Launch",
+      description: "Reimagined design workflows, enabling hyper-personalization and rapid speed-to-market for new products, powered by IP and generative AI.",
+      backgroundImage: "/images/value-blueprints/ss-fo-hero.png",
+    },
+    {
+      id: "ey-client-zero",
+      client: "EY Client Zero",
+      title: "Source-to-Pay-Risk",
+      description: "Transformed a 40-hour manual process into a 15-minute AI-powered workflow, shifting from one-time cost savings to recurring value and new business models.",
+      backgroundImage: "/images/value-blueprints/ss-ey-hero.png",
+    },
+  ];
+  
+  const handleCardClick = (storyId) => {
+    // 保存当前 section 信息
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('vb-return-section', '8');
+    }
+    
+    // 跳转到 success-story 页面，带上 client 类型参数
+    router.push(`/vb/success-story?client=${storyId}`);
+  };
+  
   return (
-    <section
-      ref={scrollSectionRef}
-      className="relative w-full text-white"
-      style={{ height: '300vh', fontFamily: 'var(--font-eyinterstate)', backgroundColor: '#000000' }}
+    <section 
+      className="relative w-full text-white min-h-screen py-20 pl-[5%] pr-[5%] flex items-center"
+      style={{ 
+        fontFamily: 'var(--font-eyinterstate)',
+        backgroundColor: '#1F1E27',
+        position: 'relative',
+        zIndex: 10,
+      }}
     >
-      {/* HTML 内容显示 - sticky定位，覆盖在Canvas之上 */}
-      <div 
-        className="pointer-events-none sticky top-0"
-        style={{ 
-          height: 0, // 不占据文档流高度
-          width: '100%',
-          zIndex: 100, // 提高z-index，确保在Canvas之上
-        }}
-      >
-        {/* 内容包装器 - 绝对定位，覆盖整个视口 */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            paddingLeft: '5%',
-            paddingRight: '5%',
-            pointerEvents: 'none',
-          }}
-        >
-          {/* 标题和文字 */}
-          <div 
-            className="px-4 sm:px-6 md:px-8"
-            style={{
-              opacity: 1,
-              textAlign: 'left',
-              maxWidth: '640px',
-              width: '100%',
-            }}
+      <div className="max-w-[1440px] mx-auto relative w-full z-10">
+        {/* Title Module - 与 Section4 一致的参数 */}
+        <div className="max-w-4xl mx-auto text-center mb-16 flex flex-col items-center gap-4 relative z-20">
+          <p className="text-[28px] md:text-[48px] font-normal tracking-[-0.05em] leading-none text-[#FFE601]">
+            Success Stories
+          </p>
+          <h2 
+            className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-white"
           >
-            <h1 
-              className="text-[32px] sm:text-[48px] md:text-[64px] font-normal leading-none mb-6 md:mb-8 tracking-[-0.05em]"
-              style={{ 
-                background: 'linear-gradient(to right, white, #EAD726)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                fontFamily: 'var(--font-eyinterstate)' 
+            EY.ai Value Blueprints in action
+          </h2>
+          <div 
+            className="w-40 h-[3px] mx-auto"
+            style={{
+              background: 'linear-gradient(to right, #FFDD0B, #FF789B, #34F8FD)',
+            }}
+          />
+        </div>
+
+        {/* Three Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-[1280px] mx-auto relative z-10">
+          {successStories.map((story, index) => {
+            const isDisabled = story.id === 'retail' || story.id === 'ey-client-zero';
+            return (
+            <div
+              key={story.id}
+              onClick={isDisabled ? undefined : () => handleCardClick(story.id)}
+              className={`relative flex flex-col group overflow-hidden ${isDisabled ? '' : 'cursor-pointer'}`}
+              style={{
+                opacity: isDisabled ? 0.4 : 1,
+                pointerEvents: isDisabled ? 'none' : 'auto',
               }}
             >
-              Building toward your Agentic Enterprise
-            </h1>
-            
-            <p 
-              className="text-base sm:text-lg md:text-xl lg:text-[24px]"
-              style={{ 
-                color: '#ffffff', 
-                fontFamily: 'var(--font-eyinterstate)',
-                opacity: 1,
-              }}
-            >
-              Transform cross-functional processes, Blueprint by Blueprint to shape the Agentic Enterprise with confidence.
-            </p>
-          </div>
+              {/* Image - 上方 */}
+              <div 
+                className="w-full"
+                style={{
+                  height: '240px',
+                  overflow: 'hidden',
+                }}
+              >
+                <img
+                  src={story.backgroundImage}
+                  alt={story.client}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.error('Failed to load image:', story.backgroundImage);
+                    e.target.style.display = 'none';
+                  }}
+                />
+              </div>
+              
+              {/* Content - 下方 */}
+              <div className="flex flex-col" style={{ marginTop: '24px' }}>
+                {/* Overline - Client */}
+                <p 
+                  className="text-white/60 mb-2 font-bold tracking-[-0.05em]" 
+                  style={{ 
+                    fontFamily: 'var(--font-eyinterstate)',
+                    fontSize: '28px',
+                  }}
+                >
+                  {story.client}
+                </p>
+                
+                {/* Title */}
+                <h3 
+                  className="text-white font-bold leading-tight tracking-[-0.05em] mb-4" 
+                  style={{ 
+                    fontFamily: 'var(--font-eyinterstate)',
+                    fontSize: '36px',
+                  }}
+                >
+                  {story.title}
+                </h3>
+                
+                {/* Description */}
+                <p 
+                  className="text-white font-normal leading-relaxed mb-4" 
+                  style={{ 
+                    fontFamily: 'var(--font-eyinterstate)',
+                    fontSize: '20px',
+                  }}
+                >
+                  {story.description}
+                </p>
+                
+                {/* Learn More Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isDisabled) {
+                      handleCardClick(story.id);
+                    }
+                  }}
+                  disabled={isDisabled}
+                  className="self-start px-6 py-3 border border-white text-white font-bold transition-all"
+                  style={{
+                    fontFamily: 'var(--font-eyinterstate)',
+                    fontSize: '16px',
+                    backgroundColor: 'transparent',
+                    cursor: isDisabled ? 'not-allowed' : 'pointer',
+                    opacity: isDisabled ? 0.4 : 1,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isDisabled) {
+                      e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'transparent';
+                  }}
+                >
+                  Learn More
+                </button>
+              </div>
+            </div>
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
-

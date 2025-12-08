@@ -31,80 +31,23 @@ export default function Section6() {
 
   return (
     <section
-      className="relative w-full text-white py-12 md:py-16 lg:py-24"
-      style={{ fontFamily: 'var(--font-eyinterstate)', paddingLeft: '5%', paddingRight: '5%', position: 'relative', zIndex: 200, backgroundColor: '#1F1E27' }}
+      className="relative w-full text-white min-h-screen py-20 pl-[5%] pr-[5%] flex items-center"
+      style={{ fontFamily: 'var(--font-eyinterstate)', position: 'relative', zIndex: 200, backgroundColor: '#1F1E27' }}
     >
-      <div className="max-w-7xl mx-auto">
-        {/* 标题 */}
-        <h2 
-          className="text-[32px] sm:text-[48px] md:text-[64px] font-normal leading-none mb-8 md:mb-12 text-center"
-          style={{
-            letterSpacing: '-0.05em',
-            background: 'linear-gradient(to right, white, #EAD726)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            fontFamily: 'var(--font-eyinterstate)'
-          }}
-        >
-          Proven EY methodology created a library of Ready Value Blueprints
-        </h2>
-
-        {/* 上半部分：4列步骤说明 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 border-t border-white/20 pt-8 md:pt-12 mb-12 md:mb-16">
-          <div className="pr-0 md:pr-8">
-            <h3 className="text-[20px] sm:text-[24px] md:text-[28px] font-semibold mb-3">EY Custom Value Blueprint Methodology</h3>
-          </div>
-
-          <div className="border-l-0 md:border-l border-white/20 pl-0 md:pl-8 border-t md:border-t-0 pt-6 md:pt-0">
-            <p className="text-sm text-gray-400 mb-2">Step 1</p>
-            <h3 className="text-base md:text-lg font-semibold mb-3">Identify Process & Readiness</h3>
-            <p className="text-sm text-gray-300 leading-relaxed mb-3">
-              Identify value pools in the organization and select process well-suited for disruption.
-            </p>
-            <button
-              onClick={() => handleOpenModal(step1Images)}
-              className="px-4 py-2 text-sm text-white border border-white/50 hover:bg-white/20 hover:border-white/70 transition-all cursor-pointer"
-              style={{
-                fontFamily: 'var(--font-eyinterstate)',
-                borderRadius: 0,
-                backgroundColor: 'transparent',
-              }}
-            >
-              View Examples
-            </button>
-          </div>
-
-          <div className="border-l-0 md:border-l border-white/20 pl-0 md:pl-8 border-t md:border-t-0 pt-6 md:pt-0 lg:border-t-0 lg:pt-0">
-            <p className="text-sm text-gray-400 mb-2">Step 2</p>
-            <h3 className="text-base md:text-lg font-semibold mb-3">
-              Reimagine Process with Trust & Scalability
-            </h3>
-            <p className="text-sm text-gray-300 leading-relaxed mb-3">
-              Build a new socio-technical model with redesigned roles, embedded trust and scalable and modular infrastructure.
-            </p>
-            <button
-              onClick={() => handleOpenModal(step2Images)}
-              className="px-4 py-2 text-sm text-white border border-white/50 hover:bg-white/20 hover:border-white/70 transition-all cursor-pointer"
-              style={{
-                fontFamily: 'var(--font-eyinterstate)',
-                borderRadius: 0,
-                backgroundColor: 'transparent',
-              }}
-            >
-              View Examples
-            </button>
-          </div>
-
-          <div className="border-l-0 md:border-l border-white/20 pl-0 md:pl-8 border-t md:border-t-0 pt-6 md:pt-0 lg:border-t-0 lg:pt-0">
-            <p className="text-sm text-gray-400 mb-2">Step 3</p>
-            <h3 className="text-base md:text-lg font-semibold mb-3">
-              Unlock New Value Creation
-            </h3>
-            <p className="text-sm text-gray-300 leading-relaxed">
-              Redeploy human capacity toward innovation and strategy and value creation.
-            </p>
-          </div>
+      <div className="max-w-[1440px] mx-auto relative w-full">
+        {/* 顶部标题区域 - 与 Section2 一致的结构，但没有 overline，title 是白色 */}
+        <div className="max-w-[1080px] mx-auto text-center mb-16 flex flex-col items-center gap-4">
+          <h2 
+            className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-white"
+          >
+            Blueprints stack for compounding value. Each blueprint makes the next one easier.
+          </h2>
+          <div 
+            className="w-40 h-[3px] mx-auto"
+            style={{
+              background: 'linear-gradient(to right, #FFDD0B, #FF789B, #34F8FD)',
+            }}
+          />
         </div>
 
         {/* 下半部分：EY Ready Value Blueprints 模块 */}
@@ -128,18 +71,21 @@ export default function Section6() {
           >
             {/* 标题 */}
             <div className="mb-6 md:mb-8">
-              <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-white">EY Ready Value Blueprints</p>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-white ">Ready EY.ai Value Blueprints</p>
             </div>
 
-            {/* 3x3 文本网格 - 响应式：移动端2列，桌面端3列 */}
+            {/* 文本网格 - 响应式：移动端2列，桌面端4列（11个卡片），无间距 */}
             <div 
-              className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 flex-1"
+              className="grid grid-cols-2 md:grid-cols-4 flex-1"
               style={{
-                maxWidth: '640px',
+                maxWidth: '1024px',
                 marginLeft: 0,
                 marginRight: 'auto',
                 position: 'relative',
-                zIndex: 10
+                zIndex: 10,
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                backdropFilter: 'blur(10px)'
               }}
             >
               {[
@@ -151,16 +97,21 @@ export default function Section6() {
                 'Transact to Transform',
                 'Engage to Advocate',
                 'Innovate to Scale',
-                'Develop Purpose, Vision and Strategy',
+                'Procure to Pay',
+                'Plan to Perform',
+                '...Or Custom Value Blueprints',
               ].map((label, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-center border border-white/20 p-3 md:p-4"
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)'
-                  }}
+                  className="flex items-center justify-start gap-3 p-3 md:p-4"
                 >
-                  <p className="text-xs sm:text-sm text-center text-white leading-tight">{label}</p>
+                  <img
+                    src="/images/value-blueprints/bullet-plus.svg"
+                    alt="Bullet"
+                    className="w-6 h-6 flex-shrink-0"
+                    style={{ width: '24px', height: '24px' }}
+                  />
+                  <p className="text-[20px] text-left text-white leading-tight font-bold">{label}</p>
                 </div>
               ))}
             </div>

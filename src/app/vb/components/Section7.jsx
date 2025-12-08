@@ -2,87 +2,96 @@
 
 import React from "react";
 
-export default function Section7({ onRiskAssessmentClick }) {
+export default function Section7() {
+  const steps = [
+    {
+      icon: "/images/value-blueprints/Section7_1.svg",
+      number: 1,
+      title: "Strategic Intent and Value",
+      description: "Strategic intent drives the identification of value levers within a process.",
+    },
+    {
+      icon: "/images/value-blueprints/Section7_2.svg",
+      number: 2,
+      title: "Process and Workforce Reimagination",
+      description: "Redesign process with AI, integrating workforce transformation for future readiness.",
+    },
+    {
+      icon: "/images/value-blueprints/Section7_3.png",
+      number: 3,
+      title: "EY.ai Value Blueprint Enablement",
+      description: "Lay the foundation needed to realize the future-ready process.",
+    },
+  ];
+
   return (
     <section
-      className="relative w-full text-white py-12 md:py-16 lg:py-24"
-      style={{ fontFamily: 'var(--font-eyinterstate)', paddingLeft: '5%', paddingRight: '5%', position: 'relative', zIndex: 200, backgroundColor: '#1F1E27' }}
+      className="relative w-full text-white min-h-screen py-20 pl-[5%] pr-[5%] flex items-center"
+      style={{ fontFamily: 'var(--font-eyinterstate)', position: 'relative', zIndex: 200, backgroundColor: '#000000' }}
     >
-      {/* 所有子元素包裹在一个背景为 #2C2B36 的大 div container 中 */}
-      <div 
-        className="max-w-7xl mx-auto p-6 md:p-8 lg:p-12 min-h-[300px] md:min-h-[400px] lg:min-h-[480px]"
-        style={{ backgroundColor: '#2C2B36' }}
-      >
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-10 lg:gap-12">
-          {/* 左侧内容区域 - 占据2/3宽度 */}
-          <div className="lg:col-span-2 max-w-full lg:max-w-[640px]">
-            {/* 小标题 */}
-            <p 
-              className="text-sm sm:text-base md:text-[18px] mb-4 md:mb-6"
-              style={{
-                color: '#EAD726',
-                fontFamily: 'var(--font-eyinterstate)'
-              }}
-            >
-              Value Blueprints in Action
-            </p>
-            
-            {/* 大标题 - 整体从左到右从白色到黄色的渐变 */}
-            <h2 
-              className="text-[32px] sm:text-[48px] md:text-[64px] font-normal leading-none mb-6 md:mb-8"
-              style={{ 
-                fontFamily: 'var(--font-eyinterstate)',
-                letterSpacing: '-0.05em',
-                background: 'linear-gradient(to right, white, #EAD726)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              What does it mean for you?
-            </h2>
-            
-            {/* 描述文字 */}
-            <p className="text-sm md:text-base lg:text-[18px] text-white max-w-full lg:max-w-xl leading-relaxed" style={{ fontFamily: 'var(--font-eyinterstate)' }}>
-              An agentic enterprise turns <span className="font-semibold">efficiency into opportunity</span> – enabling
-              new revenue streams, new business models, and driving innovative customer experiences
-              previously beyond our imagination.
-            </p>
-          </div>
+      <div className="max-w-[1440px] mx-auto relative w-full">
+        {/* 顶部标题区域 - 与 Section6 一致的结构 */}
+        <div className="max-w-[1080px] mx-auto text-center mb-16 flex flex-col items-center gap-4">
+          <h2 
+            className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-white"
+          >
+            How do we build a blueprint?
+          </h2>
+          <div 
+            className="w-40 h-[3px] mx-auto"
+            style={{
+              background: 'linear-gradient(to right, #FFDD0B, #FF789B, #34F8FD)',
+            }}
+          />
+        </div>
 
-          {/* 右侧 Success Stories 列表 - 占据1/3宽度 */}
-          <div className="flex flex-col gap-3 md:gap-4">
-            {/* 标题 */}
-            <p className="font-normal text-lg sm:text-xl md:text-[24px] text-white mb-3 md:mb-4" style={{ fontFamily: 'var(--font-eyinterstate)' }}>
-              Check out our Success Stories
-            </p>
-            
-            {/* 卡片列表 */}
-            {[
-              { title: "EY's Risk Assessment" },
-              { title: "Fossil's Watch Design" },
-              { title: "Life Sciences Global Conglomerate Order-to-Cash" },
-            ].map((item, index) => (
-              <div
-                key={index}
-                className="bg-gray-200 border border-white px-4 md:px-6 py-4 md:py-6"
+        {/* 三个步骤卡片 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 max-w-[1280px] mx-auto">
+          {steps.map((step, index) => (
+            <div
+              key={index}
+              className="flex flex-col bg-white/5 border border-white/10 items-center text-center"
+              style={{ padding: '36px' }}
+            >
+              {/* 数字 - 在图片上方，水平居中 */}
+              <div className="mb-4 flex justify-center">
+                <p 
+                  className="text-[48px] md:text-[64px] font-bold text-white"
+                  style={{ fontFamily: 'var(--font-eyinterstate)', letterSpacing: 'normal' }}
+                >
+                  {step.number}
+                </p>
+              </div>
+
+              {/* 图片 */}
+              <div className="mb-6 flex justify-center">
+                <img
+                  src={step.icon}
+                  alt={step.title}
+                  className="h-auto object-contain"
+                  style={{ maxHeight: '120px', width: 'auto' }}
+                />
+              </div>
+
+              {/* 标题 */}
+              <h3 
+                className="text-[24px] md:text-[32px] font-bold mb-4 text-white tracking-[-0.05em] leading-tight text-center"
                 style={{ fontFamily: 'var(--font-eyinterstate)' }}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-sm sm:text-base md:text-[18px] font-normal flex-1 text-black">
-                    {item.title}
-                  </div>
-                  <div className="text-black text-xl sm:text-2xl md:text-[32px] ml-2 md:ml-4 flex-shrink-0">›</div>
-                </div>
-                <div className="text-xs sm:text-sm text-gray-500 italic">
-                  Work in progress
-                </div>
-              </div>
-            ))}
-          </div>
+                {step.title}
+              </h3>
+
+              {/* 描述 */}
+              <p 
+                className="text-[14px] md:text-[16px] text-white leading-relaxed text-center"
+                style={{ fontFamily: 'var(--font-eyinterstate)' }}
+              >
+                {step.description}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
   );
 }
-

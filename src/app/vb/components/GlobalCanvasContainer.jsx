@@ -8,21 +8,21 @@ import { EffectComposer, Bloom, DepthOfField, Vignette } from "@react-three/post
 import * as THREE from "three";
 import { LABEL_DATA } from "./MeshLabels";
 
-// 阶段配置（使用实际 vh 值）- 移到文件顶部，供所有组件使用
+// Stage configuration (using actual vh values) - moved to top of file for use by all components
 const STAGES = {
-  INITIAL_ANIMATION: 100,       // 初始动画阶段（0-100vh）：10个box聚集
-  PHASE1_TOP_VIEW: 300,        // 第一阶段：俯视图（100-300vh）
-  TRANSITION_START: 300,        // 过渡阶段开始（300vh）
-  TRANSITION_END: 400,          // 过渡阶段结束（400vh）
-  PHASE2_SPACING_EXPAND_END: 600, // 第二阶段：layer间距扩大期（400-600vh）
-  PHASE3_LOOKAT_DOWN_END: 800, // 第三阶段结束（600-800vh）
-  PHASE4_START: 600,           // 第四阶段开始：逐层聚焦（600vh+）
-  PHASE5_X_OFFSET_START: 1500,  // 第五阶段开始：X轴偏移（1500vh+）
-  // 第四阶段：逐层聚焦（600-1500vh）
-  // 第五阶段：X轴偏移-100（1500vh+）
+  INITIAL_ANIMATION: 100,       // Initial animation stage (0-100vh): 10 boxes gather
+  PHASE1_TOP_VIEW: 300,        // Phase 1: Top view (100-300vh)
+  TRANSITION_START: 300,        // Transition stage start (300vh)
+  TRANSITION_END: 400,          // Transition stage end (400vh)
+  PHASE2_SPACING_EXPAND_END: 600, // Phase 2: Layer spacing expansion period (400-600vh)
+  PHASE3_LOOKAT_DOWN_END: 800, // Phase 3 end (600-800vh)
+  PHASE4_START: 600,           // Phase 4 start: Layer-by-layer focus (600vh+)
+  PHASE5_X_OFFSET_START: 1500,  // Phase 5 start: X-axis offset (1500vh+)
+  // Phase 4: Layer-by-layer focus (600-1500vh)
+  // Phase 5: X-axis offset -100 (1500vh+)
 };
 
-// Layer 默认 y 位置配置
+// Layer default y position configuration
 const layerDefaultPositions = {
   layer1: 0,
   layer2: 0.2,
@@ -33,7 +33,7 @@ const layerDefaultPositions = {
   layer7: 1.2,
 };
 
-// GLB 模型组件
+// GLB model component
 function ValueBlueprintModel({ scrollProgress, activeSection }) {
   const { scene } = useGLTF('/models/value-blueprint5.glb');
   const meshRefs = useRef({});
@@ -45,29 +45,29 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
   const layer5GroupRef = useRef(null);
   const layer6GroupRef = useRef(null);
   const layer7GroupRef = useRef(null);
-  const aeGroupRef = useRef(null); // Agentic Enterprise group引用
-  const blockGroupRef = useRef(null); // Block group引用（包含Cube247的mesh）
-  const labelMeshRefs = useRef({}); // 存储标签相关的 mesh 引用
-  const blockInstancedMeshRef = useRef(null); // Block InstancedMesh引用
-  const blockInstanceDataRef = useRef(null); // Block实例数据（几何、材质等）
-  const [blockInstanceReady, setBlockInstanceReady] = useState(false); // 标记实例数据是否准备好
-  const linesGeometryRef = useRef(null); // 线段几何体引用（用于动态更新）
-  const linesMaterialRef = useRef(null); // 线段材质引用
-  const linePointsXZRef = useRef(null); // 存储线段的XZ坐标（固定不变）
-  const lineSegmentsRef = useRef(null); // 线段渲染引用
-  // 不再需要记录动画状态，使用当前vh值实现可逆动画
-  const instanceBaseMatricesRef = useRef([]); // 存储每个实例的基础矩阵（包含位置和镜像变换）
+  const aeGroupRef = useRef(null); // Agentic Enterprise group reference
+  const blockGroupRef = useRef(null); // Block group reference (contains Cube247 meshes)
+  const labelMeshRefs = useRef({}); // Store label-related mesh references
+  const blockInstancedMeshRef = useRef(null); // Block InstancedMesh reference
+  const blockInstanceDataRef = useRef(null); // Block instance data (geometry, materials, etc.)
+  const [blockInstanceReady, setBlockInstanceReady] = useState(false); // Flag indicating if instance data is ready
+  const linesGeometryRef = useRef(null); // Line segment geometry reference (for dynamic updates)
+  const linesMaterialRef = useRef(null); // Line segment material reference
+  const linePointsXZRef = useRef(null); // Store line segment XZ coordinates (fixed)
+  const lineSegmentsRef = useRef(null); // Line segment render reference
+  // No longer need to record animation state, use current vh value to achieve reversible animation
+  const instanceBaseMatricesRef = useRef([]); // Store base matrix for each instance (includes position and mirror transformation)
   
-  // 优化：复用对象，避免在 useFrame 中创建新对象
+  // Optimization: reuse objects to avoid creating new objects in useFrame
   const tempVector3Ref = useRef(new THREE.Vector3());
   const tempQuaternionRef = useRef(new THREE.Quaternion());
   const tempScaleRef = useRef(new THREE.Vector3());
   const tempMatrixRef = useRef(new THREE.Matrix4());
-  const cachedMeshesRef = useRef([]); // 缓存所有 mesh，避免每帧遍历 scene
-  const lastActiveSectionRef = useRef(null); // 缓存上次的 activeSection
-  const layerScaleRef = useRef(new THREE.Vector3(1, 1, 1)); // 复用scale对象，用于layer groups的scale动画
+  const cachedMeshesRef = useRef([]); // Cache all meshes to avoid traversing scene every frame
+  const lastActiveSectionRef = useRef(null); // Cache last activeSection
+  const layerScaleRef = useRef(new THREE.Vector3(1, 1, 1)); // Reuse scale object for layer groups scale animation
 
-  // 缓动函数：三次缓入缓出
+  // Easing function: cubic ease in-out
   const easeInOutCubic = (t) => {
     const clampedT = Math.max(0, Math.min(1, t));
     return clampedT < 0.5
@@ -166,19 +166,19 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
       const layer7Group = createLayerGroup('layer7', 'attach7', layerDefaultPositions.layer7);
       if (layer7Group) layer7GroupRef.current = layer7Group;
       
-      // 创建Agentic Enterprise group，包含所有带有"ae"的mesh
+      // Create Agentic Enterprise group, containing all meshes with "ae"
       const aeGroup = new THREE.Group();
       aeGroup.name = 'aeGroup';
       const aeMeshes = [];
       
-      // 收集所有 layer groups
+      // Collect all layer groups
       const layerGroupsForAESearch = [
         layer1Group, layer2Group, layer3Group, layer4Group,
         layer5Group, layer6Group, layer7Group
       ].filter(Boolean);
       
-      // 先打印所有 mesh 的名字，用于调试
-      console.log('=== 所有 mesh 名称列表 ===');
+      // First print all mesh names for debugging
+      console.log('=== All mesh name list ===');
       const allMeshes = [];
       scene.traverse((child) => {
         if (child.isMesh) {
@@ -186,39 +186,39 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
           allMeshes.push(meshName);
         }
       });
-      console.log('所有 mesh 名称:', allMeshes);
-      console.log('包含 "ae" 的 mesh:', allMeshes.filter(name => name.toLowerCase().includes('ae')));
-      console.log('包含 "ball" 的 mesh:', allMeshes.filter(name => name.toLowerCase().includes('ball')));
-      console.log('=== mesh 名称列表结束 ===');
+      console.log('All mesh names:', allMeshes);
+      console.log('Meshes containing "ae":', allMeshes.filter(name => name.toLowerCase().includes('ae')));
+      console.log('Meshes containing "ball":', allMeshes.filter(name => name.toLowerCase().includes('ball')));
+      console.log('=== Mesh name list end ===');
       
-      // 从 scene 和所有 layer groups 中查找包含 "ae" 的 mesh
+      // Search for meshes containing "ae" from scene and all layer groups
       const searchInObject = (obj) => {
         obj.traverse((child) => {
           if (child.isMesh) {
             const meshName = child.name || child.uuid;
             const nameLower = meshName.toLowerCase();
             
-            // 检查是否包含"ae"（不区分大小写）
+            // Check if contains "ae" (case insensitive)
             if (nameLower.includes('ae')) {
-              // 避免重复添加
+              // Avoid duplicate additions
               if (!aeMeshes.includes(child)) {
                 aeMeshes.push(child);
-                console.log(`找到 ae mesh: "${meshName}" (来自: ${obj.name || 'scene'})`);
+                console.log(`Found ae mesh: "${meshName}" (from: ${obj.name || 'scene'})`);
               }
             }
           }
         });
       };
       
-      // 先搜索 scene
+      // First search scene
       searchInObject(scene);
       
-      // 再搜索所有 layer groups
+      // Then search all layer groups
       layerGroupsForAESearch.forEach(group => {
         searchInObject(group);
       });
       
-      // 将ae相关的mesh添加到aeGroup
+      // Add ae-related meshes to aeGroup
       if (aeMeshes.length > 0) {
         let aeWorldPos = null;
         const aeMeshTransforms = [];
@@ -258,41 +258,41 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
         aeGroup.position.copy(aeWorldPos);
         aeGroupRef.current = aeGroup;
         
-        // 打印 aeGroup 中的所有 mesh
-        console.log('=== aeGroup 中的 mesh 列表 ===');
-        console.log(`总共有 ${aeGroup.children.length} 个子对象`);
+        // Print all meshes in aeGroup
+        console.log('=== Mesh list in aeGroup ===');
+        console.log(`Total of ${aeGroup.children.length} child objects`);
         aeGroup.children.forEach((child, index) => {
           if (child.isMesh) {
-            console.log(`${index + 1}. Mesh名称: "${child.name || child.uuid}", 类型: Mesh`);
+            console.log(`${index + 1}. Mesh name: "${child.name || child.uuid}", type: Mesh`);
           } else {
-            console.log(`${index + 1}. 子对象名称: "${child.name || child.uuid}", 类型: ${child.type}`);
+            console.log(`${index + 1}. Child object name: "${child.name || child.uuid}", type: ${child.type}`);
           }
         });
-        console.log('=== aeGroup mesh 列表结束 ===');
+        console.log('=== aeGroup mesh list end ===');
       }
       
-      // 查找标签相关的 mesh - 从 LABEL_DATA 中获取所有 mesh 名称
+      // Find label-related meshes - get all mesh names from LABEL_DATA
       const labelMeshNames = LABEL_DATA.map(item => item.meshName);
-      console.log('查找标签 mesh 名称列表:', labelMeshNames);
+      console.log('Searching label mesh name list:', labelMeshNames);
       
       scene.traverse((child) => {
         if (child.isMesh) {
           const meshName = child.name || child.uuid;
-          // 检查精确匹配或大小写不敏感的匹配
+          // Check for exact match or case-insensitive match
           const matchedName = labelMeshNames.find(labelName => 
             meshName === labelName || 
             meshName.toLowerCase() === labelName.toLowerCase() ||
-            meshName.replace(/\./g, '') === labelName.replace(/\./g, '') // 处理点号的差异
+            meshName.replace(/\./g, '') === labelName.replace(/\./g, '') // Handle dot differences
           );
           
           if (matchedName) {
             labelMeshRefs.current[matchedName] = child;
-            console.log(`找到标签 mesh: "${meshName}" -> 匹配到 "${matchedName}"`);
+            console.log(`Found label mesh: "${meshName}" -> matched to "${matchedName}"`);
           }
         }
       });
       
-      // 创建Block group，包含所有名字带有"Cube247"的mesh
+      // Create Block group, containing all meshes with name "Cube247"
       const blockGroup = new THREE.Group();
       blockGroup.name = 'blockGroup';
       const blockMeshes = [];
@@ -302,21 +302,21 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
           const meshName = child.name || child.uuid;
           const nameLower = meshName.toLowerCase();
           
-          // 检查是否包含"Cube247"（不区分大小写）
+          // Check if contains "Cube247" (case insensitive)
           if (nameLower.includes('cube247')) {
             blockMeshes.push(child);
           }
         }
       });
       
-      // 调试信息：打印找到的block mesh
+      // Debug info: print found block meshes
       if (blockMeshes.length > 0) {
-        console.log(`找到 ${blockMeshes.length} 个Cube247 mesh:`, blockMeshes.map(m => m.name));
+        console.log(`Found ${blockMeshes.length} Cube247 meshes:`, blockMeshes.map(m => m.name));
       } else {
-        console.log('未找到Cube247 mesh');
+        console.log('No Cube247 mesh found');
       }
       
-      // 将Cube247相关的mesh添加到blockGroup
+      // Add Cube247-related meshes to blockGroup
       if (blockMeshes.length > 0) {
         let blockWorldPos = null;
         const blockMeshTransforms = [];
@@ -356,10 +356,10 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
         blockGroup.position.copy(blockWorldPos);
         blockGroupRef.current = blockGroup;
         
-        // 为InstancedMesh准备数据：合并blockGroup中所有mesh的几何体
-        // 使用之前保存的blockMeshTransforms来获取正确的变换
+        // Prepare data for InstancedMesh: merge geometries of all meshes in blockGroup
+        // Use previously saved blockMeshTransforms to get correct transformations
         if (blockMeshes.length > 0 && blockMeshTransforms.length > 0) {
-          // 合并所有mesh的几何体
+          // Merge geometries of all meshes
           const geometries = [];
           const mergedMaterials = [];
           
@@ -369,19 +369,19 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
               ? mesh.material 
               : [mesh.material];
             
-            // 创建变换矩阵（相对于blockWorldPos）
+            // Create transformation matrix (relative to blockWorldPos)
             const transformMatrix = new THREE.Matrix4();
             transformMatrix.compose(
-              worldPos.clone().sub(blockWorldPos), // 相对位置
+              worldPos.clone().sub(blockWorldPos), // Relative position
               worldQuat,
               worldScale
             );
             
-            // 应用变换矩阵到几何体
+            // Apply transformation matrix to geometry
             geometry.applyMatrix4(transformMatrix);
             geometries.push(geometry);
             
-            // 收集材质（使用第一个mesh的材质）
+            // Collect materials (use first mesh's material)
             if (index === 0) {
               materials.forEach((material) => {
                 mergedMaterials.push(material.clone());
@@ -389,11 +389,11 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
             }
           });
           
-          // 合并所有几何体
+          // Merge all geometries
           let mergedGeometry = geometries[0];
           if (geometries.length > 1) {
-            // 手动合并几何体（不使用BufferGeometryUtils）
-            // 合并顶点、索引等属性
+            // Manually merge geometries (not using BufferGeometryUtils)
+            // Merge vertices, indices and other attributes
             const merged = geometries[0].clone();
             const mergedPositions = [];
             const mergedNormals = [];
@@ -437,7 +437,7 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
                   mergedIndices.push(indices.getX(i) + vertexOffset);
                 }
               } else {
-                // 如果没有索引，直接使用顶点索引
+                // If no indices, use vertex indices directly
                 for (let i = 0; i < positions.count; i++) {
                   mergedIndices.push(vertexOffset + i);
                 }
@@ -446,7 +446,7 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
               vertexOffset += positions.count;
             });
             
-            // 设置合并后的属性
+            // Set merged attributes
             merged.setAttribute('position', new THREE.Float32BufferAttribute(mergedPositions, 3));
             if (mergedNormals.length > 0) {
               merged.setAttribute('normal', new THREE.Float32BufferAttribute(mergedNormals, 3));
@@ -461,43 +461,43 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
             mergedGeometry = merged;
           }
           
-          // 如果没有材质，使用默认材质
+          // If no materials, use default material
           if (mergedMaterials.length === 0) {
             mergedMaterials.push(new THREE.MeshStandardMaterial({ color: 0xffffff }));
           }
           
-          // InstancedMesh只需要单个材质（使用第一个材质）
+          // InstancedMesh only needs a single material (use first material)
           const instancedMaterial = mergedMaterials[0] || new THREE.MeshStandardMaterial({ color: 0xffffff });
           
-          // 调试信息
-          console.log(`BlockGroup: 找到 ${blockMeshes.length} 个mesh，合并后几何体顶点数: ${mergedGeometry.attributes.position.count}，使用材质:`, instancedMaterial);
+          // Debug info
+          console.log(`BlockGroup: Found ${blockMeshes.length} meshes, merged geometry vertex count: ${mergedGeometry.attributes.position.count}, using material:`, instancedMaterial);
           
-          // 计算blockGroup的边界框来确定间距
+          // Calculate blockGroup bounding box to determine spacing
           const blockBox = new THREE.Box3().setFromObject(blockGroup);
           const blockSize = blockBox.getSize(new THREE.Vector3());
           
-          // 使用固定的很小间距，让实例紧挨着排列
-          // 直接使用边界框大小 + 很小的间隙
-          let spacingX = blockSize.x > 0 ? blockSize.x + 0.1 : 0.5; // X方向：边界框宽度 + 0.1
-          let spacingZ = blockSize.z > 0 ? blockSize.z + 0.1 : 0.5; // Z方向：边界框深度 + 0.1
+          // Use fixed small spacing to arrange instances closely
+          // Directly use bounding box size + small gap
+          let spacingX = blockSize.x > 0 ? blockSize.x + 0.1 : 0.5; // X direction: bounding box width + 0.1
+          let spacingZ = blockSize.z > 0 ? blockSize.z + 0.1 : 0.5; // Z direction: bounding box depth + 0.1
           
-          // 2x2网格 = 4个实例
+          // 2x2 grid = 4 instances
           const instanceCount = 4;
           const gridSize = 2;
           
-          console.log(`BlockGroup间距计算: blockSize=(${blockSize.x.toFixed(2)}, ${blockSize.y.toFixed(2)}, ${blockSize.z.toFixed(2)}), spacingX=${spacingX.toFixed(2)}, spacingZ=${spacingZ.toFixed(2)}`);
+          console.log(`BlockGroup spacing calculation: blockSize=(${blockSize.x.toFixed(2)}, ${blockSize.y.toFixed(2)}, ${blockSize.z.toFixed(2)}), spacingX=${spacingX.toFixed(2)}, spacingZ=${spacingZ.toFixed(2)}`);
           
-          // 存储实例数据
+          // Store instance data
           blockInstanceDataRef.current = {
             geometry: mergedGeometry,
-            material: instancedMaterial, // 使用单个材质
+            material: instancedMaterial, // Use single material
             instanceCount: instanceCount,
             spacingX: spacingX,
             spacingZ: spacingZ,
             gridSize: gridSize,
           };
           
-          // 标记实例数据已准备好
+          // Mark instance data as ready
           setBlockInstanceReady(true);
         }
       }
@@ -561,8 +561,8 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
         }
       });
       
-      // 创建相邻layer之间的连接线段：layer1底部到layer2底部，layer2底部到layer3底部，...到layer6底部到layer7底部
-      // 共6段，每段10条线，总共60条线，每条线都有渐变色（从底部layer颜色到顶部layer颜色）
+      // Create connecting line segments between adjacent layers: layer1 bottom to layer2 bottom, layer2 bottom to layer3 bottom, ... to layer6 bottom to layer7 bottom
+      // Total 6 segments, 10 lines per segment, 60 lines total, each line has gradient color (from bottom layer color to top layer color)
       const allLayerGroups = [
         layer1GroupRef.current,
         layer2GroupRef.current,
@@ -573,32 +573,32 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
         layer7GroupRef.current,
       ];
       
-      // 定义每个layer的颜色
+      // Define color for each layer
       const layerColors = [
-        new THREE.Color(0xffeb3b), // Layer 1: 黄色
-        new THREE.Color(0xffa726), // Layer 2: 橙黄色
-        new THREE.Color(0xff5722), // Layer 3: 橙红色
-        new THREE.Color("#6A1A59"), // Layer 4: 梅紫色 (plum)
-        new THREE.Color(0x2196f3), // Layer 5: 蓝色
-        new THREE.Color(0x388e3c), // Layer 6: 深绿色
-        new THREE.Color(0x4dd0e1), // Layer 7: 薄荷色
+        new THREE.Color(0xffeb3b), // Layer 1: Yellow
+        new THREE.Color(0xffa726), // Layer 2: Orange-yellow
+        new THREE.Color(0xff5722), // Layer 3: Orange-red
+        new THREE.Color("#6A1A59"), // Layer 4: Plum purple
+        new THREE.Color(0x2196f3), // Layer 5: Blue
+        new THREE.Color(0x388e3c), // Layer 6: Dark green
+        new THREE.Color(0x4dd0e1), // Layer 7: Mint
       ];
       
-      // 检查所有layer groups是否都存在
+      // Check if all layer groups exist
       const allLayersExist = allLayerGroups.every(layer => layer !== null);
       
       if (allLayersExist) {
-        // 计算layer1的边界框来确定XZ坐标分布
+        // Calculate layer1 bounding box to determine XZ coordinate distribution
         const layer1Box = new THREE.Box3().setFromObject(allLayerGroups[0]);
         const layer1MinX = layer1Box.min.x;
         const layer1MaxX = layer1Box.max.x;
         const layer1MinZ = layer1Box.min.z;
         const layer1MaxZ = layer1Box.max.z;
         
-        // 在layer1的底面区域内均匀分布10个点
+        // Evenly distribute 10 points in layer1's bottom surface area
         const lineCountPerSegment = 10;
         const totalSegments = 6; // layer1->2, layer2->3, ..., layer6->7
-        const totalLineCount = lineCountPerSegment * totalSegments; // 60条线
+        const totalLineCount = lineCountPerSegment * totalSegments; // 60 lines
         
         const xzPoints = [];
         const cols = 5;
@@ -612,32 +612,32 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
           xzPoints.push({ x, z });
         }
         
-        // 存储XZ坐标供useFrame使用（每段都使用相同的XZ坐标）
+        // Store XZ coordinates for useFrame (each segment uses the same XZ coordinates)
         linePointsXZRef.current = xzPoints;
         
-        // 创建所有线段的几何体（Y坐标会在useFrame中动态更新）
+        // Create geometry for all line segments (Y coordinates will be dynamically updated in useFrame)
         const initialPoints = [];
         const initialColors = [];
         
-        // 创建6段线条：layer1->2, layer2->3, ..., layer6->7
+        // Create 6 line segments: layer1->2, layer2->3, ..., layer6->7
         for (let segmentIndex = 0; segmentIndex < totalSegments; segmentIndex++) {
-          const bottomLayerIndex = segmentIndex; // 底部layer索引
-          const topLayerIndex = segmentIndex + 1; // 顶部layer索引
+          const bottomLayerIndex = segmentIndex; // Bottom layer index
+          const topLayerIndex = segmentIndex + 1; // Top layer index
           
           const bottomColor = layerColors[bottomLayerIndex];
           const topColor = layerColors[topLayerIndex];
           
-          // 获取当前段的layer边界框（初始值，会在useFrame中更新）
+          // Get current segment's layer bounding boxes (initial values, will be updated in useFrame)
           const bottomLayerBox = new THREE.Box3().setFromObject(allLayerGroups[bottomLayerIndex]);
           const topLayerBox = new THREE.Box3().setFromObject(allLayerGroups[topLayerIndex]);
           
-          // 为这段的每条线创建起点和终点
+          // Create start and end points for each line in this segment
           for (const { x, z } of xzPoints) {
-            // 起点：底部layer的底面
+            // Start point: bottom layer's bottom surface
             initialPoints.push(new THREE.Vector3(x, bottomLayerBox.min.y, z));
             initialColors.push(bottomColor.r, bottomColor.g, bottomColor.b);
             
-            // 终点：顶部layer的底面
+            // End point: top layer's bottom surface
             initialPoints.push(new THREE.Vector3(x, topLayerBox.min.y, z));
             initialColors.push(topColor.r, topColor.g, topColor.b);
           }
@@ -645,33 +645,33 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
         
         const lineGeometry = new THREE.BufferGeometry().setFromPoints(initialPoints);
         
-        // 添加颜色属性（实现渐变色）
+        // Add color attribute (for gradient color)
         lineGeometry.setAttribute('color', new THREE.Float32BufferAttribute(initialColors, 3));
         
-        // 添加linePosition属性：用于在shader中计算opacity渐变（0=起点，1=终点）
+        // Add linePosition attribute: used to calculate opacity gradient in shader (0=start point, 1=end point)
         const linePositions = [];
-        const totalLines = lineCountPerSegment * totalSegments; // 60条线
+        const totalLines = lineCountPerSegment * totalSegments; // 60 lines
         
         for (let i = 0; i < totalLines; i++) {
-          // 每条线有两个点：起点和终点
-          linePositions.push(0.0); // 起点：opacity = 0
-          linePositions.push(1.0); // 终点：opacity = 0
+          // Each line has two points: start and end
+          linePositions.push(0.0); // Start point: opacity = 0
+          linePositions.push(1.0); // End point: opacity = 0
         }
         
         lineGeometry.setAttribute('linePosition', new THREE.Float32BufferAttribute(linePositions, 1));
         
         linesGeometryRef.current = lineGeometry;
         
-        // 创建自定义ShaderMaterial实现两端到中间的opacity渐变
+        // Create custom ShaderMaterial to achieve opacity gradient from both ends to middle
         const lineMaterial = new THREE.ShaderMaterial({
           vertexShader: `
-            // color 属性由 Three.js 自动提供（vertexColors: true）
+            // color attribute is automatically provided by Three.js (vertexColors: true)
             attribute float linePosition;
             varying vec3 vColor;
             varying float vLinePosition;
             
             void main() {
-              vColor = color; // 使用 Three.js 提供的 color 属性
+              vColor = color; // Use color attribute provided by Three.js
               vLinePosition = linePosition;
               gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
             }
@@ -681,8 +681,8 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
             varying float vLinePosition;
             
             void main() {
-              // 计算opacity：中间（0.5）是1，两端（0和1）是0
-              // 使用平滑的曲线：1 - 4 * (position - 0.5)^2
+              // Calculate opacity: middle (0.5) is 1, both ends (0 and 1) are 0
+              // Use smooth curve: 1 - 4 * (position - 0.5)^2
               float t = vLinePosition;
               float opacity = 1.0 - 4.0 * (t - 0.5) * (t - 0.5);
               opacity = clamp(opacity, 0.0, 1.0);
@@ -700,19 +700,19 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
     }
   }, [scene]);
 
-  // 初始化InstancedMesh的位置（4x4网格）- 只在数据准备好时执行一次
+  // Initialize InstancedMesh positions (2x2 grid) - only execute once when data is ready
   useEffect(() => {
     if (blockInstancedMeshRef.current && blockInstanceDataRef.current && blockInstanceReady) {
       const instanceData = blockInstanceDataRef.current;
       
-      // 计算网格中心偏移（使网格以原点为中心）
+      // Calculate grid center offset (to center grid at origin)
       const centerOffsetX = (instanceData.gridSize - 1) * instanceData.spacingX / 2;
       const centerOffsetZ = (instanceData.gridSize - 1) * instanceData.spacingZ / 2;
       
       const positions = [];
       let instanceIndex = 0;
       
-      // 创建4x4网格
+      // Create 2x2 grid
       for (let row = 0; row < instanceData.gridSize && instanceIndex < instanceData.instanceCount; row++) {
         for (let col = 0; col < instanceData.gridSize && instanceIndex < instanceData.instanceCount; col++) {
           const x = col * instanceData.spacingX - centerOffsetX;
@@ -720,77 +720,77 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
           
           positions.push({ x, z, row, col, instanceIndex });
           
-          // 每次都创建新的矩阵，避免重用导致的问题
+          // Create new matrix each time to avoid issues from reuse
           const matrix = new THREE.Matrix4();
           
-          // 对第二个实例（instanceIndex === 1）进行X轴镜像
+          // Mirror second instance (instanceIndex === 1) on X-axis
           if (instanceIndex === 1) {
-            // 先创建镜像矩阵（X轴翻转）
+            // First create mirror matrix (X-axis flip)
             const scaleMatrix = new THREE.Matrix4();
             scaleMatrix.makeScale(-1, 1, 1);
             
-            // 再创建平移矩阵
+            // Then create translation matrix
             const translationMatrix = new THREE.Matrix4();
             translationMatrix.makeTranslation(x, 0, z);
             
-            // 组合：先镜像，再平移
+            // Combine: mirror first, then translate
             matrix.multiplyMatrices(translationMatrix, scaleMatrix);
           } 
-          // 对第三个实例（instanceIndex === 2）进行Z轴镜像
+          // Mirror third instance (instanceIndex === 2) on Z-axis
           else if (instanceIndex === 2) {
-            // 先创建镜像矩阵（Z轴翻转）
+            // First create mirror matrix (Z-axis flip)
             const scaleMatrix = new THREE.Matrix4();
             scaleMatrix.makeScale(1, 1, -1);
             
-            // 再创建平移矩阵
+            // Then create translation matrix
             const translationMatrix = new THREE.Matrix4();
             translationMatrix.makeTranslation(x, 0, z);
             
-            // 组合：先镜像，再平移
+            // Combine: mirror first, then translate
             matrix.multiplyMatrices(translationMatrix, scaleMatrix);
           }
-          // 对第四个实例（instanceIndex === 3）进行X轴和Z轴镜像（同时）
+          // Mirror fourth instance (instanceIndex === 3) on both X and Z axes (simultaneously)
           else if (instanceIndex === 3) {
-            // 先创建镜像矩阵（X轴和Z轴同时翻转）
+            // First create mirror matrix (X and Z axes flip simultaneously)
             const scaleMatrix = new THREE.Matrix4();
             scaleMatrix.makeScale(-1, 1, -1);
             
-            // 再创建平移矩阵
+            // Then create translation matrix
             const translationMatrix = new THREE.Matrix4();
             translationMatrix.makeTranslation(x, 0, z);
             
-            // 组合：先镜像，再平移
+            // Combine: mirror first, then translate
             matrix.multiplyMatrices(translationMatrix, scaleMatrix);
           } else {
-            // 其他实例正常处理（只平移）
+            // Other instances handled normally (translation only)
             matrix.makeTranslation(x, 0, z);
           }
           
           blockInstancedMeshRef.current.setMatrixAt(instanceIndex, matrix);
           
-          // 保存基础矩阵（用于后续在useFrame中只更新scale）
+          // Save base matrix (for later updating only scale in useFrame)
           instanceBaseMatricesRef.current[instanceIndex] = matrix.clone();
           
           instanceIndex++;
         }
       }
       
-      // 确保实例数量正确
+      // Ensure instance count is correct
       blockInstancedMeshRef.current.count = instanceIndex;
       blockInstancedMeshRef.current.instanceMatrix.needsUpdate = true;
       
-      console.log(`InstancedMesh位置初始化完成: ${instanceIndex}个实例 (2x2网格)`, {
+      console.log(`InstancedMesh position initialization complete: ${instanceIndex} instances (2x2 grid)`, {
         spacingX: instanceData.spacingX,
         spacingZ: instanceData.spacingZ,
         gridSize: instanceData.gridSize,
         instanceCount: instanceData.instanceCount,
         actualCount: instanceIndex,
-        positions: positions, // 显示所有位置用于调试
+        positions: positions, // Display all positions for debugging
       });
     }
-  }, [blockInstanceReady]); // 当实例数据准备好时初始化
+  }, [blockInstanceReady]); // Initialize when instance data is ready
 
-  // 缓存所有 mesh，避免每帧遍历 scene
+  // Cache all meshes to avoid traversing scene every frame
   useEffect(() => {
     if (scene && cachedMeshesRef.current.length === 0) {
       scene.traverse((child) => {
@@ -802,21 +802,21 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
   }, [scene]);
 
   useFrame(() => {
-      // Section8使用独立的逻辑：使用InstancedMesh显示4x4网格的blockGroup复制
+      // Section8 uses independent logic: use InstancedMesh to display 2x2 grid of blockGroup copies
       if (activeSection === 'section8') {
-        // 只在 activeSection 改变时更新可见性
+        // Only update visibility when activeSection changes
         if (lastActiveSectionRef.current !== 'section8') {
-          // 隐藏原始的blockGroup
+          // Hide original blockGroup
           if (blockGroupRef.current) {
             blockGroupRef.current.visible = false;
           }
           
-          // 隐藏白色线条
+          // Hide white lines
           if (lineSegmentsRef.current) {
             lineSegmentsRef.current.visible = false;
           }
           
-          // 使用缓存的 mesh 列表，避免每帧遍历 scene
+          // Use cached mesh list to avoid traversing scene every frame
           const meshes = cachedMeshesRef.current;
           for (let i = 0; i < meshes.length; i++) {
             meshes[i].visible = false;
@@ -825,38 +825,38 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
           lastActiveSectionRef.current = 'section8';
         }
         
-        // 确保InstancedMesh可见并正确设置
+        // Ensure InstancedMesh is visible and correctly set
         if (blockInstancedMeshRef.current && blockInstanceDataRef.current) {
           blockInstancedMeshRef.current.visible = true;
           
-          // 确保实例数量正确
+          // Ensure instance count is correct
           blockInstancedMeshRef.current.count = blockInstanceDataRef.current.instanceCount;
           
-          // 计算当前的vh值（Section8高度是300vh，scrollProgress是0-1）
+          // Calculate current vh value (Section8 height is 300vh, scrollProgress is 0-1)
           const currentVh = (scrollProgress || 0) * 300;
           
-          // 控制实例的显示/隐藏：基于当前vh值（可逆动画）
-          // 最初只显示第一个实例（instanceIndex 0）
-          // 当vh到达100vh时，依次显示第二、三、四个实例
-          // 向上滑动时会重新隐藏（可逆动画）
+          // Control instance show/hide: based on current vh value (reversible animation)
+          // Initially only show first instance (instanceIndex 0)
+          // When vh reaches 100vh, show second, third, fourth instances in sequence
+          // When scrolling up, they will be hidden again (reversible animation)
           
-          const triggerVh = 100; // 触发动画的vh值
-          const animationDuration = 50; // 每个实例出现的动画时长（vh）
+          const triggerVh = 100; // vh value that triggers animation
+          const animationDuration = 50; // Animation duration for each instance appearance (vh)
           
-          // 定义每个实例的触发时间
+          // Define trigger time for each instance
           const instanceTriggers = [
-            0,      // 实例0：立即显示
-            triggerVh,                    // 实例1：在100vh显示
-            triggerVh + animationDuration,    // 实例2：在150vh显示
-            triggerVh + animationDuration * 2  // 实例3：在200vh显示
+            0,      // Instance 0: show immediately
+            triggerVh,                    // Instance 1: show at 100vh
+            triggerVh + animationDuration,    // Instance 2: show at 150vh
+            triggerVh + animationDuration * 2  // Instance 3: show at 200vh
           ];
           
-          // 使用当前vh值（不是最大vh值），实现可逆动画
+          // Use current vh value (not max vh value) to achieve reversible animation
           const displayVh = currentVh;
           const instanceData = blockInstanceDataRef.current;
           
-          // 根据vh值更新每个实例的可见性（只修改scale）
-          // 优化：复用对象，避免在循环中创建新对象
+          // Update visibility of each instance based on vh value (only modify scale)
+          // Optimization: reuse objects to avoid creating new objects in loop
           const position = tempVector3Ref.current;
           const rotation = tempQuaternionRef.current;
           const baseScale = tempScaleRef.current;
@@ -866,11 +866,11 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
             const shouldShow = displayVh >= instanceTriggers[i];
             
             if (instanceBaseMatricesRef.current[i]) {
-              // 从基础矩阵提取位置、旋转和原始scale（复用对象）
+              // Extract position, rotation and original scale from base matrix (reuse objects)
               instanceBaseMatricesRef.current[i].decompose(position, rotation, baseScale);
               
-              // 根据可见性设置最终scale
-              // 需要保存原始 scale，因为 baseScale 会被修改
+              // Set final scale based on visibility
+              // Need to save original scale because baseScale will be modified
               const originalScaleX = baseScale.x;
               const originalScaleY = baseScale.y;
               const originalScaleZ = baseScale.z;
@@ -879,23 +879,23 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
                 baseScale.set(0, 0, 0);
               }
               
-              // 组合最终矩阵并更新（复用对象）
+              // Compose final matrix and update (reuse objects)
               finalMatrix.compose(position, rotation, baseScale);
               blockInstancedMeshRef.current.setMatrixAt(i, finalMatrix);
               
-              // 恢复原始 scale（为下次使用准备）
+              // Restore original scale (prepare for next use)
               baseScale.set(originalScaleX, originalScaleY, originalScaleZ);
             }
           }
           
-          // 标记矩阵需要更新
+          // Mark matrix needs update
           if (blockInstancedMeshRef.current.instanceMatrix) {
             blockInstancedMeshRef.current.instanceMatrix.needsUpdate = true;
           }
           
-          // 调试信息（只在第一次时打印）
+          // Debug info (only print on first time)
           if (!blockInstancedMeshRef.current._debugLogged) {
-            console.log('Section8 InstancedMesh状态:', {
+            console.log('Section8 InstancedMesh state:', {
               visible: blockInstancedMeshRef.current.visible,
               currentVh: currentVh,
               instanceCount: blockInstancedMeshRef.current.count,
@@ -903,25 +903,25 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
             blockInstancedMeshRef.current._debugLogged = true;
           }
         } else {
-          console.warn('Section8: blockInstancedMeshRef.current 或 blockInstanceDataRef.current 不存在');
+          console.warn('Section8: blockInstancedMeshRef.current or blockInstanceDataRef.current does not exist');
         }
         
         return;
     }
     
-    // Section5的原有逻辑
+    // Section5 original logic
     const progress = scrollProgress || 0;
     const vh = progress * 1300;
     
-    // 恢复所有mesh的可见性（从section8回滚时恢复）
-    // 优化：只在 activeSection 改变时更新可见性，使用缓存的 mesh 列表
+    // Restore visibility of all meshes (restore when rolling back from section8)
+    // Optimization: only update visibility when activeSection changes, use cached mesh list
     if (lastActiveSectionRef.current !== 'section5') {
       const meshes = cachedMeshesRef.current;
       const blockGroupChildren = blockGroupRef.current ? new Set(blockGroupRef.current.children) : new Set();
       
       for (let i = 0; i < meshes.length; i++) {
         const mesh = meshes[i];
-        // 恢复mesh的可见性（除了blockGroup，它会单独控制）
+        // Restore mesh visibility (except blockGroup, which is controlled separately)
         if (!blockGroupChildren.has(mesh)) {
           mesh.visible = true;
         }
@@ -930,7 +930,7 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
       lastActiveSectionRef.current = 'section5';
     }
     
-    // 控制layer groups的显示
+    // Control layer groups display
     const layerGroups = [
       { ref: layer1GroupRef, name: 'layer1Group', index: 0 },
       { ref: layer2GroupRef, name: 'layer2Group', index: 1 },
@@ -941,19 +941,19 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
       { ref: layer7GroupRef, name: 'layer7Group', index: 6 },
     ];
     
-    // 0-200vh：layer和attach的group都不可见，200vh以后才可见
-    // 200-210vh：快速scale入场动画（从0到1）
+    // 0-200vh: layer and attach groups are invisible, visible after 200vh
+    // 200-210vh: fast scale entrance animation (from 0 to 1)
     const layerAnimationStart = 200;
-    const layerAnimationDuration = 10; // 10vh的动画时长
+    const layerAnimationDuration = 10; // Animation duration of 10vh
     const layerAnimationEnd = layerAnimationStart + layerAnimationDuration;
     
     const shouldShowLayers = vh > layerAnimationStart;
     let layerScale = 1;
     
     if (vh >= layerAnimationStart && vh <= layerAnimationEnd) {
-      // 计算scale进度（0到1）
+      // Calculate scale progress (0 to 1)
       const scaleProgress = (vh - layerAnimationStart) / layerAnimationDuration;
-      // 使用easeOutCubic缓动函数，让动画更自然
+      // Use easeOutCubic easing function for more natural animation
       const easedProgress = 1 - Math.pow(1 - scaleProgress, 3);
       layerScale = easedProgress;
     } else if (vh < layerAnimationStart) {
@@ -963,23 +963,23 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
     layerGroups.forEach(({ ref }) => {
       if (ref.current) {
         ref.current.visible = shouldShowLayers;
-        // 应用scale动画（复用对象，避免创建新Vector3）
+        // Apply scale animation (reuse object to avoid creating new Vector3)
         layerScaleRef.current.set(layerScale, layerScale, layerScale);
         ref.current.scale.copy(layerScaleRef.current);
       }
     });
     
-    // 恢复aeGroup的可见性（如果有）
+    // Restore aeGroup visibility (if exists)
     if (aeGroupRef.current) {
       aeGroupRef.current.visible = true;
     }
     
-    // Section5中：blockGroup不可见（只在section8显示）
+    // In Section5: blockGroup is invisible (only shown in section8)
     if (blockGroupRef.current) {
       blockGroupRef.current.visible = false;
     }
     
-    // 0-200vh：白色线条不可见
+    // 0-200vh: white lines invisible
     if (lineSegmentsRef.current) {
       lineSegmentsRef.current.visible = vh > 200;
     }
@@ -987,41 +987,41 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
     let layerSpacing = 0.2;
     
     if (vh < 300) {
-      // 0-300vh：保持最小的spacing
+      // 0-300vh: maintain minimum spacing
       layerSpacing = 0.2;
     } else if (vh < 400) {
-      // 300-400vh：保持0.2
+      // 300-400vh: maintain 0.2
       layerSpacing = 0.2;
     } else if (vh < STAGES.PHASE2_SPACING_EXPAND_END) {
-      // 400-600vh：layer间距扩大期，从0.2扩大到5
+      // 400-600vh: layer spacing expansion period, expand from 0.2 to 5
       const spacingProgress = (vh - 400) / 200; // 0-1
       layerSpacing = THREE.MathUtils.lerp(0.2, 5, spacingProgress);
     } else {
-      // 600vh+：保持5（进入逐层查看阶段）
+      // 600vh+: maintain 5 (enter layer-by-layer viewing stage)
       layerSpacing = 5;
     }
     
-    // 使用 originalPositions 中保存的初始位置，这些位置来自 layerDefaultPositions
+    // Use initial positions saved in originalPositions, these positions come from layerDefaultPositions
     const layer1BaseY = originalPositions.current['layer1Group'] || layerDefaultPositions.layer1;
     
     layerGroups.forEach(({ ref, name, index }) => {
       if (ref.current && ref.current.children.length > 0) {
-        // 获取该层的原始位置（来自 layerDefaultPositions）
+        // Get original position of this layer (from layerDefaultPositions)
         const originalY = originalPositions.current[name] || layerDefaultPositions[`layer${index + 1}`];
         
         if (index === 0) {
-          // Layer1 保持原始位置，在此基础上应用 layerSpacing
+          // Layer1 maintains original position, apply layerSpacing on top of it
           ref.current.position.y = originalY;
         } else {
-          // 其他层：从原始位置开始，根据 layerSpacing 调整
-          // 计算相对于 layer1 的偏移
+          // Other layers: start from original position, adjust according to layerSpacing
+          // Calculate offset relative to layer1
           const relativeOffset = (originalY - layer1BaseY) + (index * layerSpacing);
           ref.current.position.y = layer1BaseY + relativeOffset;
         }
       }
     });
     
-    // 更新线段端点位置，使其与layer位置保持同步（6段，每段10条线，共60条）
+    // Update line segment endpoint positions to keep in sync with layer positions (6 segments, 10 lines per segment, 60 lines total)
     if (linesGeometryRef.current && linePointsXZRef.current) {
       const allLayerGroups = [
         layer1GroupRef.current,
@@ -1036,21 +1036,21 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
       const allLayersExist = allLayerGroups.every(layer => layer !== null);
       
       if (allLayersExist) {
-        // 定义每个layer的颜色
+        // Define color for each layer
         const layerColors = [
-          new THREE.Color(0xffeb3b), // Layer 1: 黄色
-          new THREE.Color(0xffa726), // Layer 2: 橙黄色
-          new THREE.Color(0xff5722), // Layer 3: 橙红色
-          new THREE.Color("#6A1A59"), // Layer 4: 梅紫色 (plum)
-          new THREE.Color(0x2196f3), // Layer 5: 蓝色
-          new THREE.Color(0x388e3c), // Layer 6: 深绿色
-          new THREE.Color(0x4dd0e1), // Layer 7: 薄荷色
+          new THREE.Color(0xffeb3b), // Layer 1: Yellow
+          new THREE.Color(0xffa726), // Layer 2: Orange-yellow
+          new THREE.Color(0xff5722), // Layer 3: Orange-red
+          new THREE.Color("#6A1A59"), // Layer 4: Plum purple
+          new THREE.Color(0x2196f3), // Layer 5: Blue
+          new THREE.Color(0x388e3c), // Layer 6: Dark green
+          new THREE.Color(0x4dd0e1), // Layer 7: Mint
         ];
         
         const lineCountPerSegment = linePointsXZRef.current.length; // 10
         const totalSegments = 6; // layer1->2, layer2->3, ..., layer6->7
         
-        // 更新几何体的顶点位置和颜色
+        // Update geometry vertex positions and colors
         const positions = linesGeometryRef.current.attributes.position;
         const colors = linesGeometryRef.current.attributes.color;
         
@@ -1060,12 +1060,12 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
           let idx = 0;
           let colorIdx = 0;
           
-          // 更新每段线条的位置和颜色
+          // Update position and color for each line segment
           for (let segmentIndex = 0; segmentIndex < totalSegments; segmentIndex++) {
             const bottomLayerIndex = segmentIndex;
             const topLayerIndex = segmentIndex + 1;
             
-            // 获取当前段的layer边界框
+            // Get current segment's layer bounding boxes
             const bottomLayerBox = new THREE.Box3().setFromObject(allLayerGroups[bottomLayerIndex]);
             const topLayerBox = new THREE.Box3().setFromObject(allLayerGroups[topLayerIndex]);
             
@@ -1075,9 +1075,9 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
             const bottomColor = layerColors[bottomLayerIndex];
             const topColor = layerColors[topLayerIndex];
             
-            // 更新这段的每条线
+            // Update each line in this segment
             for (const { x, z } of linePointsXZRef.current) {
-              // 起点：底部layer的底面
+              // Start point: bottom layer's bottom surface
               positionArray[idx++] = x;
               positionArray[idx++] = bottomMinY;
               positionArray[idx++] = z;
@@ -1085,7 +1085,7 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
               colorArray[colorIdx++] = bottomColor.g;
               colorArray[colorIdx++] = bottomColor.b;
               
-              // 终点：顶部layer的底面
+              // End point: top layer's bottom surface
               positionArray[idx++] = x;
               positionArray[idx++] = topMinY;
               positionArray[idx++] = z;
@@ -1104,7 +1104,7 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
 
   return (
     <group>
-      {/* 相邻layer之间的60条渐变色线段（6段，每段10条线，每段从底部layer颜色渐变到顶部layer颜色） */}
+      {/* 60 gradient color line segments between adjacent layers (6 segments, 10 lines per segment, each segment gradients from bottom layer color to top layer color) */}
       {linesGeometryRef.current && linesMaterialRef.current && (
         <lineSegments
           ref={lineSegmentsRef}
@@ -1115,7 +1115,7 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
         />
       )}
       
-      {/* Section8的InstancedMesh：4x4网格的blockGroup复制 */}
+      {/* Section8 InstancedMesh: 2x2 grid of blockGroup copies */}
       {blockInstanceDataRef.current && blockInstanceDataRef.current.geometry && blockInstanceDataRef.current.material && (
         <instancedMesh
           ref={blockInstancedMeshRef}
@@ -1131,7 +1131,7 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
       
       <primitive object={scene} />
       
-      {/* 2D 标签坐标计算组件 - 只在 0-100vh 显示 */}
+      {/* 2D label coordinate calculation component - only display at 0-100vh */}
       {activeSection === 'section5' && (() => {
         const currentVh = scrollProgress * 1300;
         const showLabels = currentVh >= 0 && currentVh < 100;
@@ -1149,12 +1149,12 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
   );
 }
 
-// 标签坐标计算组件 - 将 3D 坐标转换为 2D 屏幕坐标
+// Label coordinate calculation component - convert 3D coordinates to 2D screen coordinates
 function LabelPositionCalculator({ labelMeshRefs, showLabels }) {
   const { camera, size } = useThree();
   const positionsRef = useRef({});
   const rafIdRef = useRef(null);
-  // 优化：复用 Vector3 对象，避免每帧创建新对象
+  // Optimization: reuse Vector3 object to avoid creating new objects every frame
   const worldPosRef = useRef(new THREE.Vector3());
   
   useFrame(() => {
@@ -1166,7 +1166,7 @@ function LabelPositionCalculator({ labelMeshRefs, showLabels }) {
       return;
     }
     
-    // 优化：复用 positions 对象，只在需要时创建新对象
+    // Optimization: reuse positions object, only create new objects when needed
     const positions = positionsRef.current;
     const worldPos = worldPosRef.current;
     
@@ -1174,18 +1174,18 @@ function LabelPositionCalculator({ labelMeshRefs, showLabels }) {
       const mesh = labelMeshRefs[meshName];
       if (mesh) {
         mesh.updateMatrixWorld();
-        // 复用 Vector3 对象
+        // Reuse Vector3 object
         mesh.getWorldPosition(worldPos);
         
-        // 将 3D 世界坐标转换为 2D 屏幕坐标
+        // Convert 3D world coordinates to 2D screen coordinates
         worldPos.project(camera);
         
-        // 转换为屏幕像素坐标
+        // Convert to screen pixel coordinates
         const x = (worldPos.x * 0.5 + 0.5) * size.width;
-        const y = (worldPos.y * -0.5 + 0.5) * size.height; // Y 轴需要翻转
+        const y = (worldPos.y * -0.5 + 0.5) * size.height; // Y axis needs to be flipped
         
-        // 标签位置在物体下方一点（向下偏移 40px）
-        // 直接更新现有对象，避免创建新对象
+        // Label position slightly below object (offset 40px downward)
+        // Directly update existing object to avoid creating new objects
         if (!positions[meshName]) {
           positions[meshName] = { x: 0, y: 0 };
         }
@@ -1194,7 +1194,7 @@ function LabelPositionCalculator({ labelMeshRefs, showLabels }) {
       }
     });
     
-    // 使用 requestAnimationFrame 来更新，避免在 useFrame 中直接调用 setState
+    // Use requestAnimationFrame to update, avoid directly calling setState in useFrame
     if (!rafIdRef.current) {
       rafIdRef.current = requestAnimationFrame(() => {
         window.dispatchEvent(new CustomEvent('meshLabelPositions', { 
@@ -1205,42 +1205,42 @@ function LabelPositionCalculator({ labelMeshRefs, showLabels }) {
     }
   });
   
-  return null; // 这个组件不渲染任何内容，只计算坐标
+  return null; // This component doesn't render anything, only calculates coordinates
 }
 
 function ModelControls({ scrollProgress, activeSection }) {
   const { scene } = useGLTF('/models/value-blueprint3.glb');
-  // activeSection 可能是 'section5', 'section8', 'section5-final', 或 null
-  // 'section5-final' 表示保持 section5 的最终状态
+  // activeSection can be 'section5', 'section8', 'section5-final', or null
+  // 'section5-final' means maintain section5's final state
   const effectiveProgress = activeSection ? (scrollProgress || 0) : 0;
   return <ValueBlueprintModel scrollProgress={effectiveProgress} activeSection={activeSection} />;
 }
 
 function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
   const { camera } = useThree();
-  // activeSection 可能是 'section5', 'section8', 'section5-final', 或 null
-  // 'section5-final' 表示保持 section5 的最终状态，此时 scrollProgress 应该是 1
+  // activeSection can be 'section5', 'section8', 'section5-final', or null
+  // 'section5-final' means maintain section5's final state, at this time scrollProgress should be 1
   const effectiveProgress = activeSection ? scrollProgress : 0;
   const lookRef = useRef(new THREE.Vector3(0, 0, 0));
   const initializedRef = useRef(false);
   
-  // 摄像机视图配置
+  // Camera view configuration
   const VIEW_CONFIG = {
-    // 俯视图配置（第一阶段：0-300vh）- 从Y轴上方往下看，画面中左右是X轴，上下是Z轴
+    // Top view configuration (Phase 1: 0-300vh) - looking down from above Y-axis, left-right in view is X-axis, up-down is Z-axis
     topView: {
       position: { x: 0, y: 15, z: 0 },
       lookAt: { x: 0, y: 0, z: 0 },
-      up: { x: 0, y: 0, z: -1 }, // 设置up向量为-Z轴，使画面中上下是Z轴
+      up: { x: 0, y: 0, z: -1 }, // Set up vector to -Z axis, so up-down in view is Z-axis
       zoom: 200,
     },
-    // 侧视图配置（第二阶段及之后）
+    // Side view configuration (Phase 2 and after)
     sideView: {
       position: { x: 1, y: 7, z: 10 },
       zoom: 200,
     },
   };
   
-  // 缓动函数：三次缓入缓出
+  // Easing function: cubic ease in-out
   const easeInOutCubic = (t) => {
     const clampedT = Math.max(0, Math.min(1, t));
     return clampedT < 0.5
@@ -1248,7 +1248,7 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
       : 1 - Math.pow(-2 * clampedT + 2, 3) / 2;
   };
   
-  // 辅助函数：计算进度并应用缓动
+  // Helper function: calculate progress and apply easing
   const getEasedProgress = (vh, start, end, delay = 0) => {
     const progress = Math.max(0, Math.min(1, (vh - start) / (end - start)));
     if (delay > 0 && progress < delay) return 0;
@@ -1256,7 +1256,7 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
     return easeInOutCubic(Math.max(0, Math.min(1, adjustedProgress)));
   };
   
-  // 辅助函数：在范围内插值
+  // Helper function: interpolate within range
   const lerpInRange = (vh, start, end, from, to, delay = 0) => {
     const t = getEasedProgress(vh, start, end, delay);
     return THREE.MathUtils.lerp(from, to, t);
@@ -1264,14 +1264,14 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
   
   useEffect(() => {
     if (camera.isOrthographicCamera && !initializedRef.current) {
-      // 初始化 camera = sideView 的初始姿态，但y位置更高，x位置往-x方向移动，zoom out一点
+      // Initialize camera = sideView initial pose, but y position higher, x position moved in -x direction, zoom out a bit
       const { position, zoom } = VIEW_CONFIG.sideView;
-      const initialY = position.y - 1; // y位置更高（从 -4 改为 -1，提高3个单位）
-      const initialX = position.x - 1; // x位置往-x方向移动1个单位
-      const initialZoom = zoom * 0.5; // zoom out更多（zoom值更小，物体更小）
+      const initialY = position.y - 1; // y position higher (changed from -4 to -1, increased by 3 units)
+      const initialX = position.x - 1; // x position moved 1 unit in -x direction
+      const initialZoom = zoom * 0.5; // zoom out more (smaller zoom value, objects smaller)
       
       camera.position.set(initialX, initialY, position.z);
-      lookRef.current.set(-1.5 - 1, 1.5 - 4, 0); // 侧视图观察点，x位置往-x方向移动1个单位，y位置不变（保持 1.5 - 4）
+      lookRef.current.set(-1.5 - 1, 1.5 - 4, 0); // Side view observation point, x position moved 1 unit in -x direction, y position unchanged (maintain 1.5 - 4)
       camera.zoom = initialZoom;
       camera.updateProjectionMatrix();
       camera.lookAt(lookRef.current);
@@ -1284,28 +1284,28 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
   useFrame(() => {
     if (!camera.isOrthographicCamera || !initializedRef.current) return;
     
-    // Section8使用独立的逻辑：isometric view观察blockGroup
+    // Section8 uses independent logic: isometric view to observe blockGroup
     if (activeSection === 'section8') {
-      // 经典的isometric view：从等轴角度观察原点
-      // 位置在等轴角度（约35.264度），观察点在(0,0,0)
-      // 0-100vh：从X轴偏移-100平滑过渡到-2
-      // 100vh+：保持在-2
-      const currentVh = (scrollProgress8 || 0) * 300; // Section8高度是300vh
-      const isometricDistance = 15; // 等轴视图距离
+      // Classic isometric view: observe origin from isometric angle
+      // Position at isometric angle (approximately 35.264 degrees), observation point at (0,0,0)
+      // 0-100vh: smooth transition from X-axis offset -100 to -2
+      // 100vh+: maintain at -2
+      const currentVh = (scrollProgress8 || 0) * 300; // Section8 height is 300vh
+      const isometricDistance = 15; // Isometric view distance
       
-      // 根据vh决定X轴和Z轴偏移：0vh时X轴偏移-100，100vh时X轴过渡到-2，Z轴过渡到+2
+      // Determine X and Z axis offsets based on vh: X-axis offset -100 at 0vh, X-axis transitions to -2 and Z-axis transitions to +2 at 100vh
       let xOffset = 0;
       let zOffset = 0;
       if (currentVh < 100) {
-        // 0-100vh：X轴从-100平滑过渡到-2，Z轴从0过渡到+2
+        // 0-100vh: X-axis smooth transition from -100 to -2, Z-axis transition from 0 to +2
         const transitionProgress = currentVh / 100; // 0-1
         const easedProgress = easeInOutCubic(transitionProgress);
         xOffset = THREE.MathUtils.lerp(-100, -2, easedProgress);
-        zOffset = THREE.MathUtils.lerp(0, 2, easedProgress); // Z轴从0过渡到+2
+        zOffset = THREE.MathUtils.lerp(0, 2, easedProgress); // Z-axis transition from 0 to +2
       } else {
-        // 100vh+：X轴保持在-2，Z轴保持在+2
+        // 100vh+: X-axis maintain at -2, Z-axis maintain at +2
         xOffset = -2;
-        zOffset = 2; // Z轴保持在+2
+        zOffset = 2; // Z-axis maintain at +2
       }
       
       const isometricX = isometricDistance + xOffset;
@@ -1313,31 +1313,31 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
       const isometricZ = isometricDistance + zOffset;
       
       camera.position.set(isometricX, isometricY, isometricZ);
-      lookRef.current.set(xOffset, 0, zOffset); // 观察点X和Z轴同样根据vh过渡
-      camera.zoom = 100; // isometric view的zoom值
+      lookRef.current.set(xOffset, 0, zOffset); // Observation point X and Z axes also transition based on vh
+      camera.zoom = 100; // Isometric view zoom value
       camera.updateProjectionMatrix();
       camera.lookAt(lookRef.current);
       camera.updateMatrixWorld();
       return;
     }
     
-    // 方案 B：effectiveProgress === 0 时完全跳过动画逻辑，保持初始化姿态
+    // Solution B: when effectiveProgress === 0, completely skip animation logic, maintain initialization pose
     if (effectiveProgress === 0) {
       return;
     }
     
     const globalProgress = Math.max(0, Math.min(1, effectiveProgress || 0));
-    const vh = globalProgress * 1300; // 总滚动高度（vh单位）
+    const vh = globalProgress * 1300; // Total scroll height (vh units)
     
-    // ========== 0-100vh：保持侧视图，摄像头不变 ==========
+    // ========== 0-100vh: maintain side view, camera unchanged ==========
     if (vh <= 100) {
-      // 保持初始化状态（侧视图，y位置更高，x位置往-x方向移动，zoom out一点），不做任何动画
+      // Maintain initialization state (side view, y position higher, x position moved in -x direction, zoom out a bit), no animation
       const { position, zoom } = VIEW_CONFIG.sideView;
-      const initialY = position.y - 1; // y位置更高（从 -4 改为 -1，提高3个单位）
-      const initialX = position.x - 1; // x位置往-x方向移动1个单位
-      const initialZoom = zoom * 0.5; // zoom out更多（zoom值更小，物体更小）
+      const initialY = position.y - 1; // y position higher (changed from -4 to -1, increased by 3 units)
+      const initialX = position.x - 1; // x position moved 1 unit in -x direction
+      const initialZoom = zoom * 0.5; // zoom out more (smaller zoom value, objects smaller)
       camera.position.set(initialX, initialY, position.z);
-      lookRef.current.set(-1.5 - 1, 1.5 - 4, 0); // 侧视图观察点，x位置往-x方向移动1个单位，y位置不变（保持 1.5 - 4）
+      lookRef.current.set(-1.5 - 1, 1.5 - 4, 0); // Side view observation point, x position moved 1 unit in -x direction, y position unchanged (maintain 1.5 - 4)
       camera.zoom = initialZoom;
       camera.updateProjectionMatrix();
       camera.lookAt(lookRef.current);
@@ -1345,14 +1345,14 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
       return;
     }
     
-    // ========== 100-200vh：从侧视图过渡到顶视图 ==========
+    // ========== 100-200vh: transition from side view to top view ==========
     if (vh <= 200) {
-      const transitionProgress = (vh - 100) / 100; // 0-1的进度
+      const transitionProgress = (vh - 100) / 100; // 0-1 progress
       const easedProgress = easeInOutCubic(transitionProgress);
       
-      // 摄像机位置从侧视图（更高的y位置，x位置往-x方向移动）插值到顶视图
-      const initialSideY = VIEW_CONFIG.sideView.position.y - 1; // 初始更高的y位置（从 -4 改为 -1）
-      const initialSideX = VIEW_CONFIG.sideView.position.x - 1; // 初始x位置往-x方向移动1个单位
+      // Camera position interpolate from side view (higher y position, x position moved in -x direction) to top view
+      const initialSideY = VIEW_CONFIG.sideView.position.y - 1; // Initial higher y position (changed from -4 to -1)
+      const initialSideX = VIEW_CONFIG.sideView.position.x - 1; // Initial x position moved 1 unit in -x direction
       const cameraX = THREE.MathUtils.lerp(
         initialSideX,
         VIEW_CONFIG.topView.position.x,
@@ -1369,15 +1369,15 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
         easedProgress
       );
       
-      // 观察点从侧视图（更低的y位置，x位置往-x方向移动）插值到顶视图
-      const initialLookAtY = 1.5 - 4; // 初始观察点y位置也往下4个单位
-      const initialLookAtX = -1.5 - 1; // 初始观察点x位置往-x方向移动1个单位
+      // Observation point interpolate from side view (lower y position, x position moved in -x direction) to top view
+      const initialLookAtY = 1.5 - 4; // Initial observation point y position also moved down 4 units
+      const initialLookAtX = -1.5 - 1; // Initial observation point x position moved 1 unit in -x direction
       const lookAtX = THREE.MathUtils.lerp(initialLookAtX, VIEW_CONFIG.topView.lookAt.x, easedProgress);
       const lookAtY = THREE.MathUtils.lerp(initialLookAtY, VIEW_CONFIG.topView.lookAt.y, easedProgress);
       const lookAtZ = THREE.MathUtils.lerp(0, VIEW_CONFIG.topView.lookAt.z, easedProgress);
       
-      // 缩放从侧视图（zoom out）插值到顶视图
-      const initialSideZoom = VIEW_CONFIG.sideView.zoom * 0.5; // 初始zoom out更多（物体更小）
+      // Zoom interpolate from side view (zoom out) to top view
+      const initialSideZoom = VIEW_CONFIG.sideView.zoom * 0.5; // Initial zoom out more (objects smaller)
       const currentZoom = THREE.MathUtils.lerp(
         initialSideZoom,
         VIEW_CONFIG.topView.zoom,
@@ -1387,7 +1387,7 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
       camera.position.set(cameraX, cameraY, cameraZ);
       lookRef.current.set(lookAtX, lookAtY, lookAtZ);
       camera.zoom = currentZoom;
-      // 在过渡阶段，up向量也需要从默认的(0,1,0)过渡到-Z轴(0,0,-1)
+      // In transition stage, up vector also needs to transition from default (0,1,0) to -Z axis (0,0,-1)
       const upProgress = easedProgress;
       camera.up.set(
         THREE.MathUtils.lerp(0, 0, upProgress),
@@ -1400,14 +1400,14 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
       return;
     }
     
-    // ========== 第一阶段：俯视图（200-300vh） ==========
+    // ========== Phase 1: Top view (200-300vh) ==========
     if (vh < STAGES.PHASE1_TOP_VIEW) {
       const { position, zoom, up } = VIEW_CONFIG.topView;
       camera.position.set(position.x, position.y, position.z);
       lookRef.current.set(VIEW_CONFIG.topView.lookAt.x, VIEW_CONFIG.topView.lookAt.y, VIEW_CONFIG.topView.lookAt.z);
       camera.zoom = zoom;
       if (up) {
-        camera.up.set(up.x, up.y, up.z); // 设置up向量为Z轴，使画面中上下是Z轴
+        camera.up.set(up.x, up.y, up.z); // Set up vector to Z-axis, so up-down in view is Z-axis
       }
       camera.updateProjectionMatrix();
       camera.lookAt(lookRef.current);
@@ -1415,16 +1415,16 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
       return;
     }
     
-    // ========== 第二阶段及之后：侧视图相关动画 ==========
-    // 计算摄像机位置（X, Y, Z）
-    // 1700vh之后：X轴偏移-100（平滑过渡）
+    // ========== Phase 2 and after: side view related animations ==========
+    // Calculate camera position (X, Y, Z)
+    // After 1500vh: X-axis offset -100 (smooth transition)
     let baseCameraX = vh <= STAGES.TRANSITION_END
       ? lerpInRange(vh, STAGES.TRANSITION_START, STAGES.TRANSITION_END, 
           VIEW_CONFIG.topView.position.x, VIEW_CONFIG.sideView.position.x)
       : VIEW_CONFIG.sideView.position.x;
     
-    // 1700vh之后添加X轴偏移（平滑过渡，持续100vh）
-    const xOffsetTransitionDuration = 100; // 过渡持续100vh
+    // Add X-axis offset after 1500vh (smooth transition, duration 100vh)
+    const xOffsetTransitionDuration = 100; // Transition duration 100vh
     const xOffsetProgress = vh >= STAGES.PHASE5_X_OFFSET_START
       ? Math.min(1, (vh - STAGES.PHASE5_X_OFFSET_START) / xOffsetTransitionDuration)
       : 0;
@@ -1432,8 +1432,8 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
     const xOffset = easedXOffsetProgress * -100;
     const cameraX = baseCameraX + xOffset;
     
-    // 400vh时摄像机Y稍微高一点
-    const targetCameraY = 7.5; // 400vh时的目标Y位置（稍微高一点）
+    // Camera Y slightly higher at 400vh
+    const targetCameraY = 7.5; // Target Y position at 400vh (slightly higher)
     const cameraY = vh <= STAGES.TRANSITION_END
       ? lerpInRange(vh, STAGES.TRANSITION_START, STAGES.TRANSITION_END,
           VIEW_CONFIG.topView.position.y, targetCameraY)
@@ -1444,15 +1444,15 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
           VIEW_CONFIG.topView.position.z, VIEW_CONFIG.sideView.position.z)
       : VIEW_CONFIG.sideView.position.z;
     
-    // 计算观察点（LookAt）的 X 和 Z（带延迟）
-    // 1700vh之后：X轴偏移-100（平滑过渡）
+    // Calculate observation point (LookAt) X and Z (with delay)
+    // After 1500vh: X-axis offset -100 (smooth transition)
     let baseLookAtX = vh <= STAGES.TRANSITION_END
       ? lerpInRange(vh, STAGES.TRANSITION_START, STAGES.TRANSITION_END,
           VIEW_CONFIG.topView.lookAt.x, -1.5)
       : -1.5;
     
-    // 1700vh之后添加X轴偏移（平滑过渡，持续100vh）
-    const lookAtXOffsetTransitionDuration = 100; // 过渡持续100vh
+    // Add X-axis offset after 1500vh (smooth transition, duration 100vh)
+    const lookAtXOffsetTransitionDuration = 100; // Transition duration 100vh
     const lookAtXOffsetProgress = vh >= STAGES.PHASE5_X_OFFSET_START
       ? Math.min(1, (vh - STAGES.PHASE5_X_OFFSET_START) / lookAtXOffsetTransitionDuration)
       : 0;
@@ -1465,45 +1465,45 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
           VIEW_CONFIG.topView.lookAt.z, 0)
       : 0;
     
-    // 计算观察点（LookAt）的 Y
+    // Calculate observation point (LookAt) Y
     let lookAtY;
     if (vh <= STAGES.TRANSITION_END) {
-      // 过渡阶段（300-400vh）：观察点Y从0移动到1（400vh时稍微高一点）
+      // Transition stage (300-400vh): observation point Y moves from 0 to 1 (slightly higher at 400vh)
       lookAtY = lerpInRange(vh, STAGES.TRANSITION_START, STAGES.TRANSITION_END, 0, 1);
     } else if (vh < STAGES.PHASE2_SPACING_EXPAND_END) {
-      // 间距扩大期（400-600vh）：观察点Y保持在1
+      // Spacing expansion period (400-600vh): observation point Y maintain at 1
       lookAtY = 1;
     } else {
-      // 第四阶段（600vh+）：观察点Y逐层移动（从600vh开始，每100vh切换一层）
+      // Phase 4 (600vh+): observation point Y moves layer by layer (starting from 600vh, switch layer every 100vh)
       const phase4Start = STAGES.PHASE4_START;
-      const layerDuration = 100; // 每层持续100vh
+      const layerDuration = 100; // Each layer lasts 100vh
       const layerCount = 7;
       const layerIndex = Math.min(layerCount - 1, Math.floor((vh - phase4Start) / layerDuration));
       const layerProgress = ((vh - phase4Start) % layerDuration) / layerDuration;
       
-      // 计算目标layer的Y位置（始终使用插值，确保平滑）
+      // Calculate target layer's Y position (always use interpolation to ensure smoothness)
       const currentLayerY = layerIndex * 5;
       const nextLayerY = Math.min(layerCount - 1, layerIndex + 1) * 5;
       let targetLayerY = THREE.MathUtils.lerp(currentLayerY, nextLayerY, layerProgress);
       
-      // 600vh时从1平滑过渡到layer 0的位置（0）
-      // 使用50vh的过渡期，确保平滑衔接
+      // At 600vh, smooth transition from 1 to layer 0's position (0)
+      // Use 50vh transition period to ensure smooth connection
       const transitionDuration = 50;
       if (vh <= phase4Start + transitionDuration) {
-        // 600-650vh：从1过渡到targetLayerY（600vh时targetLayerY=0）
+        // 600-650vh: transition from 1 to targetLayerY (targetLayerY=0 at 600vh)
         lookAtY = lerpInRange(vh, phase4Start, phase4Start + transitionDuration, 1, targetLayerY);
       } else {
-        // 对于最后一个layer（layer 6），增加偏移量使其在屏幕垂直中心
-        const lastLayerY = (layerCount - 1) * 5; // layer 6的Y位置 = 30
-        const verticalCenterOffset = 1; // 偏移量，让layer 6在屏幕中心
+        // For the last layer (layer 6), add offset to center it vertically on screen
+        const lastLayerY = (layerCount - 1) * 5; // Layer 6's Y position = 30
+        const verticalCenterOffset = 1; // Offset to center layer 6 on screen
         
-        // 平滑应用偏移量：从1100vh开始逐渐增加偏移量，到1200vh时完全应用
+        // Smoothly apply offset: gradually increase offset from 1100vh, fully applied at 1200vh
         const lastLayerStartVh = phase4Start + (layerCount - 1) * layerDuration; // 1200vh
         const offsetTransitionStart = lastLayerStartVh - layerDuration; // 1100vh
         const offsetTransitionDuration = layerDuration; // 100vh
         
         if (vh >= offsetTransitionStart) {
-          // 1100-1200vh：平滑增加偏移量
+          // 1100-1200vh: smoothly increase offset
           const offsetProgress = Math.min(1, (vh - offsetTransitionStart) / offsetTransitionDuration);
           const easedOffsetProgress = easeInOutCubic(offsetProgress);
           const appliedOffset = verticalCenterOffset * easedOffsetProgress;
@@ -1514,34 +1514,34 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
       }
     }
     
-    // 计算摄像机Y位置（在第四阶段需要跟随观察点移动）
+    // Calculate camera Y position (needs to follow observation point in Phase 4)
     let finalCameraY = cameraY;
     if (vh >= STAGES.PHASE4_START) {
       const phase4Start = STAGES.PHASE4_START;
-      const layerDuration = 100; // 每层持续100vh
+      const layerDuration = 100; // Each layer lasts 100vh
       const layerCount = 7;
       const cameraOffsetY = 8;
       
       const layerIndex = Math.min(layerCount - 1, Math.floor((vh - phase4Start) / layerDuration));
       const layerProgress = ((vh - phase4Start) % layerDuration) / layerDuration;
       
-      // 计算目标layer的Y位置（始终使用插值，确保平滑）
+      // Calculate target layer's Y position (always use interpolation to ensure smoothness)
       const currentLayerY = layerIndex * 5;
       const nextLayerY = Math.min(layerCount - 1, layerIndex + 1) * 5;
       let targetLayerY = THREE.MathUtils.lerp(currentLayerY, nextLayerY, layerProgress);
       
-      // 对于最后一个layer（layer 6），增加偏移量使其在屏幕垂直中心
-      const lastLayerY = (layerCount - 1) * 5; // layer 6的Y位置 = 30
-      const verticalCenterOffset = 1; // 偏移量，让layer 6在屏幕中心
+      // For the last layer (layer 6), add offset to center it vertically on screen
+      const lastLayerY = (layerCount - 1) * 5; // Layer 6's Y position = 30
+      const verticalCenterOffset = 1; // Offset to center layer 6 on screen
       
-      // 平滑应用偏移量：从1100vh开始逐渐增加偏移量，到1200vh时完全应用
+      // Smoothly apply offset: gradually increase offset from 1100vh, fully applied at 1200vh
       const lastLayerStartVh = phase4Start + (layerCount - 1) * layerDuration; // 1200vh
       const offsetTransitionStart = lastLayerStartVh - layerDuration; // 1100vh
       const offsetTransitionDuration = layerDuration; // 100vh
       
       let adjustedTargetLayerY = targetLayerY;
       if (vh >= offsetTransitionStart) {
-        // 1100-1200vh：平滑增加偏移量
+        // 1100-1200vh: smoothly increase offset
         const offsetProgress = Math.min(1, (vh - offsetTransitionStart) / offsetTransitionDuration);
         const easedOffsetProgress = easeInOutCubic(offsetProgress);
         const appliedOffset = verticalCenterOffset * easedOffsetProgress;
@@ -1550,34 +1550,34 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
       
       const targetCameraY = adjustedTargetLayerY + cameraOffsetY;
       
-      // 从600vh时的Y位置（7.5）平滑过渡到跟随观察点的Y位置
-      // 600vh时：Camera Y从7.5过渡到8（layer 0的Y=0，所以cameraY=0+8=8）
-      // 在过渡期间（600-650vh），targetCameraY会随着layerProgress变化，需要平滑过渡
+      // Smooth transition from Y position at 600vh (7.5) to following observation point's Y position
+      // At 600vh: Camera Y transitions from 7.5 to 8 (layer 0's Y=0, so cameraY=0+8=8)
+      // During transition period (600-650vh), targetCameraY will change with layerProgress, need smooth transition
       const transitionDuration = 50;
       if (vh <= phase4Start + transitionDuration) {
-        // 600vh时的起始Camera Y值（与400vh时的值一致）
+        // Starting Camera Y value at 600vh (consistent with value at 400vh)
         const startCameraY = 7.5;
-        // 使用缓动函数平滑过渡
+        // Use easing function for smooth transition
         const transitionProgress = (vh - phase4Start) / transitionDuration;
         const easedProgress = easeInOutCubic(transitionProgress);
-        // 从startCameraY平滑过渡到当前的targetCameraY
+        // Smooth transition from startCameraY to current targetCameraY
         finalCameraY = THREE.MathUtils.lerp(startCameraY, targetCameraY, easedProgress);
       } else {
         finalCameraY = targetCameraY;
       }
     }
     
-    // 计算缩放级别
+    // Calculate zoom level
     const zoom = vh <= STAGES.TRANSITION_END
       ? lerpInRange(vh, STAGES.TRANSITION_START, STAGES.TRANSITION_END,
           VIEW_CONFIG.topView.zoom, VIEW_CONFIG.sideView.zoom)
       : VIEW_CONFIG.sideView.zoom;
     
-    // 应用所有计算好的值
+    // Apply all calculated values
     camera.position.set(cameraX, finalCameraY, cameraZ);
     lookRef.current.set(lookAtX, lookAtY, lookAtZ);
     camera.zoom = zoom;
-    // 在过渡阶段和侧视图阶段，up向量从-Z轴(0,0,-1)恢复回默认的Y轴(0,1,0)
+    // In transition stage and side view stage, up vector transitions from -Z axis (0,0,-1) back to default Y axis (0,1,0)
     if (vh <= STAGES.TRANSITION_END) {
       const upTransitionProgress = (vh - STAGES.TRANSITION_START) / (STAGES.TRANSITION_END - STAGES.TRANSITION_START);
       const easedUpProgress = easeInOutCubic(Math.max(0, Math.min(1, upTransitionProgress)));
@@ -1587,7 +1587,7 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
         THREE.MathUtils.lerp(-1, 0, easedUpProgress)
       );
     } else {
-      // 侧视图阶段，up向量恢复为默认的Y轴
+      // Side view stage, up vector restored to default Y axis
       camera.up.set(0, 1, 0);
     }
     camera.updateProjectionMatrix();
@@ -1605,20 +1605,20 @@ export default function GlobalCanvasContainer({
   mounted,
   layerInfo 
 }) {
-  // Canvas始终渲染，不根据activeSection卸载
-  // 如果没有激活的section，可以隐藏或显示默认内容
+  // Canvas always renders, does not unmount based on activeSection
+  // If no active section, can hide or show default content
   
-  // 计算有效的 scrollProgress：
-  // - section5 激活时：使用 scrollProgress5
-  // - section8 激活时：使用 scrollProgress8
-  // - 其他情况：如果 section5 已经完成（scrollProgress5 = 1），保持最终状态；否则使用 0
+  // Calculate effective scrollProgress:
+  // - When section5 is active: use scrollProgress5
+  // - When section8 is active: use scrollProgress8
+  // - Other cases: if section5 is complete (scrollProgress5 = 1), maintain final state; otherwise use 0
   const getEffectiveScrollProgress = () => {
     if (activeSection === 'section5') {
       return scrollProgress5;
     } else if (activeSection === 'section8') {
       return scrollProgress8;
     } else {
-      // 如果 section5 已经完成，保持最终状态，避免模型突然消失
+      // If section5 is complete, maintain final state to avoid model suddenly disappearing
       if (scrollProgress5 >= 1) {
         return 1;
       }
@@ -1627,7 +1627,7 @@ export default function GlobalCanvasContainer({
   };
   
   const effectiveScrollProgress = getEffectiveScrollProgress();
-  // 确定有效的 activeSection：如果 section5 已完成但 activeSection 为 null，使用 'section5-final' 标记
+  // Determine effective activeSection: if section5 is complete but activeSection is null, use 'section5-final' marker
   const effectiveActiveSection = activeSection || (scrollProgress5 >= 1 ? 'section5-final' : null);
   
   return (
@@ -1636,7 +1636,7 @@ export default function GlobalCanvasContainer({
       style={{ zIndex: 1 }}
     >
       <Canvas
-        dpr={[1, 2]}
+        dpr={[1, 2]} // 限制 pixel ratio 最高为 2
         gl={{ 
           antialias: true,
           alpha: false,
@@ -1655,13 +1655,13 @@ export default function GlobalCanvasContainer({
           far={1000}
         />
 
-        {/* 调试用：坐标轴辅助线 */}
+        {/* Debug: coordinate axis helper */}
         {/* <axesHelper args={[5]} /> */}
 
-        {/* 所有3D内容始终存在，根据activeSection控制动画 */}
+        {/* All 3D content always exists, control animation based on activeSection */}
         {mounted && (
           <>
-            {/* 根据activeSection决定使用哪个scrollProgress */}
+            {/* Determine which scrollProgress to use based on activeSection */}
             <CameraRig 
               scrollProgress={effectiveScrollProgress}
               scrollProgress8={scrollProgress8}

@@ -7,38 +7,13 @@ const SCROLL_POSITIONS = [
   { type: 'section', id: 1, name: 'Section 1' },
   { type: 'section', id: 2, name: 'Section 2' },
   { type: 'section', id: 3, name: 'Section 3' },
-  { type: 'section', id: 4, name: 'Section 4' },
-  { type: 'section5-vh', vh: 1, name: 'Section 5 (1vh)' },
-  { type: 'section5-vh', vh: 211, name: 'Section 5 (211vh)' },
-  { type: 'section5-vh', vh: 399, name: 'Section 5 (399vh)' },
-  { type: 'section5-vh', vh: 600, name: 'Section 5 (600vh) - Layer 0' },
-  { type: 'section5-vh', vh: 700, name: 'Section 5 (700vh) - Layer 1' },
-  { type: 'section5-vh', vh: 800, name: 'Section 5 (800vh) - Layer 2' },
-  { type: 'section5-vh', vh: 900, name: 'Section 5 (900vh) - Layer 3' },
-  { type: 'section5-vh', vh: 1000, name: 'Section 5 (1000vh) - Layer 4' },
-  { type: 'section5-vh', vh: 1100, name: 'Section 5 (1100vh) - Layer 5' },
-  { type: 'section5-vh', vh: 1200, name: 'Section 5 (1200vh) - Layer 6' },
-  { type: 'section', id: 6, name: 'Section 6' },
-  { type: 'section', id: 7, name: 'Section 7' },
-  { type: 'section', id: 8, name: 'Section 8' },
-  { type: 'section', id: 9, name: 'Section 9' },
-  { type: 'section', id: 10, name: 'Section 10' },
-  { type: 'section10-vh', vh: 100, name: 'Section 10 (100vh)' },
-  { type: 'section11-end', name: 'Section 11 (end)' },
 ];
 
 // 定义 Chapter 映射
 const CHAPTERS = [
   { name: 'Home', startIndex: 0, endIndex: 0 }, // Section 1
-  { name: 'Background', startIndex: 1, endIndex: 3 }, // Section 2, 3, 4
-  { name: 'Agentic Enterprise', startIndex: 4, endIndex: 4 }, // Section 5 1vh
-  { name: 'Value Blueprints', startIndex: 5, endIndex: 13 }, // Section 5 211vh 及之后所有 section5 节点
-  { name: 'EY.ai Ready Value Blueprints', startIndex: 14, endIndex: 14 }, // Section 6
-  { name: 'Methodology', startIndex: 15, endIndex: 15 }, // Section 7
-  { name: 'Success Stories', startIndex: 16, endIndex: 16 }, // Section 8
-  { name: 'The Value', startIndex: 17, endIndex: 17 }, // Section 9
-  { name: 'Diagnostic Approach', startIndex: 18, endIndex: 19 }, // Section 10 开始, Section 10 100vh
-  { name: 'Call To Action', startIndex: 20, endIndex: 20 }, // Section 11 最下面
+  { name: 'The Outcome', startIndex: 1, endIndex: 1 }, // Section 2
+  { name: 'The Process', startIndex: 2, endIndex: 2 }, // Section 3
 ];
 
 // 根据 position index 获取对应的 chapter
@@ -52,31 +27,14 @@ const getChapterByPositionIndex = (positionIndex) => {
 const SCROLL_DURATIONS = [
   500, // Section 1 -> 2
   500, // Section 2 -> 3
-  500, // Section 3 -> 4
-  500, // Section 4 -> Section 5 vh=1
-  2000, // Section 5 vh=1 -> vh=211
-  2000, // Section 5 vh=211 -> vh=399
-  1000, // Section 5 vh=399 -> vh=600
-  1000, // Section 5 vh=600 -> vh=700
-  1000, // Section 5 vh=700 -> vh=800
-  1000, // Section 5 vh=800 -> vh=900
-  1000, // Section 5 vh=900 -> vh=1000
-  1000, // Section 5 vh=1000 -> vh=1100
-  1000, // Section 5 vh=1100 -> vh=1200
-  500, // Section 5 vh=1200 -> Section 6
-  500, // Section 6 -> Section 7
-  500, // Section 7 -> Section 8
-  500, // Section 8 -> Section 9
-  500, // Section 9 -> Section 10
-  2000, // Section 10 -> Section 10 (100vh)
-  2000, // Section 10 (100vh) -> Section 11 (end)
 ];
 
 export default function NavigationBar({ 
   onNavigate, 
   currentPositionIndex,
   isScrolling,
-  sectionRefs 
+  sectionRefs,
+  onBack
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
@@ -133,9 +91,6 @@ export default function NavigationBar({
   }, [currentChapter.name]);
   
   // 使用 useMemo 优化进度计算
-  // 如果 chapter 有多个位置，第一个位置也应该显示进度（不是0%）
-  // 例如：3个位置 -> 第一次33%，第二次66%，第三次100%
-  //      2个位置 -> 第一次50%，第二次100%
   const currentChapterProgress = useMemo(() => {
     if (currentPositionIndex < currentChapter.startIndex) return 0;
     if (currentPositionIndex > currentChapter.endIndex) return 1;
@@ -149,9 +104,10 @@ export default function NavigationBar({
       {/* 导航栏 - 固定在左下角，移动端隐藏 */}
       <div 
         data-navigation-bar
-        className="hidden md:flex fixed bottom-0 left-0 z-[1000] items-center"
+        className="hidden md:flex fixed bottom-0 left-0 z-40 items-center"
         style={{
           fontFamily: 'var(--font-eyinterstate)',
+          zIndex: 40, // 明确设置，确保低于 modals (z-10000)
         }}
       >
         <div 
@@ -163,6 +119,34 @@ export default function NavigationBar({
             WebkitBackdropFilter: 'blur(10px)',
           }}
         >
+          {/* 最左侧：Quit 按钮 */}
+          <button
+            onClick={onBack}
+            disabled={isScrolling}
+            className="h-full flex items-center justify-center gap-2 px-4 border-r border-gray-400/30 hover:bg-gray-800/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            style={{
+              pointerEvents: isScrolling ? 'none' : 'auto',
+            }}
+          >
+            <svg 
+              width="12" 
+              height="12" 
+              viewBox="0 0 12 12" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path 
+                d="M7.5 2L4.5 6L7.5 10" 
+                stroke="currentColor" 
+                strokeWidth="1.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                className="text-white"
+              />
+            </svg>
+            <span className="text-white text-sm font-bold">Quit</span>
+          </button>
+
           {/* 左侧：向上按钮 */}
           <button
             onClick={handlePrevious}

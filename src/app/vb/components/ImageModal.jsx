@@ -30,29 +30,15 @@ export default function ImageModal({ images, isOpen, onClose }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, images, onClose]);
 
-  // 阻止 body 滚动，并隐藏导航栏
+  // 阻止 body 滚动
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      // 隐藏导航栏
-      const navBar = document.querySelector('[data-navigation-bar]');
-      if (navBar) {
-        navBar.style.display = 'none';
-      }
     } else {
       document.body.style.overflow = '';
-      // 显示导航栏
-      const navBar = document.querySelector('[data-navigation-bar]');
-      if (navBar) {
-        navBar.style.display = '';
-      }
     }
     return () => {
       document.body.style.overflow = '';
-      const navBar = document.querySelector('[data-navigation-bar]');
-      if (navBar) {
-        navBar.style.display = '';
-      }
     };
   }, [isOpen]);
 
@@ -79,10 +65,11 @@ export default function ImageModal({ images, isOpen, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-6 md:p-8"
+      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-6 md:p-8"
       onClick={handleBackdropClick}
       style={{
         fontFamily: 'var(--font-eyinterstate)',
+        zIndex: 10000, // 确保在 NavigationBar (z-1000) 之上
       }}
     >
       {/* 图片容器 */}

@@ -15,6 +15,7 @@ export default function LayoutClient() {
   const isResultsPage = pathname === '/results';
   const isValueBlueprintPage = pathname === '/value-blueprint';
   const isVBTestPage = pathname === '/vb';
+  const isSuccessStoryPage = pathname === '/vb/success-story';
   const isHomePage = pathname === '/';
 
   // Do not render any global components on home page
@@ -49,6 +50,11 @@ export default function LayoutClient() {
 
   // Do not render any global components on vb page
   if (isVBTestPage) {
+    return null;
+  }
+
+  // Do not render any global components on success-story page
+  if (isSuccessStoryPage) {
     return null;
   }
 
