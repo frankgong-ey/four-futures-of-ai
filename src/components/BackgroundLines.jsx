@@ -11,9 +11,10 @@ import { usePathname } from 'next/navigation';
 export default function BackgroundLines() {
   const pathname = usePathname();
   const isVBTestPage = pathname === '/vb';
+  const isSuccessStoryPage = pathname === '/vb/success-story';
 
-  // 在 vb 页面不显示背景线
-  if (isVBTestPage) {
+  // 在 vb 页面和 success-story 页面不显示背景线
+  if (isVBTestPage || isSuccessStoryPage) {
     return null;
   }
 

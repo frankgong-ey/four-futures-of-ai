@@ -10,7 +10,6 @@ const ROITile = ({ initialRoi, index, sectionId }) => {
   const animationKeyRef = React.useRef(0);
   
   const isPositive = roi > 0;
-  const color = isPositive ? "#8BDBDC" : "#EB5242";
   const borderColor = isPositive ? "rgba(139, 219, 220, 0.5)" : "rgba(235, 82, 66, 0.5)"; // 50% 透明度
   const sign = isPositive ? "+" : "";
 
@@ -45,20 +44,17 @@ const ROITile = ({ initialRoi, index, sectionId }) => {
 
   return (
     <div
-      className="border flex items-center justify-center relative overflow-hidden"
+      className="border flex items-center justify-center relative overflow-hidden px-4"
       style={{
         borderColor: borderColor, // 50% 透明度
-        color: color,
-        height: "28px",
+        height: "64px",
+        minWidth: "96px",
         transition: 'border-color 0.5s ease-in-out, color 0.5s ease-in-out',
       }}
     >
       <span 
         key={animationKeyRef.current}
-        className="text-xs font-medium inline-block relative z-10"
-        style={{
-          color: color,
-        }}
+        className="text-[16px] font-bold inline-block relative z-10 text-white text-center"
       >
         {sign}{roi}% ROI
       </span>
@@ -98,11 +94,6 @@ const generateRandomROI = () => {
   return Math.floor(Math.random() * 101) - 50;
 };
 
-// 生成 8 个 tile 的 ROI 数组
-const generateTiles = () => {
-  return Array.from({ length: 8 }, () => generateRandomROI());
-};
-
 export default function Section2() {
   // 使用 useState 和 useEffect 确保只在客户端生成随机值，避免 hydration 错误
   const [initialMarketingTiles, setInitialMarketingTiles] = useState([]);
@@ -113,42 +104,14 @@ export default function Section2() {
   useEffect(() => {
     setMounted(true);
     // 只在客户端生成随机值
-    setInitialMarketingTiles(Array.from({ length: 8 }, () => generateRandomROI()));
-    setInitialFinanceTiles(Array.from({ length: 8 }, () => generateRandomROI()));
-    setInitialRdTiles(Array.from({ length: 8 }, () => generateRandomROI()));
+    setInitialMarketingTiles(Array.from({ length: 9 }, () => generateRandomROI()));
+    setInitialFinanceTiles(Array.from({ length: 9 }, () => generateRandomROI()));
+    setInitialRdTiles(Array.from({ length: 9 }, () => generateRandomROI()));
   }, []);
-
-  const leftItems = [
-    {
-      icon: "/images/value-blueprints/use-case.svg",
-      title: "Use-Case Driven",
-      description: "Large portfolios of bottoms-up opportunities focused on productivity gains and cost reduction",
-      isYellow: false
-    },
-    {
-      icon: "/images/value-blueprints/bolt-on.svg",
-      title: "Bolt-on AI",
-      description: "AI added to \"as is\" processes anchored in fixed, legacy processes",
-      isYellow: false
-    },
-    {
-      icon: "/images/value-blueprints/disjointed.svg",
-      title: "Disjointed Approach",
-      description: "Functions experimenting and operating in silos resulting in data & tool overload",
-      isYellow: false
-    },
-    {
-      icon: "/images/value-blueprints/plateaued.svg",
-      title: "THE RESULT",
-      subtitle: "Plateaued Value",
-      description: "The impact of use cases reaches a natural limit without further innovation.",
-      isYellow: true
-    }
-  ];
 
   return (
     <section 
-      className="relative w-full text-white py-16 pl-[5%] pr-[5%]"
+      className="relative w-full text-white min-h-screen py-20 pl-[5%] pr-[5%] flex items-center"
       style={{ 
         fontFamily: 'var(--font-eyinterstate)', 
         // 不设置 z-index，让背景图片可以延伸到 Section2
@@ -160,91 +123,43 @@ export default function Section2() {
       />
       
       <div 
-        className="max-w-[1440px] mx-auto relative z-10"
+        className="max-w-[1440px] mx-auto relative z-10 w-full"
       >
-        {/* 大标题和文字 */}
-        <div className="mb-12">
-          <h2 
-            className="text-[36px] md:text-[64px] font-normal leading-tight mb-6 tracking-[-0.05em]"
-            style={{
-              background: 'linear-gradient(to right, white, #EAD726)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            Today's AI Challenge
-          </h2>
-          <p className="font-normal text-[16px] md:text-[24px] mb-6 max-w-3xl">
-            Drawing on our market experience from delivering thousands of AI use cases across industries, we have identified common patterns.
+        {/* 顶部标题区域 */}
+        <div className="max-w-4xl mx-auto text-center mb-16 flex flex-col items-center gap-4">
+          <p className="text-[28px] md:text-[48px] font-normal tracking-[-0.05em] leading-none">
+            AI is changing the world.
           </p>
+          <h2 
+            className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-[#FFE601]"
+          >
+            Why isn’t it driving more value?
+          </h2>
+          <div 
+            className="w-40 h-[3px] mx-auto"
+            style={{
+              background: 'linear-gradient(to right, #FFDD0B, #FF789B, #34F8FD)',
+            }}
+          />
         </div>
 
-        {/* 两栏布局 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24">
-          {/* 左侧：4个 div */}
-          <div className="space-y-4 max-w-[640px]">
-            {leftItems.map((item, index) => {
-              // 第四个div（黄色框）有特殊布局
-              if (item.isYellow) {
-                return (
-                  <div 
-                    key={index}
-                    className="p-4 bg-[#FFE600] rounded-none border border-black"
-                  >
-                    {/* THE RESULT 在左上角 */}
-                    <div className="text-sm font-bold mb-3 text-black">
-                      {item.title}
-                    </div>
-                    {/* 图标和 Plateaued Value 在同一行 */}
-                    <div className="flex items-center gap-3 mb-2">
-                      <img 
-                        src={item.icon} 
-                        alt={item.subtitle}
-                        className="w-9 h-9 flex-shrink-0 brightness-0"
-                      />
-                      <h3 className="text-[18px] md:text-[20px] font-bold text-black">
-                        {item.subtitle}
-                      </h3>
-                    </div>
-                    {/* 描述文字 */}
-                    <p className="font-normal text-[16px] md:text-[18px] leading-relaxed tracking-tight text-black">
-                      {item.description}
-                    </p>
-                  </div>
-                );
-              }
-              
-              // 前三个div保持原有布局
-              return (
-                <div 
-                  key={index}
-                  className="flex items-start gap-4 p-4 bg-white/5 rounded-none border border-white/10"
-                >
-                  <img 
-                    src={item.icon} 
-                    alt={item.title}
-                    className="w-9 h-9 flex-shrink-0"
-                  />
-                  <div className="flex-1">
-                    <h3 className="text-[18px] md:text-[20px] font-bold mb-2 text-white">
-                      {item.title}
-                    </h3>
-                    <p className="text-[16px] md:text-[18px] leading-relaxed text-white">
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+        {/* 文案与 ROI 矩阵 */}
+        <div className="flex flex-col items-center">
+          {/* AI Use Cases 标题 */}
+          <div className="mb-4 text-center">
+            <p className="text-[24px] md:text-[32px] font-bold uppercase tracking-[-0.05em]">
+              AI Use Cases
+            </p>
           </div>
 
-          {/* 右侧：三个部分 */}
-          <div className="space-y-8 max-w-[560px]">
-            {/* Marketing Use Cases */}
-            <div>
-              <h3 className="text-[20px] font-normal mb-4 text-center">Marketing Use Cases</h3>
-              <div className="grid grid-cols-4 gap-3">
+          {/* 三列 ROI 区块 */}
+          <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-12">
+            {/* Marketing */}
+            <div className="flex flex-col items-center">
+              <h3 className="text-[18px] md:text-[24px] font-bold uppercase tracking-[-0.05em] mb-6">
+                Marketing
+              </h3>
+              <div className="grid grid-cols-3 gap-3">
                 {mounted && initialMarketingTiles.length > 0 ? (
                   initialMarketingTiles.map((roi, index) => (
                     <ROITile 
@@ -254,18 +169,16 @@ export default function Section2() {
                       sectionId="marketing"
                     />
                   ))
-                ) : (
-                  Array.from({ length: 8 }).map((_, index) => (
-                    <div key={`marketing-placeholder-${index}`} className="border border-white/10 h-[28px]" />
-                  ))
-                )}
+                ) : null}
               </div>
             </div>
 
-            {/* Finance Use Cases */}
-            <div>
-              <h3 className="text-[20px] font-normal mb-4 text-center">Finance Use Cases</h3>
-              <div className="grid grid-cols-4 gap-3">
+            {/* Finance */}
+            <div className="flex flex-col items-center">
+              <h3 className="text-[18px] md:text-[24px] font-bold uppercase tracking-[-0.05em] mb-6">
+                Finance
+              </h3>
+              <div className="grid grid-cols-3 gap-3">
                 {mounted && initialFinanceTiles.length > 0 ? (
                   initialFinanceTiles.map((roi, index) => (
                     <ROITile 
@@ -275,18 +188,16 @@ export default function Section2() {
                       sectionId="finance"
                     />
                   ))
-                ) : (
-                  Array.from({ length: 8 }).map((_, index) => (
-                    <div key={`finance-placeholder-${index}`} className="border border-white/10 h-[28px]" />
-                  ))
-                )}
+                ) : null}
               </div>
             </div>
 
-            {/* R&D Use Cases */}
-            <div>
-              <h3 className="text-[20px] font-normal mb-4 text-center">R&D Use Cases</h3>
-              <div className="grid grid-cols-4 gap-3">
+            {/* R&D */}
+            <div className="flex flex-col items-center">
+              <h3 className="text-[18px] md:text-[24px] font-bold uppercase tracking-[-0.05em] mb-6">
+                R&D
+              </h3>
+              <div className="grid grid-cols-3 gap-3">
                 {mounted && initialRdTiles.length > 0 ? (
                   initialRdTiles.map((roi, index) => (
                     <ROITile 
@@ -296,11 +207,7 @@ export default function Section2() {
                       sectionId="rd"
                     />
                   ))
-                ) : (
-                  Array.from({ length: 8 }).map((_, index) => (
-                    <div key={`rd-placeholder-${index}`} className="border border-white/10 h-[28px]" />
-                  ))
-                )}
+                ) : null}
               </div>
             </div>
           </div>

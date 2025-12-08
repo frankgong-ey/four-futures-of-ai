@@ -12,13 +12,14 @@ import Section6 from "./components/Section6";
 import Section7 from "./components/Section7";
 import Section8 from "./components/Section8";
 import Section9 from "./components/Section9";
+import Section10 from "./components/Section10";
+import Section11 from "./components/Section11";
 import GlobalCanvasContainer from "./components/GlobalCanvasContainer";
 import NavigationBar from "./components/NavigationBar";
-import SuccessStoryPage from "./components/SuccessStoryPage";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// 定义滚动位置配置
+// Define scroll position configuration
 const SCROLL_POSITIONS = [
   { type: 'section', id: 1 },
   { type: 'section', id: 2 },
@@ -36,11 +37,14 @@ const SCROLL_POSITIONS = [
   { type: 'section5-vh', vh: 1200 },
   { type: 'section', id: 6 },
   { type: 'section', id: 7 },
-  { type: 'section8-vh', vh: 101 },
   { type: 'section', id: 8 },
+  { type: 'section', id: 9 },
+  { type: 'section', id: 10 },
+  { type: 'section10-vh', vh: 100 },
+  { type: 'section11-end' },
 ];
 
-// 定义每个位置的滚动持续时间（毫秒）
+// Define scroll duration for each position (in milliseconds)
 const SCROLL_DURATIONS = [
   500, // Section 1 -> 2
   500, // Section 2 -> 3
@@ -57,20 +61,35 @@ const SCROLL_DURATIONS = [
   1000, // Section 5 vh=1100 -> vh=1200
   500, // Section 5 vh=1200 -> Section 6
   500, // Section 6 -> Section 7
-  2000, // Section 7 -> Section 8 vh=101
-  500, // Section 8 vh=101 -> Section 9
+  500, // Section 7 -> Section 8
+  500, // Section 8 -> Section 9
+  500, // Section 9 -> Section 10
+  2000, // Section 10 -> Section 10 (100vh)
+  2000, // Section 10 (100vh) -> Section 11 (end)
 ];
 
 export default function VBTestPage() {
+  // Check URL parameter and sessionStorage immediately during initial render to prevent flash
+  const [shouldHideContent, setShouldHideContent] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlSection8 = urlParams.get('section') === '8';
+      const sessionSection8 = sessionStorage.getItem('vb-return-section') === '8';
+      const showOverlay = sessionStorage.getItem('vb-show-overlay') === 'true';
+      // Return true if URL parameter or sessionStorage indicates we should show overlay
+      return urlSection8 || (sessionSection8 && showOverlay);
+    }
+    return false;
+  });
+  
   const [mounted, setMounted] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [scrollProgress8, setScrollProgress8] = useState(0);
   const [activeSection, setActiveSection] = useState(null); // 'section5' | 'section8' | null
   const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
-  const [showSuccessStory, setShowSuccessStory] = useState(false);
   const [showEYLogo, setShowEYLogo] = useState(false);
-  const savedScrollPositionRef = useRef(null);
+  const [isFadingOut, setIsFadingOut] = useState(false); // Control fade-out animation
   const scrollSectionRef = useRef(null);
   const scrollSectionRef8 = useRef(null);
   const section1Ref = useRef(null);
@@ -80,15 +99,18 @@ export default function VBTestPage() {
   const section6Ref = useRef(null);
   const section7Ref = useRef(null);
   const section8Ref = useRef(null);
+  const section9Ref = useRef(null);
+  const section10Ref = useRef(null);
+  const section11Ref = useRef(null);
   
-  // Layer 信息配置
+  // Layer information configuration
   const layerInfo = [
     {
       title: 'System of Record',
       description: 'Expose sources of truth through reliable connectors for agent and human interaction.',
     },
     {
-      title: 'Agentic Platform',
+      title: 'AI-Native Platform',
       description: 'Leverage the Agentic Enterprise Tech Stack to upgrade technology infrastructure to support AI at scale.',
     },
     {
@@ -108,46 +130,33 @@ export default function VBTestPage() {
       description: 'Implement a collaborative human-AI workforce model leveraging role-based interfaces and operating systems.',
     },
     {
-      title: 'Constituent',
+      title: 'Customer',
       description: "Leverage EY's venture-building expertise to create new experiences, products, and business models.",
     },
   ];
   
-  // 确保只在客户端挂载后执行
+  // Check URL parameter early and set initial scroll position before first render
   useEffect(() => {
+    // If we detected section=7 in initial state, hide body overflow immediately
+    if (shouldHideContent) {
+      document.body.style.overflow = 'hidden';
+      // Clear URL parameter and sessionStorage immediately
+      window.history.replaceState({}, '', '/vb');
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('vb-return-section');
+        sessionStorage.removeItem('vb-show-overlay');
+      }
+    }
+    
     setMounted(true);
     
-    // 清理函数：确保在组件卸载时恢复页面滚动
+    // Cleanup function: ensure page scroll is restored when component unmounts
     return () => {
       document.body.style.overflow = '';
     };
-  }, []);
+  }, [shouldHideContent]);
 
-  // 处理打开 Success Story 页面
-  const handleOpenSuccessStory = () => {
-    // 保存当前滚动位置
-    savedScrollPositionRef.current = window.scrollY || window.pageYOffset;
-    // 滚动到页面顶部
-    window.scrollTo(0, 0);
-    // 显示子页面
-    setShowSuccessStory(true);
-  };
-
-  // 处理返回主页面
-  const handleBackToMain = () => {
-    // 隐藏子页面
-    setShowSuccessStory(false);
-    // 恢复滚动位置
-    if (savedScrollPositionRef.current !== null) {
-      // 使用 requestAnimationFrame 确保 DOM 更新后再滚动
-      requestAnimationFrame(() => {
-        window.scrollTo(0, savedScrollPositionRef.current);
-        savedScrollPositionRef.current = null;
-      });
-    }
-  };
-
-  // 根据当前滚动位置更新位置索引
+  // Update position index based on current scroll position
   useEffect(() => {
     if (!mounted || isScrolling) return;
 
@@ -155,7 +164,7 @@ export default function VBTestPage() {
       const scrollY = window.scrollY || window.pageYOffset;
       const viewportHeight = window.innerHeight;
 
-      // 检查每个位置，找到最接近当前位置的
+      // Check each position to find the closest to current position
       let closestIndex = 0;
       let closestDistance = Infinity;
 
@@ -168,17 +177,19 @@ export default function VBTestPage() {
             2: section2Ref,
             3: section3Ref,
             4: section4Ref,
-        6: section6Ref,
-        7: section7Ref,
-        8: section8Ref,
+            6: section6Ref,
+            7: section7Ref,
+            8: section8Ref,
+            9: section9Ref,
+            10: section10Ref,
           };
           const ref = sectionRefs[position.id];
           if (ref?.current) {
             targetY = ref.current.offsetTop;
           }
         } else if (position.type === 'section5-vh') {
-          // 使用和calculateScrollTarget相同的计算逻辑
-          // 注意：对于layers展示阶段（600vh+），实际滚动位置可能是+2vh，但检测时应该基于原始vh
+          // Use the same calculation logic as calculateScrollTarget
+          // Note: For layers display stage (600vh+), actual scroll position may be +2vh, but detection should be based on original vh
           if (scrollSectionRef.current) {
             const trigger = ScrollTrigger.getById('section5-trigger');
             if (trigger) {
@@ -189,7 +200,7 @@ export default function VBTestPage() {
               const targetProgress = position.vh / 1300;
               targetY = startScrollY + targetProgress * scrollRange;
             } else {
-              // Fallback: 如果trigger还没创建
+              // Fallback: if trigger hasn't been created yet
               const section5Top = scrollSectionRef.current.offsetTop;
               const section5Height = 1300 * viewportHeight / 100;
               const scrollRange = section5Height - viewportHeight;
@@ -203,12 +214,25 @@ export default function VBTestPage() {
             const vhInPixels = (position.vh / 100) * viewportHeight;
             targetY = section8Top + vhInPixels;
           }
+        } else if (position.type === 'section10-vh') {
+          if (section10Ref?.current) {
+            const section10Top = section10Ref.current.offsetTop;
+            const vhInPixels = (position.vh / 100) * viewportHeight;
+            targetY = section10Top + vhInPixels;
+          }
+        } else if (position.type === 'section11-end') {
+          if (scrollSectionRef8.current) {
+            // Section11 uses scrollSectionRef8, and it's 300vh tall
+            const section11Top = scrollSectionRef8.current.offsetTop;
+            const section11Height = 300 * viewportHeight / 100;
+            targetY = section11Top + section11Height - viewportHeight;
+          }
         }
 
-        // 对于layers展示阶段（600vh+），允许±2vh的容差，因为滚动目标位置会+2vh
+        // For layers display stage (600vh+), allow ±2vh tolerance because scroll target position will be +2vh
         let distance = Math.abs(scrollY - targetY);
         if (position.type === 'section5-vh' && position.vh >= 600) {
-          // 检查是否在±2vh范围内（对应实际滚动位置+2vh的情况）
+          // Check if within ±2vh range (corresponding to actual scroll position +2vh case)
           const vh2Offset = (2 / 100) * viewportHeight;
           distance = Math.min(distance, Math.abs(scrollY - (targetY + vh2Offset)));
         }
@@ -218,16 +242,16 @@ export default function VBTestPage() {
         }
       });
 
-      // 只有当距离足够近时才更新（避免频繁更新）
+      // Only update when distance is close enough (to avoid frequent updates)
       if (closestDistance < viewportHeight * 0.5) {
         setCurrentPositionIndex(closestIndex);
       }
     };
 
-    // 初始更新
+    // Initial update
     updateCurrentPosition();
 
-    // 监听滚动事件（使用节流）
+    // Listen to scroll events (with throttling)
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
@@ -245,13 +269,13 @@ export default function VBTestPage() {
     };
   }, [mounted, isScrolling]);
 
-  // 计算滚动目标位置 - 使用 useCallback 优化，避免每次渲染时重新创建
+  // Calculate scroll target position - use useCallback for optimization, avoid recreating on each render
   const calculateScrollTarget = useCallback((positionIndex) => {
     const position = SCROLL_POSITIONS[positionIndex];
     if (!position) return null;
 
     if (position.type === 'section') {
-      // 普通section，滚动到section顶部
+      // Regular section, scroll to section top
       const sectionRefs = {
         1: section1Ref,
         2: section2Ref,
@@ -260,6 +284,8 @@ export default function VBTestPage() {
         6: section6Ref,
         7: section7Ref,
         8: section8Ref,
+        9: section9Ref,
+        10: section10Ref,
       };
       const ref = sectionRefs[position.id];
       if (ref?.current) {
@@ -269,18 +295,18 @@ export default function VBTestPage() {
         };
       }
     } else if (position.type === 'section5-vh') {
-      // Section5的特定vh位置
+      // Section5 specific vh position
       // ScrollTrigger: start="top top", end="bottom bottom"
       // progress = (scrollY - startScrollY) / (endScrollY - startScrollY)
-      // 要使得progress = vh / 1300，需要正确计算start和end位置
-      // 对于layers展示阶段（600vh+），滚动目标位置要+2vh
+      // To make progress = vh / 1300, need to correctly calculate start and end positions
+      // For layers display stage (600vh+), scroll target position should be +2vh
       if (scrollSectionRef.current) {
         const trigger = ScrollTrigger.getById('section5-trigger');
-        // 如果是layers展示阶段（600vh及以上），滚动目标+2vh
+        // If it's layers display stage (600vh and above), scroll target +2vh
         const targetVh = position.vh >= 600 ? position.vh + 2 : position.vh;
         
         if (trigger) {
-          // 使用ScrollTrigger的实际start和end位置
+          // Use ScrollTrigger's actual start and end positions
           const startScrollY = trigger.start;
           const endScrollY = trigger.end;
           const section5Height = 1300 * window.innerHeight / 100;
@@ -294,7 +320,7 @@ export default function VBTestPage() {
             offset: targetScrollY,
           };
         } else {
-          // 如果trigger还没创建，使用简单计算
+          // If trigger hasn't been created yet, use simple calculation
           const section5Top = scrollSectionRef.current.offsetTop;
           const section5Height = 1300 * window.innerHeight / 100;
           const viewportHeight = window.innerHeight;
@@ -309,7 +335,7 @@ export default function VBTestPage() {
         }
       }
     } else if (position.type === 'section8-vh') {
-      // Section8的特定vh位置
+      // Section8 specific vh position
       if (scrollSectionRef8.current) {
         const section8Top = scrollSectionRef8.current.offsetTop;
         const vhInPixels = (position.vh / 100) * window.innerHeight;
@@ -318,11 +344,35 @@ export default function VBTestPage() {
           offset: section8Top + vhInPixels,
         };
       }
+    } else if (position.type === 'section10-vh') {
+      // Section10 specific vh position
+      if (section10Ref?.current) {
+        const section10Top = section10Ref.current.offsetTop;
+        const vhInPixels = (position.vh / 100) * window.innerHeight;
+        return {
+          element: section10Ref.current,
+          offset: section10Top + vhInPixels,
+        };
+      }
+    } else if (position.type === 'section11-end') {
+      // Section11 end position (scroll to bottom of section11)
+      if (scrollSectionRef8.current) {
+        // Section11 uses scrollSectionRef8, and it's 300vh tall
+        const section11Top = scrollSectionRef8.current.offsetTop;
+        const section11Height = 300 * window.innerHeight / 100;
+        const viewportHeight = window.innerHeight;
+        // Scroll to bottom of section11, accounting for viewport height
+        const targetScrollY = section11Top + section11Height - viewportHeight;
+        return {
+          element: scrollSectionRef8.current,
+          offset: targetScrollY,
+        };
+      }
     }
     return null;
-  }, [scrollSectionRef, scrollSectionRef8, section1Ref, section2Ref, section3Ref, section4Ref, section6Ref, section7Ref, section8Ref]);
+  }, [scrollSectionRef, scrollSectionRef8, section1Ref, section2Ref, section3Ref, section4Ref, section6Ref, section7Ref, section8Ref, section9Ref, section10Ref]);
 
-  // 导航到指定位置
+  // Navigate to specified position
   const handleNavigate = (targetIndex) => {
     if (isScrolling || targetIndex < 0 || targetIndex >= SCROLL_POSITIONS.length) {
       return;
@@ -338,30 +388,30 @@ export default function VBTestPage() {
       return;
     }
 
-    // 获取滚动持续时间
-    // SCROLL_DURATIONS对应从当前位置到下一个位置的持续时间
-    // 根据方向选择正确的持续时间索引
+    // Get scroll duration
+    // SCROLL_DURATIONS corresponds to duration from current position to next position
+    // Select correct duration index based on direction
     const isForward = targetIndex > sourceIndex;
     const stepIndex = isForward ? sourceIndex : targetIndex;
     const duration = stepIndex >= 0 && stepIndex < SCROLL_DURATIONS.length 
       ? SCROLL_DURATIONS[stepIndex] 
       : 500;
 
-    // 禁用页面滚动（防止用户手动滚动干扰动画）
+    // Disable page scrolling (prevent user manual scrolling from interfering with animation)
     document.body.style.overflow = 'hidden';
 
-    // 获取当前滚动位置
+    // Get current scroll position
     const startY = window.scrollY || window.pageYOffset;
     const targetY = target.offset;
     const distance = targetY - startY;
     const startTime = performance.now();
 
-    // 使用requestAnimationFrame实现平滑滚动
+    // Use requestAnimationFrame to implement smooth scrolling
     const animateScroll = (currentTime) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
       
-      // 使用easeInOut缓动函数
+      // Use easeInOut easing function
       const easeInOut = progress < 0.5
         ? 2 * progress * progress
         : 1 - Math.pow(-2 * progress + 2, 2) / 2;
@@ -372,12 +422,12 @@ export default function VBTestPage() {
       if (progress < 1) {
         requestAnimationFrame(animateScroll);
       } else {
-        // 确保最终位置准确
+        // Ensure final position is accurate
         window.scrollTo(0, targetY);
-        // 恢复页面滚动
+        // Restore page scrolling
         document.body.style.overflow = '';
         setIsScrolling(false);
-        // 强制更新当前位置索引，确保导航栏显示正确
+        // Force update current position index to ensure navigation bar displays correctly
         setCurrentPositionIndex(targetIndex);
       }
     };
@@ -385,11 +435,88 @@ export default function VBTestPage() {
     requestAnimationFrame(animateScroll);
   };
   
-  // 设置滚动触发器（控制3D部分的滚动范围）
+  // Handle URL parameter to jump to Section 8 when returning from success story
+  useEffect(() => {
+    if (!mounted || !shouldHideContent) return;
+    
+    // Clear sessionStorage if used
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('vb-return-section');
+      sessionStorage.removeItem('vb-show-overlay');
+    }
+    
+    // Wait for page to fully render and refs to be ready, then jump to Section 8
+    const attemptScroll = (retries = 15) => {
+      if (retries <= 0) {
+        console.warn('Failed to scroll to Section 8: refs not ready');
+        document.body.style.overflow = ''; // Restore overflow if failed
+        setIsFadingOut(true);
+        setTimeout(() => {
+          setShouldHideContent(false); // Completely remove overlay
+          setIsFadingOut(false);
+        }, 300);
+        return;
+      }
+      
+      // Check if section8Ref is ready
+      if (!section8Ref.current) {
+        setTimeout(() => attemptScroll(retries - 1), 50);
+        return;
+      }
+      
+      // Section 8 index in SCROLL_POSITIONS array is 16
+      // Index calculation: 0-3 (sections 1-4) + 4-13 (section5 vh positions) + 14 (section 6) + 15 (section 7) + 16 (section 8)
+      const targetIndex = 16;
+      const target = calculateScrollTarget(targetIndex);
+      
+      if (target && target.offset !== undefined && target.offset > 0) {
+        // Direct positioning, no animation
+        window.scrollTo({
+          top: target.offset,
+          behavior: 'auto' // Ensure no animation
+        });
+        setCurrentPositionIndex(targetIndex);
+        
+        // Ensure overlay displays for at least 500ms, then fade out
+        const startTime = Date.now();
+        const minDisplayTime = 500; // Minimum display time 500ms
+        
+        const checkAndFade = () => {
+          const elapsed = Date.now() - startTime;
+          if (elapsed >= minDisplayTime) {
+            // Start fade out
+            setIsFadingOut(true);
+            // Restore overflow and hide overlay after fade-out animation completes
+            setTimeout(() => {
+              document.body.style.overflow = '';
+              setShouldHideContent(false); // Completely remove overlay
+              setIsFadingOut(false);
+            }, 300); // Fade-out animation duration 300ms
+          } else {
+            // If not yet 500ms, continue waiting
+            setTimeout(checkAndFade, minDisplayTime - elapsed);
+          }
+        };
+        
+        checkAndFade();
+      } else {
+        // If calculateScrollTarget failed, try again
+        setTimeout(() => attemptScroll(retries - 1), 50);
+      }
+    };
+    
+    // Start attempting scroll immediately (no delay to prevent flash)
+    // Use requestAnimationFrame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      attemptScroll();
+    });
+  }, [mounted, calculateScrollTarget, section8Ref]);
+  
+  // Set up scroll triggers (control scroll range for 3D section)
   useEffect(() => {
     if (!mounted) return;
     
-    // Section5的ScrollTrigger
+    // Section5 ScrollTrigger
     const trigger = ScrollTrigger.create({
       id: 'section5-trigger',
       trigger: scrollSectionRef.current,
@@ -402,7 +529,7 @@ export default function VBTestPage() {
       },
       onEnter: () => setActiveSection('section5'),
       onLeave: () => {
-        // 只有在进入Section8之前才清空
+        // Only clear when before entering Section8
         if (!scrollSectionRef8.current) return;
         const rect8 = scrollSectionRef8.current.getBoundingClientRect();
         if (rect8.top > window.innerHeight) {
@@ -413,10 +540,10 @@ export default function VBTestPage() {
       onLeaveBack: () => setActiveSection(null),
     });
     
-    // Section8的ScrollTrigger
-    // start: "top bottom" 表示当 section8 的顶部进入视口底部时开始计算（progress = 0）
-    // end: "bottom bottom" 表示当 section8 的底部到达视口底部时结束（progress = 1）
-    // 这样从开始进入屏幕到完全滚过屏幕正好是 300vh 的滚动距离（section8高度）
+    // Section8 ScrollTrigger
+    // start: "top bottom" means when section8's top enters viewport bottom, start calculation (progress = 0)
+    // end: "bottom bottom" means when section8's bottom reaches viewport bottom, end (progress = 1)
+    // This way from entering screen to completely scrolling past is exactly 300vh scroll distance (section8 height)
     const trigger8 = ScrollTrigger.create({
       trigger: scrollSectionRef8.current,
       start: "top bottom",
@@ -427,32 +554,32 @@ export default function VBTestPage() {
         if (self.isActive) {
           setActiveSection('section8');
         } else if (self.progress >= 1) {
-          // 如果已经滚动到section8的最后（progress = 1），保持section8激活
+          // If already scrolled to end of section8 (progress = 1), keep section8 active
           setActiveSection('section8');
         }
       },
       onEnter: () => setActiveSection('section8'),
       onLeave: () => {
-        // 只有在真正离开section8区域时才设置（检查是否还有section8在视口中）
+        // Only set when truly leaving section8 area (check if section8 is still in viewport)
         if (scrollSectionRef8.current) {
           const rect8 = scrollSectionRef8.current.getBoundingClientRect();
-          // 如果section8完全离开视口（底部在视口顶部之上），才设置为null
+          // If section8 completely leaves viewport (bottom above viewport top), set to null
           if (rect8.bottom < 0) {
             setActiveSection(null);
           } else {
-            // 否则保持section8激活（保持在最后阶段）
+            // Otherwise keep section8 active (stay at final stage)
             setActiveSection('section8');
           }
         }
       },
       onEnterBack: () => setActiveSection('section8'),
       onLeaveBack: () => {
-        // 如果离开Section8回到Section5，保持Section5激活
+        // If leaving Section8 back to Section5, keep Section5 active
         const rect5 = scrollSectionRef.current?.getBoundingClientRect();
         if (rect5 && rect5.top <= window.innerHeight && rect5.bottom > 0) {
           setActiveSection('section5');
         } else {
-          // 否则保持section8激活（向上滚动时保持在最后阶段）
+          // Otherwise keep section8 active (stay at final stage when scrolling up)
           setActiveSection('section8');
         }
       },
@@ -464,7 +591,7 @@ export default function VBTestPage() {
     };
   }, [mounted]);
 
-  // 监听滚动，控制EY logo的显示/隐藏
+  // Listen to scroll, control EY logo show/hide
   useEffect(() => {
     if (!mounted || !section1Ref.current) return;
 
@@ -476,10 +603,10 @@ export default function VBTestPage() {
       }
     };
 
-    // 初始检查
+    // Initial check
     checkScrollPosition();
 
-    // 监听滚动事件
+    // Listen to scroll events
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
@@ -497,55 +624,62 @@ export default function VBTestPage() {
     };
   }, [mounted]);
 
-  // 如果显示 Success Story 页面，只渲染子页面
-  if (showSuccessStory) {
-    return (
-      <SuccessStoryPage onBack={handleBackToMain} />
-    );
-  }
-
   return (
     <>
-      {/* 全局Canvas容器 - fixed定位，根据activeSection切换内容 */}
-      {/* 只在主页面显示时渲染 3D canvas */}
-      {!showSuccessStory && (
-        <GlobalCanvasContainer
-          activeSection={activeSection}
-          scrollProgress5={scrollProgress}
-          scrollProgress8={scrollProgress8}
-          mounted={mounted}
-          layerInfo={layerInfo}
+      {/* Hide content overlay - render FIRST to prevent flash when returning from success story */}
+      {shouldHideContent && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: '#1F1E27',
+            zIndex: 99999,
+            pointerEvents: 'none',
+            opacity: isFadingOut ? 0 : 1,
+            transition: isFadingOut ? 'opacity 300ms ease-out' : 'none', // Only transition on fade-out, not initial display
+            willChange: 'opacity' // Optimize for opacity changes
+          }}
         />
       )}
 
-      {/* Fixed EY Logo - 在section1之外时显示 */}
-      {!showSuccessStory && (
-        <div
-          className="fixed z-[9999] cursor-pointer transition-opacity duration-500 ease-in-out"
-          style={{
-            left: '16px',
-            top: '16px',
-            width: '40px',
-            height: '40px',
-            opacity: showEYLogo ? 1 : 0,
-            pointerEvents: showEYLogo ? 'auto' : 'none',
-          }}
-          onClick={() => {
-            if (showEYLogo) {
-              window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-              });
-            }
-          }}
-        >
-          <img
-            src="/images/EY_logo.svg"
-            alt="EY"
-            className="w-full h-full object-contain"
-          />
-        </div>
-      )}
+      {/* Global Canvas container - fixed positioning, switch content based on activeSection */}
+      <GlobalCanvasContainer
+        activeSection={activeSection}
+        scrollProgress5={scrollProgress}
+        scrollProgress8={scrollProgress8}
+        mounted={mounted}
+        layerInfo={layerInfo}
+      />
+
+      {/* Fixed EY Logo - show when outside section1 */}
+      <div
+        className="fixed z-[9999] cursor-pointer transition-opacity duration-500 ease-in-out"
+        style={{
+          left: '16px',
+          top: '16px',
+          width: '40px',
+          height: '40px',
+          opacity: showEYLogo ? 1 : 0,
+          pointerEvents: showEYLogo ? 'auto' : 'none',
+        }}
+        onClick={() => {
+          if (showEYLogo) {
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          }
+        }}
+      >
+        <img
+          src="/images/EY_logo.svg"
+          alt="EY"
+          className="w-full h-full object-contain"
+        />
+      </div>
       
       <div ref={section1Ref}>
         <Section1 onGetStartedClick={() => handleNavigate(1)} />
@@ -570,17 +704,23 @@ export default function VBTestPage() {
         <Section6 />
       </div>
       <div ref={section7Ref}>
-        <Section7 onRiskAssessmentClick={handleOpenSuccessStory} />
+        <Section7 />
       </div>
-      <Section8
-        scrollSectionRef={scrollSectionRef8}
-      />
       <div ref={section8Ref}>
+        <Section8 />
+      </div>
+      <div ref={section9Ref}>
         <Section9 />
       </div>
+      <div ref={section10Ref}>
+        <Section10 />
+      </div>
+      <Section11
+        scrollSectionRef={scrollSectionRef8}
+      />
 
-      {/* 导航栏 */}
-      {mounted && !showSuccessStory && (
+      {/* Navigation bar */}
+      {mounted && (
         <NavigationBar
           onNavigate={handleNavigate}
           currentPositionIndex={currentPositionIndex}
@@ -593,8 +733,10 @@ export default function VBTestPage() {
             section5: scrollSectionRef,
             section6: section6Ref,
             section7: section7Ref,
-            section8: scrollSectionRef8,
-            section9: section8Ref,
+            section8: section8Ref,
+            section9: section9Ref,
+            section10: section10Ref,
+            section11: scrollSectionRef8,
           }}
         />
       )}

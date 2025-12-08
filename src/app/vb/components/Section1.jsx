@@ -86,14 +86,15 @@ export default function Section1({ onGetStartedClick }) {
           <div className="flex flex-col gap-4 md:gap-6 lg:gap-8">
             {/* Value Blueprints 标题 - 大字体，渐变文字 */}
             <h1 
-              className="text-[48px] sm:text-[60px] md:text-[72px] lg:text-[80px] xl:text-[96px] font-normal leading-none tracking-[-4px] bg-gradient-to-r from-[#e2f3f6] to-[#ead726] bg-clip-text text-transparent"
-              style={{ 
-                WebkitTextFillColor: 'transparent',
-                fontFamily: 'var(--font-eyinterstate)'
-              }}
+              className="text-[48px] sm:text-[60px] md:text-[72px] lg:text-[80px] xl:text-[96px] font-bold leading-none tracking-[-4px] text-white"
             >
-              Value Blueprints
+              EY.ai Value Blueprints
             </h1>
+
+            {/* 副标题文案 */}
+            <p className="text-[18px] md:text-[20px] lg:text-[24px] font-normal text-white leading-snug tracking-[-0.03em]">
+              AI that drives transformational value, not more bolt-on bots
+            </p>
 
             {/* Get Started 按钮 - 白色背景，带向下箭头图标 */}
             <button 
