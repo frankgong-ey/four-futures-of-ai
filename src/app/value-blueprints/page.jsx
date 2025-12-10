@@ -16,8 +16,7 @@ import Section10 from "./components/Section10";
 import Section11 from "./components/Section11";
 import GlobalCanvasContainer from "./components/GlobalCanvasContainer";
 import NavigationBar from "./components/NavigationBar";
-
-gsap.registerPlugin(ScrollTrigger);
+import VBLoadingScreen from "./components/VBLoadingScreen";
 
 // Define scroll position configuration
 const SCROLL_POSITIONS = [
@@ -90,6 +89,7 @@ export default function VBTestPage() {
   const [isScrolling, setIsScrolling] = useState(false);
   const [showEYLogo, setShowEYLogo] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false); // Control fade-out animation
+  const [isModelLoaded, setIsModelLoaded] = useState(false);
   const scrollSectionRef = useRef(null);
   const scrollSectionRef8 = useRef(null);
   const section1Ref = useRef(null);
@@ -135,30 +135,39 @@ export default function VBTestPage() {
     },
   ];
   
+  // Register ScrollTrigger plugin and initialize mounted state
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+  }, []);
+
   // Check URL parameter early and set initial scroll position before first render
   useEffect(() => {
-    // If we detected section=7 in initial state, hide body overflow immediately
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    
+    // If we detected section=8 in initial state, hide body overflow immediately
     if (shouldHideContent) {
       document.body.style.overflow = 'hidden';
       // Clear URL parameter and sessionStorage immediately
       window.history.replaceState({}, '', '/value-blueprints');
-      if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('vb-return-section');
-        sessionStorage.removeItem('vb-show-overlay');
-      }
+      sessionStorage.removeItem('vb-return-section');
+      sessionStorage.removeItem('vb-show-overlay');
     }
     
     setMounted(true);
     
     // Cleanup function: ensure page scroll is restored when component unmounts
     return () => {
-      document.body.style.overflow = '';
+      if (typeof document !== 'undefined') {
+        document.body.style.overflow = '';
+      }
     };
   }, [shouldHideContent]);
 
   // Update position index based on current scroll position
   useEffect(() => {
-    if (!mounted || isScrolling) return;
+    if (!mounted || isScrolling || typeof window === 'undefined') return;
 
     const updateCurrentPosition = () => {
       const scrollY = window.scrollY || window.pageYOffset;
@@ -254,7 +263,7 @@ export default function VBTestPage() {
     // Listen to scroll events (with throttling)
     let ticking = false;
     const handleScroll = () => {
-      if (!ticking) {
+      if (!ticking && typeof window !== 'undefined') {
         window.requestAnimationFrame(() => {
           updateCurrentPosition();
           ticking = false;
@@ -263,14 +272,18 @@ export default function VBTestPage() {
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+      };
+    }
   }, [mounted, isScrolling]);
 
   // Calculate scroll target position - use useCallback for optimization, avoid recreating on each render
   const calculateScrollTarget = useCallback((positionIndex) => {
+    if (typeof window === 'undefined') return null;
+    
     const position = SCROLL_POSITIONS[positionIndex];
     if (!position) return null;
 
@@ -374,6 +387,7 @@ export default function VBTestPage() {
 
   // Navigate to specified position
   const handleNavigate = (targetIndex) => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
     if (isScrolling || targetIndex < 0 || targetIndex >= SCROLL_POSITIONS.length) {
       return;
     }
@@ -417,39 +431,49 @@ export default function VBTestPage() {
         : 1 - Math.pow(-2 * progress + 2, 2) / 2;
       
       const currentY = startY + distance * easeInOut;
-      window.scrollTo(0, currentY);
+      if (typeof window !== 'undefined') {
+        window.scrollTo(0, currentY);
+      }
 
       if (progress < 1) {
-        requestAnimationFrame(animateScroll);
+        if (typeof window !== 'undefined' && window.requestAnimationFrame) {
+          requestAnimationFrame(animateScroll);
+        }
       } else {
         // Ensure final position is accurate
-        window.scrollTo(0, targetY);
+        if (typeof window !== 'undefined') {
+          window.scrollTo(0, targetY);
+        }
         // Restore page scrolling
-        document.body.style.overflow = '';
+        if (typeof document !== 'undefined') {
+          document.body.style.overflow = '';
+        }
         setIsScrolling(false);
         // Force update current position index to ensure navigation bar displays correctly
         setCurrentPositionIndex(targetIndex);
       }
     };
 
-    requestAnimationFrame(animateScroll);
+    if (typeof window !== 'undefined' && window.requestAnimationFrame) {
+      requestAnimationFrame(animateScroll);
+    }
   };
   
   // Handle URL parameter to jump to Section 8 when returning from success story
   useEffect(() => {
-    if (!mounted || !shouldHideContent) return;
+    if (!mounted || !shouldHideContent || typeof window === 'undefined' || typeof document === 'undefined') return;
     
     // Clear sessionStorage if used
-    if (typeof window !== 'undefined') {
-      sessionStorage.removeItem('vb-return-section');
-      sessionStorage.removeItem('vb-show-overlay');
-    }
+    sessionStorage.removeItem('vb-return-section');
+    sessionStorage.removeItem('vb-show-overlay');
     
     // Wait for page to fully render and refs to be ready, then jump to Section 8
     const attemptScroll = (retries = 15) => {
       if (retries <= 0) {
         console.warn('Failed to scroll to Section 8: refs not ready');
-        document.body.style.overflow = ''; // Restore overflow if failed
+        if (typeof document !== 'undefined') {
+          document.body.style.overflow = ''; // Restore overflow if failed
+        }
         setIsFadingOut(true);
         setTimeout(() => {
           setShouldHideContent(false); // Completely remove overlay
@@ -488,7 +512,9 @@ export default function VBTestPage() {
             setIsFadingOut(true);
             // Restore overflow and hide overlay after fade-out animation completes
             setTimeout(() => {
-              document.body.style.overflow = '';
+              if (typeof document !== 'undefined') {
+                document.body.style.overflow = '';
+              }
               setShouldHideContent(false); // Completely remove overlay
               setIsFadingOut(false);
             }, 300); // Fade-out animation duration 300ms
@@ -507,14 +533,21 @@ export default function VBTestPage() {
     
     // Start attempting scroll immediately (no delay to prevent flash)
     // Use requestAnimationFrame to ensure DOM is ready
-    requestAnimationFrame(() => {
-      attemptScroll();
-    });
+    if (typeof window !== 'undefined' && window.requestAnimationFrame) {
+      requestAnimationFrame(() => {
+        attemptScroll();
+      });
+    } else {
+      // Fallback for environments without requestAnimationFrame
+      setTimeout(() => {
+        attemptScroll();
+      }, 0);
+    }
   }, [mounted, calculateScrollTarget, section8Ref]);
   
   // Set up scroll triggers (control scroll range for 3D section)
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || typeof window === 'undefined') return;
     
     // Section5 ScrollTrigger
     const trigger = ScrollTrigger.create({
@@ -593,10 +626,10 @@ export default function VBTestPage() {
 
   // Listen to scroll, control EY logo show/hide
   useEffect(() => {
-    if (!mounted || !section1Ref.current) return;
+    if (!mounted || !section1Ref.current || typeof window === 'undefined') return;
 
     const checkScrollPosition = () => {
-      if (section1Ref.current) {
+      if (section1Ref.current && typeof window !== 'undefined') {
         const section1Bottom = section1Ref.current.offsetTop + section1Ref.current.offsetHeight;
         const scrollY = window.scrollY || window.pageYOffset;
         setShowEYLogo(scrollY > section1Bottom);
@@ -609,7 +642,7 @@ export default function VBTestPage() {
     // Listen to scroll events
     let ticking = false;
     const handleScroll = () => {
-      if (!ticking) {
+      if (!ticking && typeof window !== 'undefined') {
         window.requestAnimationFrame(() => {
           checkScrollPosition();
           ticking = false;
@@ -618,14 +651,21 @@ export default function VBTestPage() {
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+      };
+    }
   }, [mounted]);
 
   return (
     <>
+      {/* Loading screen - render first, highest z-index */}
+      {!isModelLoaded && (
+        <VBLoadingScreen onComplete={() => setIsModelLoaded(true)} />
+      )}
+      
       {/* Hide content overlay - render FIRST to prevent flash when returning from success story */}
       {shouldHideContent && (
         <div 

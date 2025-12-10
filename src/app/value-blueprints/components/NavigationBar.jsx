@@ -83,6 +83,8 @@ export default function NavigationBar({
 
   // 点击外部关闭菜单
   useEffect(() => {
+    if (typeof document === 'undefined') return;
+    
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setShowMenu(false);
