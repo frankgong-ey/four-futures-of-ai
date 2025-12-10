@@ -267,7 +267,7 @@ export default function Navigation() {
   // Hide navigation on DetailView pages
   const isDetailPage = pathname?.startsWith('/futures/') && pathname !== '/futures';
   // Hide navigation on vb page
-  const isVBTestPage = pathname?.startsWith('/vb');
+  const isVBTestPage = pathname?.startsWith('/value-blueprints');
   // Hide navigation on home page
   const isHomePage = pathname === '/';
   const shouldHideNavigation = isDetailPage || isVBTestPage || isHomePage;

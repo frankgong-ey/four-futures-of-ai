@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 
-export default function LayerDetailModal({ isOpen, onClose, layerIndex }) {
+export default function LayerDetailModal({ isOpen, onClose, layerIndex, storyData }) {
   const [shouldRender, setShouldRender] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [currentView, setCurrentView] = useState(layerIndex);
@@ -39,8 +39,8 @@ export default function LayerDetailModal({ isOpen, onClose, layerIndex }) {
 
   if (!shouldRender) return null;
 
-  // Layer 配置数据
-  const layerData = [
+  // Layer 配置数据 - 优先使用 storyData，否则使用默认数据
+  const defaultLayerData = [
     {
       name: "Customer",
       color: "#D3F4DC",
@@ -53,7 +53,7 @@ export default function LayerDetailModal({ isOpen, onClose, layerIndex }) {
       color: "#6DDEDC",
       image: "/images/value-blueprints/ss-workforce.png",
       inAction: "Unlocks value of a GBS organization, enabled to work across process instead of within steps",
-      valueUnlocked: "Accelerates ability to migrate QTC process across all 27 divisions into GBS team"
+      valueUnlocked: "Accelerates ability to migrate Quote-to-cash process across a global business strategical into their Global Business Services organization"
     },
     {
       name: "Processes",
@@ -92,6 +92,7 @@ export default function LayerDetailModal({ isOpen, onClose, layerIndex }) {
     }
   ];
 
+  const layerData = storyData?.section3?.layers || defaultLayerData;
   const currentLayer = layerData[currentView] || layerData[0];
 
   const handlePrevious = () => {
@@ -129,63 +130,53 @@ export default function LayerDetailModal({ isOpen, onClose, layerIndex }) {
     >
       {/* Modal 内容 */}
       <div
-        className="relative bg-black/95 w-full h-full max-w-[1024px] mx-auto my-auto flex flex-col outline outline-white/50 transition-opacity duration-300"
+        className="relative bg-black/95 w-full h-full flex flex-col outline-none md:outline md:outline-white/50 transition-opacity duration-300 md:max-w-[1024px] md:mx-auto md:my-auto md:max-h-[640px]"
         onClick={(e) => e.stopPropagation()}
         style={{ 
           fontFamily: 'var(--font-eyinterstate)',
           opacity: isVisible ? 1 : 0,
-          maxHeight: '640px'
         }}
       >
         {/* 可滚动内容区域 */}
-        <div className="flex-1 overflow-y-auto p-9 pb-32">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-9 pb-20 md:pb-24 lg:pb-32">
           {/* Title module - 左上角 */}
-          <div className="mb-12">
-            <div className="flex items-center gap-4">
-              <div 
-                className="w-[3px] h-12 flex-shrink-0"
-                style={{
-                  background: 'linear-gradient(to bottom, #FFDD0B, #FF789B, #34F8FD)',
-                }}
-              />
-              <h2 
-                className="text-[48px] md:text-[64px] font-bold text-white leading-none tracking-[-0.05em]"
-              >
-                {currentLayer.name}
-              </h2>
-            </div>
+          <div className="mb-6 md:mb-8 lg:mb-12">
+            <h2 
+              className="text-[32px] md:text-[40px] lg:text-[48px] xl:text-[64px] font-bold text-white leading-none tracking-[-0.05em]"
+            >
+              {currentLayer.name}
+            </h2>
           </div>
 
           {/* 两栏布局 */}
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 lg:items-center">
+          <div className="flex flex-col lg:flex-row gap-4 md:gap-6 lg:gap-8 xl:gap-12 lg:items-center">
             {/* 左侧：Layer 图片 - 放大 */}
             <div className="flex-shrink-0">
               <img 
                 src={currentLayer.image}
                 alt={currentLayer.name}
-                className="w-full max-w-[400px] h-auto object-contain"
-                style={{ width: 'auto', height: 'auto', maxWidth: '500px' }}
+                className="w-full max-w-[280px] md:max-w-[350px] lg:max-w-[400px] xl:max-w-[500px] h-auto object-contain mx-auto lg:mx-0"
               />
             </div>
 
             {/* 右侧：In Action 和 Value Unlocked */}
-            <div className="flex-1 flex flex-col gap-8 lg:gap-12">
+            <div className="flex-1 flex flex-col gap-4 md:gap-6 lg:gap-8 xl:gap-12">
               {/* In Action */}
               <div>
-                <h3 className="text-[24px] md:text-[32px] font-bold text-white mb-4">
-                  In Action
+                <h3 className="text-[18px] md:text-[22px] lg:text-[24px] xl:text-[32px] font-bold text-white mb-3 md:mb-4">
+                  What We Did
                 </h3>
-                <p className="text-[18px] md:text-[20px] text-white leading-relaxed">
+                <p className="text-[14px] md:text-[16px] lg:text-[18px] xl:text-[20px] text-white leading-relaxed">
                   {currentLayer.inAction}
                 </p>
               </div>
 
               {/* Value Unlocked */}
               <div>
-                <h3 className="text-[24px] md:text-[32px] font-bold text-white mb-4">
+                <h3 className="text-[18px] md:text-[22px] lg:text-[24px] xl:text-[32px] font-bold text-white mb-3 md:mb-4">
                   Value Unlocked
                 </h3>
-                <p className="text-[18px] md:text-[20px] text-white leading-relaxed">
+                <p className="text-[14px] md:text-[16px] lg:text-[18px] xl:text-[20px] text-white leading-relaxed">
                   {currentLayer.valueUnlocked}
                 </p>
               </div>
@@ -194,18 +185,17 @@ export default function LayerDetailModal({ isOpen, onClose, layerIndex }) {
         </div>
 
         {/* Action Row - 底部导航（固定在底部） */}
-        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between p-8 border-t border-white/20 bg-black">
-          {/* 关闭按钮 */}
+        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between p-3 md:p-4 lg:p-6 xl:p-8 border-t border-white/20 bg-black">
+          {/* 关闭按钮 - 左侧 */}
           <button
             onClick={onClose}
-            className="w-20 h-20 rounded-full bg-black border border-white/50 flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer"
+            className="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 rounded-full bg-black border border-white/50 flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer flex-shrink-0"
           >
             <svg
-              width="32"
-              height="32"
               viewBox="0 0 16 16"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              className="w-6 h-6 md:w-8 md:h-8"
             >
               <path
                 d="M12 4L4 12M4 4L12 12"
@@ -217,24 +207,23 @@ export default function LayerDetailModal({ isOpen, onClose, layerIndex }) {
             </svg>
           </button>
 
-          {/* View 切换按钮组合 - 居中 */}
-          <div className="flex items-center gap-8">
+          {/* View 切换按钮组合 - 右侧对齐（mobile）或居中（desktop） */}
+          <div className="flex items-center gap-4 md:gap-6 lg:gap-8 ml-auto md:mx-auto">
             {/* 上一个按钮 */}
             <button
               onClick={handlePrevious}
               disabled={currentView === 0}
-              className={`w-20 h-20 rounded-full border flex items-center justify-center transition-colors ${
+              className={`w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 rounded-full border flex items-center justify-center transition-colors flex-shrink-0 ${
                 currentView === 0
                   ? 'border-white/20 cursor-not-allowed opacity-50'
                   : 'border-white/50 hover:bg-white/10 cursor-pointer'
               }`}
             >
               <svg
-                width="32"
-                height="32"
                 viewBox="0 0 16 16"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
+                className="w-6 h-6 md:w-8 md:h-8"
               >
                 <path
                   d="M10 12L6 8L10 4"
@@ -264,18 +253,17 @@ export default function LayerDetailModal({ isOpen, onClose, layerIndex }) {
             <button
               onClick={handleNext}
               disabled={currentView === totalViews - 1}
-              className={`w-20 h-20 rounded-full border flex items-center justify-center transition-colors ${
+              className={`w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 rounded-full border flex items-center justify-center transition-colors flex-shrink-0 ${
                 currentView === totalViews - 1
                   ? 'border-white/20 cursor-not-allowed opacity-50'
                   : 'border-white/50 hover:bg-white/10 cursor-pointer'
               }`}
             >
               <svg
-                width="32"
-                height="32"
                 viewBox="0 0 16 16"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
+                className="w-6 h-6 md:w-8 md:h-8"
               >
                 <path
                   d="M6 4L10 8L6 12"
@@ -288,8 +276,8 @@ export default function LayerDetailModal({ isOpen, onClose, layerIndex }) {
             </button>
           </div>
 
-          {/* 右侧占位，保持平衡 */}
-          <div className="w-20"></div>
+          {/* 右侧占位，保持平衡（仅 desktop） */}
+          <div className="hidden md:block w-12 lg:w-14 xl:w-16 2xl:w-20"></div>
         </div>
       </div>
     </div>

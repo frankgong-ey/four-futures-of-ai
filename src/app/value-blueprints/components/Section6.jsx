@@ -59,7 +59,7 @@ export default function Section6() {
             outline: 'none' // 移除默认的 outline
           }}
         >
-          {/* 左侧：标题和文本网格 */}
+          {/* 左侧：文本网格 */}
           <div 
             className="p-6 md:p-8 lg:p-12 flex flex-col" 
             style={{ 
@@ -69,11 +69,6 @@ export default function Section6() {
               zIndex: 10
             }}
           >
-            {/* 标题 */}
-            <div className="mb-6 md:mb-8">
-              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-white ">Ready EY.ai Value Blueprints</p>
-            </div>
-
             {/* 文本网格 - 响应式：移动端2列，桌面端4列（11个卡片），无间距 */}
             <div 
               className="grid grid-cols-2 md:grid-cols-4 flex-1"
@@ -82,10 +77,7 @@ export default function Section6() {
                 marginLeft: 0,
                 marginRight: 'auto',
                 position: 'relative',
-                zIndex: 10,
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                backdropFilter: 'blur(10px)'
+                zIndex: 10
               }}
             >
               {[
@@ -103,13 +95,16 @@ export default function Section6() {
               ].map((label, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-start gap-3 p-3 md:p-4"
+                  className="flex items-center justify-start gap-4 p-3 md:p-4"
                 >
-                  <img
-                    src="/images/value-blueprints/bullet-plus.svg"
-                    alt="Bullet"
-                    className="w-6 h-6 flex-shrink-0"
-                    style={{ width: '24px', height: '24px' }}
+                  <div
+                    style={{
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      backgroundColor: 'white',
+                      flexShrink: 0
+                    }}
                   />
                   <p className="text-[20px] text-left text-white leading-tight font-bold">{label}</p>
                 </div>

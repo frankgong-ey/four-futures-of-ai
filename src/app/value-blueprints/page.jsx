@@ -141,7 +141,7 @@ export default function VBTestPage() {
     if (shouldHideContent) {
       document.body.style.overflow = 'hidden';
       // Clear URL parameter and sessionStorage immediately
-      window.history.replaceState({}, '', '/vb');
+      window.history.replaceState({}, '', '/value-blueprints');
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem('vb-return-section');
         sessionStorage.removeItem('vb-show-overlay');
