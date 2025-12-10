@@ -16,7 +16,6 @@ import Section10 from "./components/Section10";
 import Section11 from "./components/Section11";
 import GlobalCanvasContainer from "./components/GlobalCanvasContainer";
 import NavigationBar from "./components/NavigationBar";
-import VBLoadingScreen from "./components/VBLoadingScreen";
 
 // Define scroll position configuration
 const SCROLL_POSITIONS = [
@@ -89,7 +88,6 @@ export default function VBTestPage() {
   const [isScrolling, setIsScrolling] = useState(false);
   const [showEYLogo, setShowEYLogo] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false); // Control fade-out animation
-  const [isModelLoaded, setIsModelLoaded] = useState(false);
   const scrollSectionRef = useRef(null);
   const scrollSectionRef8 = useRef(null);
   const section1Ref = useRef(null);
@@ -661,11 +659,6 @@ export default function VBTestPage() {
 
   return (
     <>
-      {/* Loading screen - render first, highest z-index */}
-      {!isModelLoaded && (
-        <VBLoadingScreen onComplete={() => setIsModelLoaded(true)} />
-      )}
-      
       {/* Hide content overlay - render FIRST to prevent flash when returning from success story */}
       {shouldHideContent && (
         <div 
