@@ -1209,7 +1209,6 @@ function LabelPositionCalculator({ labelMeshRefs, showLabels }) {
 }
 
 function ModelControls({ scrollProgress, activeSection }) {
-  const { scene } = useGLTF('/models/value-blueprint3.glb', true); // true = use preload cache
   // activeSection can be 'section5', 'section8', 'section5-final', or null
   // 'section5-final' means maintain section5's final state
   const effectiveProgress = activeSection ? (scrollProgress || 0) : 0;
