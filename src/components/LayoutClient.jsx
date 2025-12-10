@@ -14,8 +14,8 @@ export default function LayoutClient() {
   const isVotePage = pathname === '/vote';
   const isResultsPage = pathname === '/results';
   const isValueBlueprintPage = pathname === '/value-blueprint';
-  const isVBTestPage = pathname === '/vb';
-  const isSuccessStoryPage = pathname === '/vb/success-story';
+  const isVBTestPage = pathname === '/value-blueprints';
+  const isSuccessStoryPage = pathname === '/value-blueprints/success-story';
   const isHomePage = pathname === '/';
 
   // Do not render any global components on home page

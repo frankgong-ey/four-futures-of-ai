@@ -6,12 +6,12 @@ import { usePathname } from 'next/navigation';
 /**
  * 背景竖线组件
  * 在所有页面section中显示，包含6条均匀分布的竖线
- * 在 /vb 页面不显示
+ * 在 /value-blueprints 页面不显示
  */
 export default function BackgroundLines() {
   const pathname = usePathname();
-  const isVBTestPage = pathname === '/vb';
-  const isSuccessStoryPage = pathname === '/vb/success-story';
+  const isVBTestPage = pathname === '/value-blueprints';
+  const isSuccessStoryPage = pathname === '/value-blueprints/success-story';
 
   // 在 vb 页面和 success-story 页面不显示背景线
   if (isVBTestPage || isSuccessStoryPage) {

@@ -37,7 +37,7 @@ export default function Section8() {
     }
     
     // 跳转到 success-story 页面，带上 client 类型参数
-    router.push(`/vb/success-story?client=${storyId}`);
+    router.push(`/value-blueprints/success-story?client=${storyId}`);
   };
   
   return (
@@ -72,15 +72,14 @@ export default function Section8() {
         {/* Three Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-[1280px] mx-auto relative z-10">
           {successStories.map((story, index) => {
-            const isDisabled = story.id === 'retail' || story.id === 'ey-client-zero';
             return (
             <div
               key={story.id}
-              onClick={isDisabled ? undefined : () => handleCardClick(story.id)}
-              className={`relative flex flex-col group overflow-hidden ${isDisabled ? '' : 'cursor-pointer'}`}
+              onClick={() => handleCardClick(story.id)}
+              className="relative flex flex-col group overflow-hidden cursor-pointer"
               style={{
-                opacity: isDisabled ? 0.4 : 1,
-                pointerEvents: isDisabled ? 'none' : 'auto',
+                opacity: 1,
+                pointerEvents: 'auto',
               }}
             >
               {/* Image - 上方 */}
@@ -141,23 +140,17 @@ export default function Section8() {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (!isDisabled) {
                       handleCardClick(story.id);
-                    }
                   }}
-                  disabled={isDisabled}
                   className="self-start px-6 py-3 border border-white text-white font-bold transition-all"
                   style={{
                     fontFamily: 'var(--font-eyinterstate)',
                     fontSize: '16px',
                     backgroundColor: 'transparent',
-                    cursor: isDisabled ? 'not-allowed' : 'pointer',
-                    opacity: isDisabled ? 0.4 : 1,
+                    cursor: 'pointer',
                   }}
                   onMouseEnter={(e) => {
-                    if (!isDisabled) {
                       e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                    }
                   }}
                   onMouseLeave={(e) => {
                     e.target.style.backgroundColor = 'transparent';

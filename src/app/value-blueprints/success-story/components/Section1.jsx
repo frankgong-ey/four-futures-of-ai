@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import MoreBackgroundModal from "./MoreBackgroundModal";
 
-export default function Section1() {
+export default function Section1({ storyData }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 当 modal 打开时禁用背景滚动
@@ -31,7 +31,7 @@ export default function Section1() {
     >
       {/* 背景图片 - 保持长宽比 */}
       <img 
-        src="/images/value-blueprints/ss-tf-hero.png"
+        src={storyData.section1.heroImage}
         alt="Background"
         className="absolute inset-0 w-full h-full object-cover"
         style={{ zIndex: 1 }}
@@ -47,49 +47,64 @@ export default function Section1() {
           {/* Title Module */}
           <div className="flex items-stretch max-w-[1024px]">
             {/* 垂直渐变边框 */}
-            <div
-              className="w-[3px] flex-shrink-0"
-              style={{
-                background: 'linear-gradient(to bottom, #FFDD0B, #FF789B, #34F8FD)',
-              }}
-            />
+          <div
+            className="w-[2px] md:w-[3px] flex-shrink-0"
+            style={{
+              background: 'linear-gradient(to bottom, #FFDD0B, #FF789B, #34F8FD)',
+            }}
+          />
             {/* 文案容器 */}
-            <div className="pl-6 flex flex-col gap-4">
+            <div className="pl-4 md:pl-6 flex flex-col gap-2 md:gap-4">
               <p 
-                className="text-[48px] font-normal tracking-[-0.05em] leading-none text-[#FFE601]"
+                className="text-[28px] md:text-[36px] lg:text-[48px] font-normal tracking-[-0.05em] leading-none text-[#FFE601]"
                 style={{ fontFamily: 'var(--font-eyinterstate)' }}
               >
                 Success Story
               </p>
               <h1 
-                className="text-[80px] font-bold leading-none tracking-[-0.05em] text-white"
+                className="text-[36px] md:text-[48px] lg:text-[64px] xl:text-[80px] font-bold leading-none tracking-[-0.05em] text-white"
                 style={{ fontFamily: 'var(--font-eyinterstate)' }}
               >
-                Life Sciences Quote-to-Cash
+                {storyData.title}
               </h1>
             </div>
           </div>
 
           {/* 描述文本 */}
-          <p className="text-[20px] font-normal leading-relaxed text-white">
-            A global life sciences conglomerate sought to unlock more value from its fragmented, highly manual Quote-to-Cash process. With a complex system of record landscape, the organization struggled with complex CSR workflows, disconnected communications, and limited end-to-end visibility—creating inefficiencies, compliance risks, and inconsistent experiences. EY partnered with the client to rapidly identify the highest-value parts of the process and reimagine them using the Value Blueprint framework.
-          </p>
+          {Array.isArray(storyData.section1.description) ? (
+            <div className="flex flex-col gap-3 md:gap-4">
+              {storyData.section1.description.map((paragraph, index) => (
+                <p key={index} className="text-[16px] md:text-[18px] lg:text-[20px] font-normal leading-relaxed text-white">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[16px] md:text-[18px] lg:text-[20px] font-normal leading-relaxed text-white">
+              {storyData.section1.description}
+            </p>
+          )}
           
           {/* More background 按钮 - Outline Style */}
+          {storyData.id !== 'retail' && (
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="px-6 py-6 border border-white/50 hover:bg-white/10 transition-colors cursor-pointer text-white font-bold text-[18px] md:text-[18px] self-start"
+            className="px-4 py-3 md:px-6 md:py-4 lg:px-6 lg:py-6 border border-white/50 hover:bg-white/10 transition-colors cursor-pointer text-white font-bold text-[14px] md:text-[16px] lg:text-[18px] self-start"
           >
             More Background
           </button>
+          )}
         </div>
       </div>
 
       {/* More Background Modal */}
+      {storyData.id !== 'retail' && (
       <MoreBackgroundModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+          storyData={storyData}
       />
+      )}
     </section>
   );
 }

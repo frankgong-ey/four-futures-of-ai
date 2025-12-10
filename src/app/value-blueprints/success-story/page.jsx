@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useState, useRef, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Section1 from "./components/Section1";
 import Section2 from "./components/Section2";
 import Section3 from "./components/Section3";
 import Section4 from "./components/Section4";
 import NavigationBar from "./components/NavigationBar";
+import { storiesData, defaultStoryId } from "./data/storiesData";
 
 // Define scroll position configuration
 const SCROLL_POSITIONS = [
@@ -21,8 +22,12 @@ const SCROLL_DURATIONS = [
   500, // Section 2 -> 3
 ];
 
-export default function SuccessStoryRoute() {
+function SuccessStoryContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const clientId = searchParams.get('client') || defaultStoryId;
+  const storyData = storiesData[clientId] || storiesData[defaultStoryId];
+  
   const [mounted, setMounted] = useState(false);
   const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -37,15 +42,15 @@ export default function SuccessStoryRoute() {
       sessionStorage.setItem('vb-show-overlay', 'true');
     }
     
-    // 返回时跳转到 /vb，并带上 section=8 参数
-    router.push('/vb?section=8');
+    // 返回时跳转到 /value-blueprints，并带上 section=8 参数
+    router.push('/value-blueprints?section=8');
   };
   
   const handleMoreStoryClick = (storyId) => {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('vb-return-section', '8');
     }
-    router.push(`/vb/success-story?client=${storyId}`);
+    router.push(`/value-blueprints/success-story?client=${storyId}`);
   };
   
   // 确保页面加载时滚动到顶部
@@ -201,13 +206,13 @@ export default function SuccessStoryRoute() {
   return (
     <div className="relative w-full text-white bg-black" style={{ fontFamily: 'var(--font-eyinterstate)' }}>
       <div ref={section1Ref}>
-        <Section1 />
+        <Section1 storyData={storyData} />
       </div>
       <div ref={section2Ref}>
-        <Section2 />
+        <Section2 storyData={storyData} />
       </div>
       <div ref={section3Ref}>
-        <Section3 />
+        <Section3 storyData={storyData} />
       </div>
       <Section4 onBack={handleBack} onMoreStoryClick={handleMoreStoryClick} />
       
@@ -226,6 +231,14 @@ export default function SuccessStoryRoute() {
         />
       )}
     </div>
+  );
+}
+
+export default function SuccessStoryRoute() {
+  return (
+    <Suspense fallback={<div className="relative w-full text-white bg-black min-h-screen flex items-center justify-center" style={{ fontFamily: 'var(--font-eyinterstate)' }}>Loading...</div>}>
+      <SuccessStoryContent />
+    </Suspense>
   );
 }
 

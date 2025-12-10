@@ -156,10 +156,11 @@ export default function Section4({ onBack, onMoreStoryClick }) {
         <div className="flex justify-center">
           <button
             onClick={onBack}
-            className="px-8 py-4 border border-white/50 hover:bg-white/10 hover:border-white transition-all duration-300 cursor-pointer"
+            className="px-6 py-3 md:px-8 md:py-4 border border-white/50 hover:bg-white/10 hover:border-white transition-all duration-300 cursor-pointer"
+            className="md:text-[16px] lg:text-[18px]"
             style={{
               fontFamily: 'var(--font-eyinterstate)',
-              fontSize: '18px',
+              fontSize: '14px',
               fontWeight: 'bold',
               backgroundColor: 'transparent',
               color: 'white',

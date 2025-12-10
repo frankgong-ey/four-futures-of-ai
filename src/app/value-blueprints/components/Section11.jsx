@@ -60,7 +60,7 @@ export default function Section11({ scrollSectionRef }) {
                   fontFamily: 'var(--font-eyinterstate)',
                 }}
               >
-                Transform cross-functional processes, Blueprint by Blueprint to shape the Agentic Enterprise with confidence.
+                Together, we transform cross-functional processes—Blueprint by Blueprint—to shape the Agentic Enterprise with confidence.
               </p>
             </div>
           </div>

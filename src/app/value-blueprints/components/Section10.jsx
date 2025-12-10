@@ -40,22 +40,18 @@ export default function Section10() {
       <div className="flex flex-col lg:flex-row relative w-full">
         {/* 左侧：Sticky Title Module */}
         <div 
-          className="w-full lg:w-auto xl:max-w-[640px] lg:max-w-[400px] flex items-center pl-[5%] pr-[5%] lg:pr-0"
+          className="w-full lg:w-auto xl:max-w-[640px] lg:max-w-[400px] flex items-center lg:items-center pl-[5%] pr-[5%] lg:pr-0 relative lg:sticky lg:top-0 lg:self-start py-8 lg:py-0 lg:!min-h-screen"
           style={{
-            minHeight: '100vh',
-            position: 'sticky',
-            top: 0,
-            alignSelf: 'flex-start',
+            minHeight: 'auto',
             zIndex: 20,
           }}
         >
           <div className="flex items-center w-full">
             {/* 垂直渐变边框 */}
             <div 
-              className="w-[3px] h-full flex-shrink-0"
+              className="w-[3px] h-auto lg:h-full lg:!min-h-[200px] flex-shrink-0 self-stretch lg:self-auto"
               style={{
                 background: 'linear-gradient(to bottom, #FFDD0B, #FF789B, #34F8FD)',
-                minHeight: '200px',
               }}
             />
             {/* 文案容器 */}
