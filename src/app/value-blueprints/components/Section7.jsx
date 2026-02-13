@@ -7,19 +7,19 @@ export default function Section7() {
     {
       icon: "/images/value-blueprints/Section7_1.svg",
       number: 1,
-      title: "Strategic Intent and Value",
-      description: "Strategic intent drives the identification of value levers within a process.",
+      title: "Strategic intent and value",
+      description: "Use strategic intent to drive the identification of value levers within a process.",
     },
     {
       icon: "/images/value-blueprints/Section7_2.svg",
       number: 2,
-      title: "Process and Workforce Reimagination",
-      description: "Redesign process with AI, integrating workforce transformation for future readiness.",
+      title: "Process and workforce reimagination",
+      description: "Redesign the process with AI, integrating workforce transformation for future readiness.",
     },
     {
       icon: "/images/value-blueprints/Section7_3.png",
       number: 3,
-      title: "EY.ai Value Blueprint Enablement",
+      title: "EY.ai Value Blueprint enablement",
       description: "Lay the foundation needed to realize the future-ready process.",
     },
   ];

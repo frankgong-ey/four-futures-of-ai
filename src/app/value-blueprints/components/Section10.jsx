@@ -10,15 +10,15 @@ export default function Section10() {
     },
     {
       title: "Business",
-      description: "Strategic understanding with process expertise",
+      description: "Develop strategic understanding with deep process experience",
     },
     {
-      title: "Data & AI",
-      description: "Strategic approach and expertise to data and AI capabilities",
+      title: "Data and AI",
+      description: "Utilize a strategic approach and knowledge of data and AI capabilities",
     },
     {
       title: "Technology",
-      description: "Leverage tech platforms to enable scalable, secure, and efficient delivery",
+      description: "Leverage technology platforms to enable scalable, secure and efficient delivery",
     },
     {
       title: "Change",
@@ -57,10 +57,10 @@ export default function Section10() {
             {/* 文案容器 */}
             <div className="pl-6">
               <p className="text-[28px] md:text-[48px] font-normal tracking-[-0.05em] leading-none text-[#FFE601] mb-4">
-                Getting Started
+                Getting started
               </p>
               <h2 className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-white">
-                EY's Strategy Diagnostic
+                EY strategy diagnostic
               </h2>
             </div>
           </div>
@@ -89,7 +89,7 @@ export default function Section10() {
                     EY.ai Value Blueprints
                   </h3>
                   <p className="text-[16px] md:text-[20px] text-white leading-relaxed">
-                    Ready to be tailored with context to industry.
+                    Ready to be tailored with context to industry
                   </p>
                 </div>
                 {/* 右侧：图片 */}
@@ -112,10 +112,10 @@ export default function Section10() {
             {/* Cross-Functional Teams */}
             <div>
               <h3 className="text-[24px] md:text-[32px] font-bold text-white mb-4 tracking-[-0.05em]">
-                Cross-Functional Teams
+                Cross-functional teams
               </h3>
               <p className="text-[16px] md:text-[20px] text-white leading-relaxed mb-6">
-                Focused on 5 strategic outcomes.
+                Focused on 5 strategic outcomes
               </p>
               
               {/* 5 个卡片网格 - 3 个在上排，2 个在下排 */}
@@ -189,14 +189,9 @@ export default function Section10() {
             {/* Enterprise Strategy */}
             <div className="mb-0 flex justify-center">
               <div 
-                className="bg-[#2C2B36] border border-[#EAD726] rounded-none p-4 md:p-6 flex items-center justify-center gap-4"
+                className="bg-[#2C2B36] border border-[#EAD726] rounded-none p-4 md:p-6 flex items-center justify-center"
                 style={{ maxWidth: '600px', width: '100%' }}
               >
-                <img
-                  src="/images/value-blueprints/s9-es.svg"
-                  alt="Enterprise Strategy"
-                  className="w-8 h-8 md:w-10 md:h-10 flex-shrink-0"
-                />
                 <h3 className="text-[18px] md:text-[24px] font-bold text-white text-center">
                   Enterprise Strategy
                 </h3>
@@ -220,7 +215,7 @@ export default function Section10() {
                 style={{ maxWidth: '600px', width: '100%' }}
               >
                 <h3 className="text-[24px] md:text-[32px] font-bold text-black text-center" style={{ letterSpacing: '-0.05em' }}>
-                  Value-led Transformation
+                  Value-led transformation
                 </h3>
               </div>
             </div>
@@ -263,14 +258,14 @@ export default function Section10() {
                     }}
                   ></div>
                   <p 
-                    className="text-sm md:text-base font-bold"
-                    style={{ color: '#E87729' }}
+                    className="text-sm font-bold md:text-[18px]"
+                    style={{ color: '#ffffff' }}
                   >
                     Step 1
                   </p>
                 </div>
                 <h4 className="text-white text-base md:text-lg font-normal">
-                  Context and Ambition
+                  Context and ambition
                 </h4>
               </div>
 
@@ -292,14 +287,14 @@ export default function Section10() {
                     }}
                   ></div>
                   <p 
-                    className="text-sm md:text-base font-bold"
-                    style={{ color: '#D85978' }}
+                    className="text-sm font-bold md:text-[18px]"
+                    style={{ color: '#ffffff' }}
                   >
                     Step 2
                   </p>
                 </div>
                 <h4 className="text-white text-base md:text-lg font-normal">
-                  Future State Processes Reimagined
+                  Future state processes reimagined
                 </h4>
               </div>
 
@@ -321,14 +316,14 @@ export default function Section10() {
                     }}
                   ></div>
                   <p 
-                    className="text-sm md:text-base font-bold"
-                    style={{ color: '#59A0F0' }}
+                    className="text-sm font-bold md:text-[18px]"
+                    style={{ color: '#ffffff' }}
                   >
                     Step 3
                   </p>
                 </div>
                 <h4 className="text-white text-base md:text-lg font-normal">
-                  Future State Architecture and Roadmap
+                  Future state architecture and roadmap
                 </h4>
               </div>
             </div>
@@ -336,7 +331,7 @@ export default function Section10() {
             {/* 底部定义文本 */}
             <div className="text-left" style={{ maxWidth: '900px', margin: '0 auto' }}>
               <p className="text-white font-normal leading-relaxed" style={{ fontSize: '24px' }}>
-                A <span className="font-bold" style={{ color: '#EAD726' }}>value-led transformation</span> quantifies the benefits of reimagined processes, creates a practical playbook to prioritize initiatives and establishes a <span className="font-bold" style={{ color: '#EAD726' }}>self-funding program</span>.
+                A <span className="font-bold" style={{ color: '#EAD726' }}>value-led transformation</span> quantifies benefits, prioritizes initiatives, and establishes a <span className="font-bold" style={{ color: '#EAD726' }}>self-funding program</span>.
               </p>
             </div>
           </div>

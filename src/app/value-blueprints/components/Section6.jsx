@@ -54,7 +54,7 @@ export default function Section6() {
         <div 
           className="relative"
           style={{
-            background: 'linear-gradient(to right, #2C2B36, #BC991A)',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
             minHeight: '300px',
             outline: 'none' // 移除默认的 outline
           }}
@@ -91,7 +91,7 @@ export default function Section6() {
                 'Innovate to Scale',
                 'Procure to Pay',
                 'Plan to Perform',
-                '...Or Custom Value Blueprints',
+                'Or custom Value Blueprints',
               ].map((label, index) => (
                 <div
                   key={index}
@@ -101,7 +101,6 @@ export default function Section6() {
                     style={{
                       width: '6px',
                       height: '6px',
-                      borderRadius: '50%',
                       backgroundColor: 'white',
                       flexShrink: 0
                     }}

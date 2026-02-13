@@ -58,7 +58,7 @@ export default function Section1({ onGetStartedClick }) {
           }}
         >
           <img 
-            src="/images/EY_logo.svg" 
+            src="/images/EY_logo_yellow.svg" 
             alt="EY" 
             className="h-12 md:h-16 lg:h-20 w-auto object-contain" 
           />
@@ -103,7 +103,7 @@ export default function Section1({ onGetStartedClick }) {
               style={{ fontFamily: 'var(--font-eyinterstate)' }}
             >
               <span className="text-[16px] md:text-[18px] lg:text-[20px] font-normal text-black">
-                Get Started
+                Get started
               </span>
               {/* 使用 arrow-next.svg 作为向下箭头图标 */}
               <div className="flex-none w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 flex items-center justify-center">

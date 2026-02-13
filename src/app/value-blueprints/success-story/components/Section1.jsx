@@ -59,7 +59,7 @@ export default function Section1({ storyData }) {
                 className="text-[28px] md:text-[36px] lg:text-[48px] font-normal tracking-[-0.05em] leading-none text-[#FFE601]"
                 style={{ fontFamily: 'var(--font-eyinterstate)' }}
               >
-                Success Story
+                Success story
               </p>
               <h1 
                 className="text-[36px] md:text-[48px] lg:text-[64px] xl:text-[80px] font-bold leading-none tracking-[-0.05em] text-white"

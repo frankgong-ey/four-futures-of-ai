@@ -2,7 +2,7 @@ export const storiesData = {
   'life-sciences': {
     id: 'life-sciences',
     client: 'Life Sciences Client',
-    title: 'Life Sciences Quote-to-Cash',
+    title: 'Life Sciences Quote to Cash',
     
     // Section1 数据
     section1: {
@@ -160,7 +160,7 @@ export const storiesData = {
   'retail': {
     id: 'retail',
     client: 'Retail Client',
-    title: 'Retail Design-to-Launch',
+    title: 'Retail Design to Launch',
     
     section1: {
       heroImage: '/images/value-blueprints/ss-fo-hero.png',
@@ -312,7 +312,7 @@ export const storiesData = {
   'ey-client-zero': {
     id: 'ey-client-zero',
     client: 'EY Client Zero',
-    title: 'EY Source-to-Pay-Risk',
+    title: 'EY Source to Pay - risk',
     
     section1: {
       heroImage: '/images/value-blueprints/ss-ey-hero.png',

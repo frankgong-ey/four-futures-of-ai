@@ -36,7 +36,7 @@ export default function Section9() {
             {/* Chart Image */}
             <div className="mb-6">
               <img
-                src="/images/value-blueprints/section9_a.svg"
+                src="/images/value-blueprints/section9_a.png"
                 alt="Bolt-on AI Chart"
                 className="w-full h-auto object-contain"
               />
@@ -47,7 +47,7 @@ export default function Section9() {
               className="text-[16px] md:text-[20px] text-white leading-relaxed"
               style={{ fontFamily: 'var(--font-eyinterstate)' }}
             >
-              Use case by use case, capabilities remain siloed, only achieving incremental gains, value plateaus.
+              Use case by use case, capabilities remain siloed, only achieving incremental gains and reaching value plateaus.
             </p>
           </div>
 
@@ -56,7 +56,7 @@ export default function Section9() {
             {/* Chart Image */}
             <div className="mb-6">
               <img
-                src="/images/value-blueprints/section9_b.svg"
+                src="/images/value-blueprints/section9_b.png"
                 alt="Built-in AI Chart"
                 className="w-full h-auto object-contain"
               />
@@ -67,7 +67,7 @@ export default function Section9() {
               className="text-[16px] md:text-[20px] text-white leading-relaxed"
               style={{ fontFamily: 'var(--font-eyinterstate)' }}
             >
-              Blueprint by blueprint, with a cross-functional target, capabilities become reusable, effort decreases, and each function raises as they climb towards a complete transformation.
+              Blueprint by blueprint, with a cross-functional target, capabilities become reusable, effort decreases, and each function raises as they climb toward a complete transformation.
             </p>
           </div>
         </div>
