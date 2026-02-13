@@ -22,6 +22,13 @@ const STAGES = {
   // Phase 5: X-axis offset -100 (1500vh+)
 };
 
+// Mesh names to hide throughout (全程不显示)
+const HIDDEN_MESH_NAMES = new Set([
+  'Cube206', 'Cube206_1', 'Cube217', 'Cube217_1', 'Cube218', 'Cube218_1',
+  'Icosphere016', 'Icosphere016_1',
+  'ae-stand', 'ae-line', 'ae-gear', 'ae-data', 'ae-dot',
+]);
+
 // Layer default y position configuration
 const layerDefaultPositions = {
   layer1: 0,
@@ -166,7 +173,7 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
       const layer7Group = createLayerGroup('layer7', 'attach7', layerDefaultPositions.layer7);
       if (layer7Group) layer7GroupRef.current = layer7Group;
       
-      // Create Agentic Enterprise group, containing all meshes with "ae"
+      // Create Agentic Enterprise group, containing all meshes with "ae" 
       const aeGroup = new THREE.Group();
       aeGroup.name = 'aeGroup';
       const aeMeshes = [];
@@ -191,7 +198,7 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
       console.log('Meshes containing "ball":', allMeshes.filter(name => name.toLowerCase().includes('ball')));
       console.log('=== Mesh name list end ===');
       
-      // Search for meshes containing "ae" from scene and all layer groups
+      // Search for meshes containing "ae" from scene and all layer groups - 搜索名字
       const searchInObject = (obj) => {
         obj.traverse((child) => {
           if (child.isMesh) {
@@ -504,9 +511,9 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
       
       scene.traverse((child) => {
         if (child.isMesh) {
-          child.visible = true;
-          
           const meshName = child.name || child.uuid;
+          child.visible = !HIDDEN_MESH_NAMES.has(meshName);
+          
           const nameLower = meshName.toLowerCase();
           let defaultY = child.position.y;
           
@@ -921,9 +928,10 @@ function ValueBlueprintModel({ scrollProgress, activeSection }) {
       
       for (let i = 0; i < meshes.length; i++) {
         const mesh = meshes[i];
-        // Restore mesh visibility (except blockGroup, which is controlled separately)
+        // Restore mesh visibility (except blockGroup and 全程隐藏的 mesh)
         if (!blockGroupChildren.has(mesh)) {
-          mesh.visible = true;
+          const name = mesh.name || mesh.uuid;
+          mesh.visible = !HIDDEN_MESH_NAMES.has(name);
         }
       }
       
@@ -1263,19 +1271,17 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
   
   useEffect(() => {
     if (camera.isOrthographicCamera && !initializedRef.current) {
-      // Initialize camera = sideView initial pose, but y position higher, x position moved in -x direction, zoom out a bit
-      const { position, zoom } = VIEW_CONFIG.sideView;
-      const initialY = position.y - 1; // y position higher (changed from -4 to -1, increased by 3 units)
-      const initialX = position.x - 1; // x position moved 1 unit in -x direction
-      const initialZoom = zoom * 0.5; // zoom out more (smaller zoom value, objects smaller)
-      
-      camera.position.set(initialX, initialY, position.z);
-      lookRef.current.set(-1.5 - 1, 1.5 - 4, 0); // Side view observation point, x position moved 1 unit in -x direction, y position unchanged (maintain 1.5 - 4)
-      camera.zoom = initialZoom;
+      // 初始化为俯视，与 0-200vh 一致，避免刚进入 Section5 时闪回侧视
+      const { position, zoom, up } = VIEW_CONFIG.topView;
+      camera.position.set(position.x, position.y, position.z);
+      lookRef.current.set(VIEW_CONFIG.topView.lookAt.x, VIEW_CONFIG.topView.lookAt.y, VIEW_CONFIG.topView.lookAt.z);
+      camera.zoom = zoom;
+      if (up) {
+        camera.up.set(up.x, up.y, up.z);
+      }
       camera.updateProjectionMatrix();
       camera.lookAt(lookRef.current);
       camera.updateMatrixWorld();
-      
       initializedRef.current = true;
     }
   }, [camera]);
@@ -1328,71 +1334,15 @@ function CameraRig({ scrollProgress = 0, scrollProgress8 = 0, activeSection }) {
     const globalProgress = Math.max(0, Math.min(1, effectiveProgress || 0));
     const vh = globalProgress * 1300; // Total scroll height (vh units)
     
-    // ========== 0-100vh: maintain side view, camera unchanged ==========
-    if (vh <= 100) {
-      // Maintain initialization state (side view, y position higher, x position moved in -x direction, zoom out a bit), no animation
-      const { position, zoom } = VIEW_CONFIG.sideView;
-      const initialY = position.y - 1; // y position higher (changed from -4 to -1, increased by 3 units)
-      const initialX = position.x - 1; // x position moved 1 unit in -x direction
-      const initialZoom = zoom * 0.5; // zoom out more (smaller zoom value, objects smaller)
-      camera.position.set(initialX, initialY, position.z);
-      lookRef.current.set(-1.5 - 1, 1.5 - 4, 0); // Side view observation point, x position moved 1 unit in -x direction, y position unchanged (maintain 1.5 - 4)
-      camera.zoom = initialZoom;
-      camera.updateProjectionMatrix();
-      camera.lookAt(lookRef.current);
-      camera.updateMatrixWorld();
-      return;
-    }
-    
-    // ========== 100-200vh: transition from side view to top view ==========
+    // ========== 0-200vh: 俯视，与 200vh 时一致 ==========
     if (vh <= 200) {
-      const transitionProgress = (vh - 100) / 100; // 0-1 progress
-      const easedProgress = easeInOutCubic(transitionProgress);
-      
-      // Camera position interpolate from side view (higher y position, x position moved in -x direction) to top view
-      const initialSideY = VIEW_CONFIG.sideView.position.y - 1; // Initial higher y position (changed from -4 to -1)
-      const initialSideX = VIEW_CONFIG.sideView.position.x - 1; // Initial x position moved 1 unit in -x direction
-      const cameraX = THREE.MathUtils.lerp(
-        initialSideX,
-        VIEW_CONFIG.topView.position.x,
-        easedProgress
-      );
-      const cameraY = THREE.MathUtils.lerp(
-        initialSideY,
-        VIEW_CONFIG.topView.position.y,
-        easedProgress
-      );
-      const cameraZ = THREE.MathUtils.lerp(
-        VIEW_CONFIG.sideView.position.z,
-        VIEW_CONFIG.topView.position.z,
-        easedProgress
-      );
-      
-      // Observation point interpolate from side view (lower y position, x position moved in -x direction) to top view
-      const initialLookAtY = 1.5 - 4; // Initial observation point y position also moved down 4 units
-      const initialLookAtX = -1.5 - 1; // Initial observation point x position moved 1 unit in -x direction
-      const lookAtX = THREE.MathUtils.lerp(initialLookAtX, VIEW_CONFIG.topView.lookAt.x, easedProgress);
-      const lookAtY = THREE.MathUtils.lerp(initialLookAtY, VIEW_CONFIG.topView.lookAt.y, easedProgress);
-      const lookAtZ = THREE.MathUtils.lerp(0, VIEW_CONFIG.topView.lookAt.z, easedProgress);
-      
-      // Zoom interpolate from side view (zoom out) to top view
-      const initialSideZoom = VIEW_CONFIG.sideView.zoom * 0.5; // Initial zoom out more (objects smaller)
-      const currentZoom = THREE.MathUtils.lerp(
-        initialSideZoom,
-        VIEW_CONFIG.topView.zoom,
-        easedProgress
-      );
-      
-      camera.position.set(cameraX, cameraY, cameraZ);
-      lookRef.current.set(lookAtX, lookAtY, lookAtZ);
-      camera.zoom = currentZoom;
-      // In transition stage, up vector also needs to transition from default (0,1,0) to -Z axis (0,0,-1)
-      const upProgress = easedProgress;
-      camera.up.set(
-        THREE.MathUtils.lerp(0, 0, upProgress),
-        THREE.MathUtils.lerp(1, 0, upProgress),
-        THREE.MathUtils.lerp(0, -1, upProgress)
-      );
+      const { position, zoom, up } = VIEW_CONFIG.topView;
+      camera.position.set(position.x, position.y, position.z);
+      lookRef.current.set(VIEW_CONFIG.topView.lookAt.x, VIEW_CONFIG.topView.lookAt.y, VIEW_CONFIG.topView.lookAt.z);
+      camera.zoom = zoom;
+      if (up) {
+        camera.up.set(up.x, up.y, up.z);
+      }
       camera.updateProjectionMatrix();
       camera.lookAt(lookRef.current);
       camera.updateMatrixWorld();

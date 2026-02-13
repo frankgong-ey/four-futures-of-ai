@@ -16,7 +16,7 @@ export default function Section4() {
         {/* 顶部标题区域 - 与 Section2 一致的布局/尺寸 */}
         <div className="max-w-4xl mx-auto text-center mb-16 flex flex-col items-center gap-4">
           <p className="text-[28px] md:text-[48px] font-normal tracking-[-0.05em] leading-none text-[#FFE601]">
-            The Opportunity
+            The opportunity
           </p>
           <h2 
             className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-white"
@@ -63,7 +63,7 @@ export default function Section4() {
                   className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 translate-y-1"
                 />
                 <p className="text-[14px] md:text-[18px] font-normal leading-relaxed">
-                  Applying AI to existing processes (e.g., chatbots).
+                  Applying AI to existing processes (e.g., chatbots)
                 </p>
               </div>
               <div className="flex items-start gap-3">
@@ -73,7 +73,7 @@ export default function Section4() {
                   className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 translate-y-1"
                 />
                 <p className="text-[14px] md:text-[18px] font-normal leading-relaxed">
-                  Drives operational efficiency, but value is only found within the constraints of the process.
+                  Driving operational efficiency, but value is only found within the constraints of the process
                 </p>
               </div>
             </div>
@@ -84,24 +84,12 @@ export default function Section4() {
             {/* 标题与副标题 */}
             <div className="text-center flex flex-col items-center">
               <h3 
-                className="inline-block text-[24px] md:text-[48px] font-bold tracking-[-0.03em]"
-                style={{
-                  background: 'linear-gradient(to right, #59A0F0, #D85978, #FEE404)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
+                className="inline-block text-[24px] md:text-[48px] font-bold tracking-[-0.03em] text-[#FFE601]"
               >
                 Built-in AI
               </h3>
               <p 
-                className="inline-block text-[16px] md:text-[24px] font-bold"
-                style={{
-                  background: 'linear-gradient(to right, #59A0F0, #D85978, #FEE404)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
+                className="inline-block text-[16px] md:text-[24px] font-bold text-[#FFE601]"
               >
                 “Doing different things”
               </p>
@@ -125,7 +113,7 @@ export default function Section4() {
                   className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 translate-y-1"
                 />
                 <p className="text-[14px] md:text-[18px] font-normal leading-relaxed">
-                  Reimagining workflows, products, and business models with AI as the baseline.
+                  Reimagining what outcome is, and how it will unlock tangible value for the business, new revenue streams and business model
                 </p>
               </div>
               <div className="flex items-start gap-3">
@@ -135,7 +123,7 @@ export default function Section4() {
                   className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 translate-y-1"
                 />
                 <p className="text-[14px] md:text-[18px] font-normal leading-relaxed">
-                  Unlocking value through new revenue streams, business models, and customer experiences.
+                  Reimagining how process and workflows can be executed with AI working with humans in the loop
                 </p>
               </div>
             </div>

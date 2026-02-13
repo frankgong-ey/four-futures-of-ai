@@ -104,32 +104,32 @@ export default function VBTestPage() {
   // Layer information configuration
   const layerInfo = [
     {
-      title: 'System of Record',
+      title: 'Systems of record',
       description: 'Expose sources of truth through reliable connectors for agent and human interaction.',
     },
     {
-      title: 'AI-Native Platform',
-      description: 'Leverage the Agentic Enterprise Tech Stack to upgrade technology infrastructure to support AI at scale.',
+      title: 'AI-native platform',
+      description: 'Leverage the agentic enterprise tech stack to upgrade technology infrastructure to support AI at scale.',
     },
     {
       title: 'Intelligence',
-      description: 'Encode enterprise knowledge and Implement advanced AI and analytics to enhance decision-making and insights.',
+      description: 'Encode enterprise knowledge and implement advanced AI and analytics to enhance decision-making and insights.',
     },
     {
       title: 'Trust',
-      description: "Leverage EY's Responsible AI Framework to implement controls, guardrails and security in systems and data.",
+      description: "Leverage the EY Responsible AI Framework to implement controls, guardrails and security in systems and data.",
     },
     {
       title: 'Processes',
-      description: 'Leverage methodologies such as contact engineering to streamline and improve core business processes.',
+      description: 'Leverage methodologies, such as contact engineering, to streamline and improve core business processes.',
     },
     {
       title: 'Workforce',
-      description: 'Implement a collaborative human-AI workforce model leveraging role-based interfaces and operating systems.',
+      description: 'Implement a collaborative human/AI workforce model leveraging role-based interfaces and operating systems.',
     },
     {
       title: 'Customer',
-      description: "Leverage EY's venture-building expertise to create new experiences, products, and business models.",
+      description: "Leverage EY professionals' venture-building knowledge to create new experiences, products, and business models.",
     },
   ];
   
@@ -708,7 +708,7 @@ export default function VBTestPage() {
         }}
       >
         <img
-          src="/images/EY_logo.svg"
+          src="/images/EY_logo_yellow.svg"
           alt="EY"
           className="w-full h-full object-contain"
         />

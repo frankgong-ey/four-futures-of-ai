@@ -51,7 +51,7 @@ export default function Section11({ scrollSectionRef }) {
             {/* 文案容器 */}
             <div className="pl-6 relative z-10 flex-1">
               <h2 className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-white mb-6 md:mb-8">
-                Building toward your Agentic Enterprise
+                Building toward your agentic enterprise
               </h2>
               
               <p 
@@ -60,7 +60,7 @@ export default function Section11({ scrollSectionRef }) {
                   fontFamily: 'var(--font-eyinterstate)',
                 }}
               >
-                Together, we transform cross-functional processes—Blueprint by Blueprint—to shape the Agentic Enterprise with confidence.
+                Together, we transform cross-functional processes — blueprint by blueprint — to shape the agentic enterprise with confidence.
               </p>
             </div>
           </div>

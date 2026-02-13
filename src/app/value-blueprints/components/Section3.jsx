@@ -35,7 +35,7 @@ export default function Section3() {
               {/* 文案容器 */}
               <div className="pl-6">
                 <p className="text-[28px] md:text-[48px] font-normal tracking-[-0.05em] leading-none text-[#FFE601] mb-4">
-                  The Problem
+                  The problem
                 </p>
                 <h2 className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-white">
                   AI’s value plateau
@@ -69,9 +69,10 @@ export default function Section3() {
                 className="w-6 h-6 md:w-9 md:h-9 flex-shrink-0"
               />
               <p className="text-[14px] md:text-[20px] font-normal leading-relaxed">
-                <span className="font-bold">
-                  Siloed initiatives, legacy frameworks, and use-case obsession
-                </span>{" "}
+                <span className="font-bold text-[#FFE600]">Siloed initiatives, legacy frameworks </span>
+                <span className="font-normal text-white">and </span>
+                <span className="font-bold text-[#FFE600]">use case obsession</span>
+                {" "}
                 lead to diminishing returns and missed opportunities.
               </p>
             </div>
@@ -88,7 +89,7 @@ export default function Section3() {
                   The Result
                 </span>
                 <p className="text-[14px] md:text-[20px] font-normal leading-relaxed">
-                  Plateaued value, fragmented efforts, and unrealized potential.
+                  Plateaued value, fragmented efforts and unrealized potential.
                 </p>
               </div>
             </div>

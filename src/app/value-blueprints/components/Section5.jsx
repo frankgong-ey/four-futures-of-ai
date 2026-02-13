@@ -18,13 +18,13 @@ const layerGradientColors = [
 
 // 每个 layer 的 badge 文本
 const layerBadgeTexts = [
-  'Reliable Data', // layer1
-  'Tech Stack', // layer2
-  'Enterprise Knowledge', // layer3
-  'Responsible AI, Security', // layer4
-  'Streamlined, AI-First', // layer5
-  'Human/AI Collaboration', // layer6
-  'Customer Experience', // layer7
+  'Reliable data', // layer1
+  'Tech stack', // layer2
+  'Enterprise knowledge', // layer3
+  'Responsible AI, security', // layer4
+  'Streamlined, AI first', // layer5
+  'Human/AI collaboration', // layer6
+  'Customer experience', // layer7
 ];
 
 export default function Section5({ scrollProgress, mounted, layerInfo, scrollSectionRef, activeSection }) {
@@ -111,10 +111,10 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
                 {/* 文案容器 */}
                 <div className="pl-6">
                   <p className="text-[28px] md:text-[48px] font-normal tracking-[-0.05em] leading-none text-[#FFE601] mb-4">
-                    The Vision
+                    The vision
                   </p>
                   <h2 className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-white">
-                    The Agentic Enterprise
+                    The agentic enterprise
                   </h2>
                 </div>
               </div>
@@ -186,7 +186,7 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
                   className="w-7 h-7 flex-shrink-0"
                 />
                 <p className="text-[18px] font-bold leading-relaxed text-white">
-                  Work advances itself; humans focus on judgment and innovation.
+                  Work advances itself; humans focus on judgment and innovation
                 </p>
               </div>
             </div>
@@ -218,7 +218,7 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
                 {/* 文案容器 */}
                 <div className="pl-6">
                   <p className="text-[28px] md:text-[48px] font-normal tracking-[-0.05em] leading-none text-[#FFE601] mb-4">
-                    The Solution
+                    The solution
                   </p>
                     <h2 
                       className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-white"
@@ -235,7 +235,7 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
               className="text-[16px] md:text-[20px]"
               style={{ color: '#ffffff', fontFamily: 'var(--font-eyinterstate)' }}
             >
-              EY's layered AI methodology and library of ready-made Value Blueprints guide transformation into an agentic enterprise – blueprint by blueprint.
+              The EY layered AI methodology and library of ready-made Value Blueprints guide transformation into an agentic enterprise — blueprint by blueprint.
             </p>
           </div>
         )}
@@ -263,7 +263,7 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
                 {/* 文案容器 */}
                 <div className="pl-6">
                   <p className="text-[28px] md:text-[48px] font-normal tracking-[-0.05em] leading-none text-[#FFE601] mb-4">
-                    The Solution
+                    The solution
                   </p>
                   <h2 className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-white">
                     Seven interconnected layers
@@ -296,9 +296,9 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
             <div 
               className="text-[80px] font-bold mb-4 tracking-[-0.05em]"
               style={{ 
-                color: '#ffffff', 
+                color: layerGradientColors[currentLayerIndex], 
                 fontFamily: 'var(--font-eyinterstate)',
-                opacity: 0.2,
+                opacity: 0.6,
                 lineHeight: 1,
               }}
             >
@@ -307,7 +307,7 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
             <h3 
               className="text-[36px] md:text-[64px] font-bold mb-6 tracking-[-0.05em] leading-none"
               style={{ 
-                color: layerGradientColors[currentLayerIndex],
+                color: '#ffffff',
                 fontFamily: 'var(--font-eyinterstate)' 
               }}
             >
@@ -335,8 +335,8 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
         </div>
       </div>
       
-      {/* 2D HTML 标签 - 只在 Section5 激活且 0-100vh 范围内显示 */}
-      {activeSection === 'section5' && currentVh >= 0 && currentVh < 100 && (
+      {/* 2D HTML 标签 - 已隐藏 */}
+      {false && activeSection === 'section5' && currentVh >= 0 && currentVh < 100 && (
         <LabelProvider>
           <div
             style={{

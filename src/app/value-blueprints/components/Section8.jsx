@@ -9,23 +9,23 @@ export default function Section8() {
   const successStories = [
     {
       id: "life-sciences",
-      client: "Life Sciences Client",
-      title: "Quote-to-Cash",
-      description: "Unified 100+ ERPs with an agentic orchestration layer and reimagined process outcomes, delivering $100M+ annual cost savings and enabling new experiences.",
+      client: "Life sciences client",
+      title: "Quote to Cash",
+      description: "Unified more than 100 ERPs with an agentic orchestration layer and reimagined process outcomes, delivering more than $100 million in annual cost savings and enabling new experiences",
       backgroundImage: "/images/value-blueprints/ss-tf-hero.png",
     },
     {
       id: "retail",
-      client: "Retail Client",
-      title: "Design-to-Launch",
-      description: "Reimagined design workflows, enabling hyper-personalization and rapid speed-to-market for new products, powered by IP and generative AI.",
+      client: "Retail client",
+      title: "Design to Launch",
+      description: "Reimagined design workflows, enabling hyper-personalization and rapid speed to market for new products, powered by IP and generative AI",
       backgroundImage: "/images/value-blueprints/ss-fo-hero.png",
     },
     {
       id: "ey-client-zero",
-      client: "EY Client Zero",
-      title: "Source-to-Pay-Risk",
-      description: "Transformed a 40-hour manual process into a 15-minute AI-powered workflow, shifting from one-time cost savings to recurring value and new business models.",
+      client: "EY client zero",
+      title: "Source to Pay - risk",
+      description: "Transformed a 40-hour manual process into a 15-minute AI-powered workflow, shifting from one-time cost savings to recurring value and new business models",
       backgroundImage: "/images/value-blueprints/ss-ey-hero.png",
     },
   ];
@@ -54,7 +54,7 @@ export default function Section8() {
         {/* Title Module - 与 Section4 一致的参数 */}
         <div className="max-w-4xl mx-auto text-center mb-16 flex flex-col items-center gap-4 relative z-20">
           <p className="text-[28px] md:text-[48px] font-normal tracking-[-0.05em] leading-none text-[#FFE601]">
-            Success Stories
+            Success stories
           </p>
           <h2 
             className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-white"
@@ -156,7 +156,7 @@ export default function Section8() {
                     e.target.style.backgroundColor = 'transparent';
                   }}
                 >
-                  Learn More
+                  Learn more
                 </button>
               </div>
             </div>
