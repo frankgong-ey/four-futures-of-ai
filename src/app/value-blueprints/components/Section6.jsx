@@ -101,7 +101,7 @@ export default function Section6() {
                     style={{
                       width: '6px',
                       height: '6px',
-                      backgroundColor: 'white',
+                      backgroundColor: '#FFE601',
                       flexShrink: 0
                     }}
                   />
