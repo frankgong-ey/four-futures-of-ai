@@ -92,50 +92,53 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
         {/* 新第一阶段：The Agentic Enterprise */}
         {showAgenticEnterprise && (
           <div 
-            className="px-8 w-full max-w-[480px]"
+            className="px-8 w-full flex flex-col lg:flex-row lg:items-center gap-8 lg:gap-12"
             style={{
               opacity: 1,
               textAlign: 'left',
             }}
           >
-            {/* Title Module - 与 Section3 一致 */}
-            <div className="flex justify-start mb-8">
-              <div className="flex items-stretch">
-                {/* 垂直渐变边框 */}
-                <div
-                  className="w-[3px]"
-                  style={{
-                    background: 'linear-gradient(to bottom, #FFDD0B, #FF789B, #34F8FD)',
-                  }}
-                />
-                {/* 文案容器 */}
-                <div className="pl-6">
-                  <p className="text-[28px] md:text-[48px] font-normal tracking-[-0.05em] leading-none text-[#FFE601] mb-4">
-                    The vision
-                  </p>
-                  <h2 className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-white">
-                    The agentic enterprise
-                  </h2>
+            {/* 左侧：Title Module + 描述（大屏时与右侧卡片左右排列，宽度固定不收缩） */}
+            <div className="flex flex-col w-full max-w-[480px] lg:w-[480px] lg:min-w-[480px] lg:flex-shrink-0">
+              {/* Title Module - 与 Section3 一致 */}
+              <div className="flex justify-start mb-8">
+                <div className="flex items-stretch">
+                  {/* 垂直渐变边框 */}
+                  <div
+                    className="w-[3px]"
+                    style={{
+                      background: 'linear-gradient(to bottom, #FFDD0B, #FF789B, #34F8FD)',
+                    }}
+                  />
+                  {/* 文案容器 */}
+                  <div className="pl-6">
+                    <p className="text-[28px] md:text-[48px] font-normal tracking-[-0.05em] leading-none text-[#FFE601] mb-4">
+                      The vision
+                    </p>
+                    <h2 className="text-[36px] md:text-[64px] font-bold leading-none tracking-[-0.05em] text-white">
+                      The agentic enterprise
+                    </h2>
+                  </div>
                 </div>
               </div>
+
+              {/* 描述文本框 */}
+              <p 
+                className="text-[16px] md:text-[20px] mb-8 lg:mb-0"
+                style={{ color: '#ffffff', fontFamily: 'var(--font-eyinterstate)' }}
+              >
+                Built-in AI provides the building blocks of scalable AI value.
+              </p>
             </div>
 
-            {/* 描述文本框 */}
-            <p 
-              className="text-[16px] md:text-[20px] mb-8"
-              style={{ color: '#ffffff', fontFamily: 'var(--font-eyinterstate)' }}
-            >
-              Built-in AI provides the building blocks of scalable AI value.
-            </p>
-
-            {/* 5个卡片列表 */}
-            <div className="flex flex-col gap-2">
+            {/* 右侧：5个卡片列表（大屏时在 title+描述 右侧；大屏下 2 列布局；最大宽度 640px） */}
+            <div className="flex flex-col gap-2 lg:grid lg:grid-cols-2 lg:gap-4 min-w-0 lg:flex-1 lg:max-w-[960px]">
               {/* 卡片 1 */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-none p-3 flex items-center gap-6">
+              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-none p-3 lg:p-5 flex items-center gap-6 lg:flex-col lg:items-start lg:gap-2 lg:text-left">
                 <img
-                  src="/images/value-blueprints/bullet-plus.svg"
+                  src="/images/value-blueprints/s5_ae_1.svg"
                   alt="Bullet"
-                  className="w-7 h-7 flex-shrink-0"
+                  className="w-10 h-10 lg:w-12 lg:h-12 flex-shrink-0"
                 />
                 <p className="text-[18px] font-bold leading-relaxed text-white">
                   Interoperable toolsets
@@ -143,11 +146,11 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
               </div>
 
               {/* 卡片 2 */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-none p-3 flex items-center gap-6">
+              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-none p-3 lg:p-5 flex items-center gap-6 lg:flex-col lg:items-start lg:gap-2 lg:text-left">
                 <img
-                  src="/images/value-blueprints/bullet-plus.svg"
+                  src="/images/value-blueprints/s5_ae_2.svg"
                   alt="Bullet"
-                  className="w-7 h-7 flex-shrink-0"
+                  className="w-10 h-10 lg:w-12 lg:h-12 flex-shrink-0"
                 />
                 <p className="text-[18px] font-bold leading-relaxed text-white">
                   Compliance as code
@@ -155,11 +158,11 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
               </div>
 
               {/* 卡片 3 */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-none p-3 flex items-center gap-6">
+              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-none p-3 lg:p-5 flex items-center gap-6 lg:flex-col lg:items-start lg:gap-2 lg:text-left">
                 <img
-                  src="/images/value-blueprints/bullet-plus.svg"
+                  src="/images/value-blueprints/s5_ae_3.svg"
                   alt="Bullet"
-                  className="w-7 h-7 flex-shrink-0"
+                  className="w-10 h-10 lg:w-12 lg:h-12 flex-shrink-0"
                 />
                 <p className="text-[18px] font-bold leading-relaxed text-white">
                   Transparent hybrid workforce
@@ -167,11 +170,11 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
               </div>
 
               {/* 卡片 4 */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-none p-3 flex items-center gap-6">
+              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-none p-3 lg:p-5 flex items-center gap-6 lg:flex-col lg:items-start lg:gap-2 lg:text-left">
                 <img
-                  src="/images/value-blueprints/bullet-plus.svg"
+                  src="/images/value-blueprints/s5_ae_4.svg"
                   alt="Bullet"
-                  className="w-7 h-7 flex-shrink-0"
+                  className="w-10 h-10 lg:w-12 lg:h-12 flex-shrink-0"
                 />
                 <p className="text-[18px] font-bold leading-relaxed text-white">
                   Goal-oriented execution
@@ -179,11 +182,11 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
               </div>
 
               {/* 卡片 5 */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-none p-3 flex items-center gap-6">
+              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-none p-3 lg:p-5 flex items-center gap-6 lg:flex-col lg:items-start lg:gap-2 lg:text-left">
                 <img
-                  src="/images/value-blueprints/bullet-plus.svg"
+                  src="/images/value-blueprints/s5_ae_5.svg"
                   alt="Bullet"
-                  className="w-7 h-7 flex-shrink-0"
+                  className="w-10 h-10 lg:w-12 lg:h-12 flex-shrink-0"
                 />
                 <p className="text-[18px] font-bold leading-relaxed text-white">
                   Work advances itself; humans focus on judgment and innovation
