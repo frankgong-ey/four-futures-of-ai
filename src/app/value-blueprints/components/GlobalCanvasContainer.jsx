@@ -26,7 +26,7 @@ const STAGES = {
 const HIDDEN_MESH_NAMES = new Set([
   'Cube206', 'Cube206_1', 'Cube217', 'Cube217_1', 'Cube218', 'Cube218_1',
   'Icosphere016', 'Icosphere016_1',
-  'ae-stand', 'ae-line', 'ae-gear', 'ae-data', 'ae-dot',
+  'ae-stand', 'ae-line', 'ae-gear', 'ae-data', 'ae-dot', 'ae-tracks', 'ae-plane',
 ]);
 
 // Layer default y position configuration
