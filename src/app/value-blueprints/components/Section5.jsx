@@ -295,34 +295,27 @@ export default function Section5({ scrollProgress, mounted, layerInfo, scrollSec
               maxWidth: '640px',
             }}
           >
-            {/* 序号与横线左右并列 */}
-            <div
-              className="mb-4"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '24px',
-                width: '100%',
+            {/* 大序号 */}
+            <div 
+              className="text-[80px] font-bold tracking-[-0.05em]"
+              style={{ 
+                color: 'rgba(255, 255, 255, 0.4)',
+                fontFamily: 'var(--font-eyinterstate)',
+                lineHeight: 1,
               }}
             >
-              <div 
-                className="text-[80px] font-bold tracking-[-0.05em] flex-shrink-0"
-                style={{ 
-                  color: 'rgba(255, 255, 255, 0.2)',
-                  fontFamily: 'var(--font-eyinterstate)',
-                  lineHeight: 1,
-                }}
-              >
-                {String(currentLayerIndex + 1).padStart(2, '0')}
-              </div>
-              <div
-                style={{
-                  flex: 1,
-                  height: '1px',
-                  backgroundColor: layerGradientColors[currentLayerIndex],
-                }}
-              />
+              {String(currentLayerIndex + 1).padStart(2, '0')}
             </div>
+            {/* 序号下、标题上：4px 高 × 64px 宽的主题色横条 */}
+            <div
+              style={{
+                width: '96px',
+                height: '4px',
+                backgroundColor: layerGradientColors[currentLayerIndex],
+                marginTop: '12px',
+                marginBottom: '20px',
+              }}
+            />
             <h3 
               className="text-[36px] md:text-[64px] font-bold mb-6 tracking-[-0.05em] leading-none"
               style={{ 
