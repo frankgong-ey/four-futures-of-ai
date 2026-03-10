@@ -43,9 +43,9 @@ export default function Section3({ storyData }) {
               <div className="space-y-2">
                   {/* Customer */}
                   <div 
-                    className={`flex items-center gap-4 px-4 md:!h-16 ${storyData.id !== 'retail' ? 'cursor-pointer hover:bg-white/5 transition-colors' : ''}`}
+                    className="flex items-center gap-4 px-4 md:!h-16 cursor-pointer hover:bg-white/5 transition-colors"
                     style={{ minHeight: '48px', height: 'auto' }}
-                    onClick={storyData.id !== 'retail' ? () => handleLayerClick(0) : undefined}
+                    onClick={() => handleLayerClick(0)}
                   >
                     <img 
                       src="/images/value-blueprints/ss-constituent.png" 
@@ -56,17 +56,15 @@ export default function Section3({ storyData }) {
                     <span className="flex-1 text-[18px] md:text-[20px] lg:text-[24px] font-bold" style={{ fontFamily: 'var(--font-eyinterstate)', color: '#D3F4DC' }}>
                       Customer
                     </span>
-                    {storyData.id !== 'retail' && (
                     <div className="rounded-full border border-white/50 flex items-center justify-center flex-shrink-0 w-10 h-10 md:w-12 md:h-12">
                       <span className="text-white text-[16px] md:text-[18px] lg:text-[20px]">+</span>
                     </div>
-                    )}
                   </div>
                   {/* Workforce */}
                   <div 
-                    className={`flex items-center gap-4 px-4 md:!h-16 ${storyData.id !== 'retail' ? 'cursor-pointer hover:bg-white/5 transition-colors' : ''}`}
+                    className="flex items-center gap-4 px-4 md:!h-16 cursor-pointer hover:bg-white/5 transition-colors"
                     style={{ minHeight: '48px', height: 'auto' }}
-                    onClick={storyData.id !== 'retail' ? () => handleLayerClick(1) : undefined}
+                    onClick={() => handleLayerClick(1)}
                   >
                     <img 
                       src="/images/value-blueprints/ss-workforce.png" 
@@ -77,18 +75,16 @@ export default function Section3({ storyData }) {
                     <span className="flex-1 text-[18px] md:text-[20px] lg:text-[24px] font-bold" style={{ fontFamily: 'var(--font-eyinterstate)', color: '#6DDEDC' }}>
                       Workforce
                     </span>
-                    {storyData.id !== 'retail' && (
                     <div className="rounded-full border border-white/50 flex items-center justify-center flex-shrink-0 w-10 h-10 md:w-12 md:h-12">
                       <span className="text-white text-[16px] md:text-[18px] lg:text-[20px]">+</span>
                     </div>
-                    )}
                   </div>
                   
                   {/* Processes */}
                   <div 
-                    className={`flex items-center gap-4 px-4 md:!h-16 ${storyData.id !== 'retail' ? 'cursor-pointer hover:bg-white/5 transition-colors' : ''}`}
+                    className="flex items-center gap-4 px-4 md:!h-16 cursor-pointer hover:bg-white/5 transition-colors"
                     style={{ minHeight: '48px', height: 'auto' }}
-                    onClick={storyData.id !== 'retail' ? () => handleLayerClick(2) : undefined}
+                    onClick={() => handleLayerClick(2)}
                   >
                     <img 
                       src="/images/value-blueprints/ss-processes.png" 
@@ -99,11 +95,9 @@ export default function Section3({ storyData }) {
                     <span className="flex-1 text-[18px] md:text-[20px] lg:text-[24px] font-bold" style={{ fontFamily: 'var(--font-eyinterstate)', color: '#73BAF0' }}>
                       Processes
                     </span>
-                    {storyData.id !== 'retail' && (
                     <div className="rounded-full border border-white/50 flex items-center justify-center flex-shrink-0 w-10 h-10 md:w-12 md:h-12">
                       <span className="text-white text-[16px] md:text-[18px] lg:text-[20px]">+</span>
                     </div>
-                    )}
                 </div>
               </div>
             </div>
@@ -131,9 +125,9 @@ export default function Section3({ storyData }) {
               <div className="space-y-2">
                   {/* Trust */}
                   <div 
-                    className={`flex items-center gap-4 px-4 md:!h-16 ${storyData.id !== 'retail' ? 'cursor-pointer hover:bg-white/5 transition-colors' : ''}`}
+                    className="flex items-center gap-4 px-4 md:!h-16 cursor-pointer hover:bg-white/5 transition-colors"
                     style={{ minHeight: '48px', height: 'auto' }}
-                    onClick={storyData.id !== 'retail' ? () => handleLayerClick(3) : undefined}
+                    onClick={() => handleLayerClick(3)}
                   >
                     <img 
                       src="/images/value-blueprints/ss-trust.png" 
@@ -144,18 +138,16 @@ export default function Section3({ storyData }) {
                     <span className="flex-1 text-[18px] md:text-[20px] lg:text-[24px] font-bold" style={{ fontFamily: 'var(--font-eyinterstate)', color: '#E734BB' }}>
                       Trust
                     </span>
-                    {storyData.id !== 'retail' && (
                     <div className="rounded-full border border-white/50 flex items-center justify-center flex-shrink-0 w-10 h-10 md:w-12 md:h-12">
                       <span className="text-white text-[16px] md:text-[18px] lg:text-[20px]">+</span>
                     </div>
-                    )}
                   </div>
                   
                   {/* Intelligence */}
                   <div 
-                    className={`flex items-center gap-4 px-4 md:!h-16 ${storyData.id !== 'retail' ? 'cursor-pointer hover:bg-white/5 transition-colors' : ''}`}
+                    className="flex items-center gap-4 px-4 md:!h-16 cursor-pointer hover:bg-white/5 transition-colors"
                     style={{ minHeight: '48px', height: 'auto' }}
-                    onClick={storyData.id !== 'retail' ? () => handleLayerClick(4) : undefined}
+                    onClick={() => handleLayerClick(4)}
                   >
                     <img 
                       src="/images/value-blueprints/ss-intelligence.png" 
@@ -166,18 +158,16 @@ export default function Section3({ storyData }) {
                     <span className="flex-1 text-[18px] md:text-[20px] lg:text-[24px] font-bold" style={{ fontFamily: 'var(--font-eyinterstate)', color: '#FF4136' }}>
                       Intelligence
                     </span>
-                    {storyData.id !== 'retail' && (
                     <div className="rounded-full border border-white/50 flex items-center justify-center flex-shrink-0 w-10 h-10 md:w-12 md:h-12">
                       <span className="text-white text-[16px] md:text-[18px] lg:text-[20px]">+</span>
                     </div>
-                    )}
                   </div>
                 
                   {/* Agentic Platform */}
                   <div 
-                    className={`flex items-center gap-4 px-4 md:!h-16 ${storyData.id !== 'retail' ? 'cursor-pointer hover:bg-white/5 transition-colors' : ''}`}
+                    className="flex items-center gap-4 px-4 md:!h-16 cursor-pointer hover:bg-white/5 transition-colors"
                     style={{ minHeight: '48px', height: 'auto' }}
-                    onClick={storyData.id !== 'retail' ? () => handleLayerClick(5) : undefined}
+                    onClick={() => handleLayerClick(5)}
                   >
                     <img 
                       src="/images/value-blueprints/ss-agentic-platform.png" 
@@ -188,18 +178,16 @@ export default function Section3({ storyData }) {
                     <span className="flex-1 text-[18px] md:text-[20px] lg:text-[24px] font-bold" style={{ fontFamily: 'var(--font-eyinterstate)', color: '#FF6D01' }}>
                       Agentic Platform
                     </span>
-                    {storyData.id !== 'retail' && (
                     <div className="rounded-full border border-white/50 flex items-center justify-center flex-shrink-0 w-10 h-10 md:w-12 md:h-12">
                       <span className="text-white text-[16px] md:text-[18px] lg:text-[20px]">+</span>
                     </div>
-                    )}
                   </div>
                   
                   {/* System of Records */}
                   <div 
-                    className={`flex items-center gap-4 px-4 md:!h-16 ${storyData.id !== 'retail' ? 'cursor-pointer hover:bg-white/5 transition-colors' : ''}`}
+                    className="flex items-center gap-4 px-4 md:!h-16 cursor-pointer hover:bg-white/5 transition-colors"
                     style={{ minHeight: '48px', height: 'auto' }}
-                    onClick={storyData.id !== 'retail' ? () => handleLayerClick(6) : undefined}
+                    onClick={() => handleLayerClick(6)}
                   >
                     <img 
                       src="/images/value-blueprints/ss-system-of-records.png" 
@@ -210,11 +198,9 @@ export default function Section3({ storyData }) {
                     <span className="flex-1 text-[18px] md:text-[20px] lg:text-[24px] font-bold" style={{ fontFamily: 'var(--font-eyinterstate)', color: '#FFE600' }}>
                       System of Records
                     </span>
-                    {storyData.id !== 'retail' && (
                     <div className="rounded-full border border-white/50 flex items-center justify-center flex-shrink-0 w-10 h-10 md:w-12 md:h-12">
                       <span className="text-white text-[16px] md:text-[18px] lg:text-[20px]">+</span>
                     </div>
-                    )}
                 </div>
               </div>
             </div>
@@ -223,14 +209,12 @@ export default function Section3({ storyData }) {
       </div>
 
       {/* Layer Detail Modal */}
-      {storyData.id !== 'retail' && (
       <LayerDetailModal 
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         layerIndex={selectedLayerIndex}
-          storyData={storyData}
+        storyData={storyData}
       />
-      )}
     </section>
   );
 }
