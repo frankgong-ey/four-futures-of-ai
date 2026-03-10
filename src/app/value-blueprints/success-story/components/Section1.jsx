@@ -86,25 +86,21 @@ export default function Section1({ storyData }) {
           )}
           
           {/* More background 按钮 - Outline Style */}
-          {storyData.id !== 'retail' && (
           <button 
             onClick={() => setIsModalOpen(true)}
             className="px-4 py-3 md:px-6 md:py-4 lg:px-6 lg:py-6 border border-white/50 hover:bg-white/10 transition-colors cursor-pointer text-white font-bold text-[14px] md:text-[16px] lg:text-[18px] self-start"
           >
             More Background
           </button>
-          )}
         </div>
       </div>
 
       {/* More Background Modal */}
-      {storyData.id !== 'retail' && (
       <MoreBackgroundModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-          storyData={storyData}
+        storyData={storyData}
       />
-      )}
     </section>
   );
 }
